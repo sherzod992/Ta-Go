@@ -8,39 +8,31 @@ a {
 	text-decoration: none;
 	color: #212121;
 }
-
 button {
 	text-transform: none;
 	box-shadow: none;
 	padding: 0;
 }
-
 button.outline {
 	border: 1px solid #eee;
 }
-
 button.contain {
 	color: #fff;
 }
-
 span,
 p {
 	line-height: 1.2;
 }
-
 body {
 	font-family: $font;
-	
 	&::-webkit-scrollbar {
 		width: 9px;
 	}
-	
 	&::-webkit-scrollbar-thumb {
 		height: 30%;
 		background: #bdbdbd;
 		border-radius: 10px;
 	}
-	
 	&::-webkit-scrollbar-track {
 		background: #eee;
 	}
@@ -49,7 +41,6 @@ body {
 		box-shadow: none;
 	}
 }
-
 hr {
 	border-width: 0;
 	border-bottom-width: thin;
@@ -57,17 +48,15 @@ hr {
 	margin: auto;
 }
 
-
-// 공통 유틸리티 클래스
-.container {
+/** VERSION: PC **/
+#pc-wrap {
 	width: 100%;
-	max-width: 1200px;
-	margin: 0 auto;
-	padding: 0 20px;
-}
+	height: 100%;
 
-@media (max-width: 768px) {
 	.container {
-		padding: 0 15px;
+		position: relative;
+		width: 1300px;
+		margin: 0 auto;
+		display: flex;
 	}
 }
