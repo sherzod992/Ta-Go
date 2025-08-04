@@ -1,156 +1,179 @@
-// import React, { useEffect, useMemo, useState } from 'react';
-// import { useRouter } from 'next/router';
-// import useDeviceDetect from '../../hooks/useDeviceDetect';
-// import Head from 'next/head';
-// import Top from '../Top';
-// import Footer from '../Footer';
-// import { Stack } from '@mui/material';
-// import { getJwtToken, updateUserInfo } from '../../auth';
-// import Chat from '../Chat';
-// import { useReactiveVar } from '@apollo/client';
-// import { userVar } from '../../../apollo/store';
-// import { useTranslation } from 'next-i18next';
-// import 'swiper/css';
-// import 'swiper/css/pagination';
-// import 'swiper/css/navigation';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/router';
+import useDeviceDetect from '../../hooks/useDeviceDetect';
+import Head from 'next/head';
+import Top from '../Top';
+import Footer from '../Footer';
+import { Stack, Typography, Box } from '@mui/material';
+import { getJwtToken, updateUserInfo } from '../../auth';
+import { useReactiveVar } from '@apollo/client';
+import { userVar } from '../../../apollo/store';
 
-// const withLayoutBasic = (Component: any) => {
-// 	return (props: any) => {
-// 		const router = useRouter();
-// 		const { t, i18n } = useTranslation('common');
-// 		const device = useDeviceDetect();
-// 		const [authHeader, setAuthHeader] = useState<boolean>(false);
-// 		const user = useReactiveVar(userVar);
+const withLayoutBasic = (Component: any) => {
+	return (props: any) => {
+		const router = useRouter();
+		const device = useDeviceDetect();
+		const [authHeader, setAuthHeader] = useState<boolean>(false);
+		const user = useReactiveVar(userVar);
 
-// 		const memoizedValues = useMemo(() => {
-// 			let title = '',
-// 				desc = '',
-// 				bgImage = '';
+		const memoizedValues = useMemo(() => {
+			let title = '',
+				desc = '',
+				bgImage = '';
 
-// 			switch (router.pathname) {
-// 				case '/property':
-// 					title = 'Property Search';
-// 					desc = 'We are glad to see you again!';
-// 					bgImage = '/img/banner/header2.svg';
-// 					break;
-// 				case '/agent':
-// 					title = 'Agents';
-// 					desc = 'Home / Agents';
-// 					bgImage = '/img/banner/header2.svg';
-// 					break;
-// 				case '/agent/detail':
-// 					title = 'Agent Page';
-// 					desc = 'Home / Agents';
-// 					bgImage = '/img/banner/header2.svg';
-// 					break;
-// 				case '/mypage':
-// 					title = 'my page';
-// 					desc = 'Home / My Page';
-// 					bgImage = '/img/banner/header1.svg';
-// 					break;
-// 				case '/community':
-// 					title = 'Community';
-// 					desc = 'Home / Community';
-// 					bgImage = '/img/banner/header2.svg';
-// 					break;
-// 				case '/community/detail':
-// 					title = 'Community Detail';
-// 					desc = 'Home / Community';
-// 					bgImage = '/img/banner/header2.svg';
-// 					break;
-// 				case '/cs':
-// 					title = 'CS';
-// 					desc = 'We are glad to see you again!';
-// 					bgImage = '/img/banner/header2.svg';
-// 					break;
-// 				case '/account/join':
-// 					title = 'Login/Signup';
-// 					desc = 'Authentication Process';
-// 					bgImage = '/img/banner/header2.svg';
-// 					setAuthHeader(true);
-// 					break;
-// 				case '/member':
-// 					title = 'Member Page';
-// 					desc = 'Home / Member';
-// 					bgImage = '/img/banner/header1.svg';
-// 					break;
-// 				default:
-// 					break;
-// 			}
+			switch (router.pathname) {
+				case '/property':
+					title = 'Property Search';
+					desc = 'Find your perfect motorcycle';
+					bgImage = '/img/home/home2.jpg';
+					break;
+				case '/agent':
+					title = 'Agents';
+					desc = 'Connect with motorcycle experts';
+					bgImage = '/img/home/home3.jpg';
+					break;
+				case '/agent/detail':
+					title = 'Agent Details';
+					desc = 'Learn more about our agents';
+					bgImage = '/img/home/home2.jpg';
+					break;
+				case '/mypage':
+					title = 'My Page';
+					desc = 'Manage your account';
+					bgImage = '/img/home/home1.jpg';
+					break;
+				case '/community':
+					title = 'Community';
+					desc = 'Join the motorcycle community';
+					bgImage = '/img/home/home3.jpg';
+					break;
+				case '/community/detail':
+					title = 'Community Detail';
+					desc = 'Community discussions';
+					bgImage = '/img/home/home2.jpg';
+					break;
+				case '/cs':
+					title = 'Customer Service';
+					desc = 'We are here to help you';
+					bgImage = '/img/home/home1.jpg';
+					break;
+				case '/login':
+					title = 'Login/Signup';
+					desc = 'Authentication Process';
+					bgImage = '/img/login/login.jpg';
+					setAuthHeader(true);
+					break;
+				case '/member':
+					title = 'Member Page';
+					desc = 'Member information';
+					bgImage = '/img/home/home1.jpg';
+					break;
+				default:
+					title = 'ta-Go';
+					desc = 'Motorcycle marketplace';
+					bgImage = '/img/home/home1.jpg';
+					break;
+			}
 
-// 			return { title, desc, bgImage };
-// 		}, [router.pathname]);
+			return { title, desc, bgImage };
+		}, [router.pathname]);
 
-// 		/** LIFECYCLES **/
-// 		useEffect(() => {
-// 			const jwt = getJwtToken();
-// 			if (jwt) updateUserInfo(jwt);
-// 		}, []);
+		/** LIFECYCLES **/
+		useEffect(() => {
+			const jwt = getJwtToken();
+			if (jwt) updateUserInfo(jwt);
+		}, []);
 
-// 		/** HANDLERS **/
+		/** HANDLERS **/
 
-// 		if (device == 'mobile') {
-// 			return (
-// 				<>
-// 					<Head>
-// 						<title>ta-Go</title>
-// 						<meta name={'title'} content={`ta-Go`} />
-// 					</Head>
-// 					<Stack id="mobile-wrap">
-// 						<Stack id={'top'}>
-// 							<Top />
-// 						</Stack>
+		if (device == 'mobile') {
+			return (
+				<>
+					<Head>
+						<title>ta-Go - {memoizedValues.title}</title>
+						<meta name={'title'} content={`ta-Go - ${memoizedValues.title}`} />
+						<meta name={'description'} content={memoizedValues.desc} />
+					</Head>
+					<Stack id="mobile-wrap">
+						<Stack id={'top'}>
+							<Top />
+						</Stack>
 
-// 						<Stack id={'main'}>
-// 							<Component {...props} />
-// 						</Stack>
+						<Stack id={'main'}>
+							<Component {...props} />
+						</Stack>
 
-// 						<Stack id={'footer'}>
-// 							<Footer />
-// 						</Stack>
-// 					</Stack>
-// 				</>
-// 			);
-// 		} else {
-// 			return (
-// 				<>
-// 					<Head>
-// 						<title>ta-Go</title>
-// 						<meta name={'title'} content={`ta-Go`} />
-// 					</Head>
-// 					<Stack id="pc-wrap">
-// 						<Stack id={'top'}>
-// 							<Top />
-// 						</Stack>
+						<Stack id={'footer'}>
+							<Footer />
+						</Stack>
+					</Stack>
+				</>
+			);
+		} else {
+			return (
+				<>
+					<Head>
+						<title>ta-Go - {memoizedValues.title}</title>
+						<meta name={'title'} content={`ta-Go - ${memoizedValues.title}`} />
+						<meta name={'description'} content={memoizedValues.desc} />
+					</Head>
+					<Stack id="pc-wrap">
+						<Stack id={'top'}>
+							<Top />
+						</Stack>
 
-// 						<Stack
-// 							className={`header-basic ${authHeader && 'auth'}`}
-// 							style={{
-// 								backgroundImage: `url(${memoizedValues.bgImage})`,
-// 								backgroundSize: 'cover',
-// 								boxShadow: 'inset 10px 40px 150px 40px rgb(24 22 36)',
-// 							}}
-// 						>
-// 							<Stack className={'container'}>
-// 								<strong>{t(memoizedValues.title)}</strong>
-// 								<span>{t(memoizedValues.desc)}</span>
-// 							</Stack>
-// 						</Stack>
+						<Stack
+							className={`header-basic ${authHeader && 'auth'}`}
+							sx={{
+								backgroundImage: `url(${memoizedValues.bgImage})`,
+								backgroundSize: 'cover',
+								backgroundPosition: 'center',
+								position: 'relative',
+								py: 6,
+								'&::before': {
+									content: '""',
+									position: 'absolute',
+									top: 0,
+									left: 0,
+									right: 0,
+									bottom: 0,
+									backgroundColor: 'rgba(0, 0, 0, 0.5)',
+								}
+							}}
+						>
+							<Box
+								className={'container'}
+								sx={{
+									position: 'relative',
+									zIndex: 1,
+									textAlign: 'center',
+									color: 'white',
+									maxWidth: '1200px',
+									margin: '0 auto',
+									px: 2,
+								}}
+							>
+								<Typography variant="h2" component="h1" sx={{ fontWeight: 'bold', mb: 2 }}>
+									{memoizedValues.title}
+								</Typography>
+								<Typography variant="h5" sx={{ opacity: 0.9 }}>
+									{memoizedValues.desc}
+								</Typography>
+							</Box>
+						</Stack>
 
-// 						<Stack id={'main'}>
-// 							<Component {...props} />
-// 						</Stack>
+						<Stack id={'main'}>
+							<Component {...props} />
+						</Stack>
 
-// 						<Chat />
+						<Stack id={'footer'}>
+							<Footer />
+						</Stack>
+					</Stack>
+				</>
+			);
+		}
+	};
+};
 
-// 						<Stack id={'footer'}>
-// 							<Footer />
-// 						</Stack>
-// 					</Stack>
-// 				</>
-// 			);
-// 		}
-// 	};
-// };
-
-// export default withLayoutBasic;
+export default withLayoutBasic;
