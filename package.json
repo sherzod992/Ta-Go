@@ -4,9 +4,9 @@
 	"private": true,
 	"license": "ITC",
 	"scripts": {
-		"dev": "next dev",
+		"dev": "next dev -p 3011",
 		"build": "next build",
-		"start": "next start",
+		"start": "next start -p 3011",
 		"lint": "next lint",
 		"changelog": "standard-version --skip.tag"
 	},
