@@ -52,48 +52,37 @@ export const GET_AGENTS = gql`
 	}
 `;
 
-export const GET_MEMBER = gql(`
-query GetMember($input: String!) {
+export const GET_MEMBER = gql`
+  query GetMember($input: String!) {
     getMember(memberId: $input) {
-        _id
-        memberType
-        memberStatus
-        memberAuthType
-        memberPhone
-        memberEmail
-        memberNick
-        memberFullName
-        memberImage
-        memberAddress
-        memberDesc
-        socialId
-        socialProvider
-        socialAccessToken
-        socialRefreshToken
-        socialTokenExpiresAt
-        memberProperties
-        memberArticles
-        memberFollowers
-        memberFollowings
-        memberPoints
-        memberLikes
-        memberViews
-        memberComments
-        memberRank
-        memberWarnings
-        memberBlocks
-        deletedAt
-        createdAt
-        updatedAt
-        accessToken
-        meFollowed {
-            followingId
-            followerId
-            myFollowing
-        }
+      _id
+      memberType
+      memberStatus
+      memberAuthType
+      memberPhone
+      memberNick
+      memberFullName
+      memberImage
+      memberAddress
+      memberDesc
+      memberProperties
+      memberArticles
+      memberFollowers
+      memberFollowings
+      memberPoints
+      memberLikes
+      memberViews
+      memberComments
+      memberRank
+      memberWarnings
+      memberBlocks
+      deletedAt
+      createdAt
+      updatedAt
+      accessToken
     }
-}
-`);
+  }
+`;
 
 /**************************
  *        PROPERTY        *
