@@ -50,17 +50,12 @@ const HeroSection: React.FC = () => {
   return (
     <Box
       sx={{
-        minHeight: '600px',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+        minHeight: '800px',
         position: 'relative',
         overflow: 'hidden',
-        padding: '2rem 0',
       }}
     >
-      {/* Background Image */}
+      {/* Background Image - Full Size */}
       <Box
         sx={{
           position: 'absolute',
@@ -71,239 +66,295 @@ const HeroSection: React.FC = () => {
           backgroundImage: 'url(/img/home/home1.jpg)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          opacity: 0.3,
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%)',
+          }
         }}
       />
       
-      {/* Content */}
-      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
-        {/* Search Filter Card */}
-        <Card
+      {/* Hero Content */}
+      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1, height: '100%' }}>
+        <Box
           sx={{
-            borderRadius: 3,
-            boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
-            marginBottom: 4,
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '100%',
+            textAlign: 'center',
+            color: 'white',
+            pt: 8,
           }}
         >
-          <CardContent sx={{ padding: 3 }}>
-            <Typography
-              variant="h3"
-              sx={{
-                textAlign: 'center',
-                marginBottom: 3,
-                fontWeight: 'bold',
-                color: '#333',
-              }}
-            >
-              Find your next bike
-            </Typography>
-            
-            {/* Top Row Filters */}
-            <Grid container spacing={2} sx={{ marginBottom: 2 }}>
-              <Grid item xs={12} sm={6} md={2}>
-                <FormControl fullWidth size="small">
-                  <InputLabel>Make</InputLabel>
-                  <Select
-                    value={make}
-                    label="Make"
-                    onChange={(e) => setMake(e.target.value)}
-                  >
-                    <MenuItem value="all">All makes</MenuItem>
-                    <MenuItem value="honda">Honda</MenuItem>
-                    <MenuItem value="yamaha">Yamaha</MenuItem>
-                    <MenuItem value="kawasaki">Kawasaki</MenuItem>
-                    <MenuItem value="suzuki">Suzuki</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} sm={6} md={2}>
-                <FormControl fullWidth size="small">
-                  <InputLabel>Model</InputLabel>
-                  <Select
-                    value={model}
-                    label="Model"
-                    onChange={(e) => setModel(e.target.value)}
-                    disabled={make === 'all'}
-                  >
-                    <MenuItem value="all">All models</MenuItem>
-                    <MenuItem value="cbr">CBR</MenuItem>
-                    <MenuItem value="cb">CB</MenuItem>
-                    <MenuItem value="vfr">VFR</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} sm={6} md={2}>
-                <FormControl fullWidth size="small">
-                  <InputLabel>Category</InputLabel>
-                  <Select
-                    value={category}
-                    label="Category"
-                    onChange={(e) => setCategory(e.target.value)}
-                  >
-                    <MenuItem value="all">All categories</MenuItem>
-                    <MenuItem value="sport">Sport</MenuItem>
-                    <MenuItem value="cruiser">Cruiser</MenuItem>
-                    <MenuItem value="touring">Touring</MenuItem>
-                    <MenuItem value="dirt">Dirt</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Keyword"
-                  placeholder="Search by keyword..."
-                  value={keyword}
-                  onChange={(e) => setKeyword(e.target.value)}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="large"
-                  fullWidth
-                  sx={{
-                    height: '40px',
-                    backgroundColor: '#d32f2f',
-                    '&:hover': { backgroundColor: '#b71c1c' }
-                  }}
-                >
-                  Show 21,842 bikes
-                </Button>
-              </Grid>
-            </Grid>
-
-            {/* Bottom Row Filters */}
-            <Grid container spacing={2} sx={{ marginBottom: 2 }}>
-              <Grid item xs={12} sm={6} md={2}>
-                <FormControl fullWidth size="small">
-                  <InputLabel>Location</InputLabel>
-                  <Select
-                    value={location}
-                    label="Location"
-                    onChange={(e) => setLocation(e.target.value)}
-                  >
-                    <MenuItem value="all">All locations</MenuItem>
-                    <MenuItem value="seoul">Seoul</MenuItem>
-                    <MenuItem value="busan">Busan</MenuItem>
-                    <MenuItem value="daegu">Daegu</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} sm={6} md={2}>
-                <FormControl fullWidth size="small">
-                  <InputLabel>New and used</InputLabel>
-                  <Select
-                    value={condition}
-                    label="New and used"
-                    onChange={(e) => setCondition(e.target.value)}
-                  >
-                    <MenuItem value="all">All</MenuItem>
-                    <MenuItem value="new">New</MenuItem>
-                    <MenuItem value="used">Used</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} sm={6} md={2}>
-                <FormControl fullWidth size="small">
-                  <InputLabel>Price min</InputLabel>
-                  <Select
-                    value={priceMin}
-                    label="Price min"
-                    onChange={(e) => setPriceMin(e.target.value)}
-                  >
-                    <MenuItem value="">Any</MenuItem>
-                    <MenuItem value="1000">$1,000</MenuItem>
-                    <MenuItem value="5000">$5,000</MenuItem>
-                    <MenuItem value="10000">$10,000</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} sm={6} md={2}>
-                <FormControl fullWidth size="small">
-                  <InputLabel>Price max</InputLabel>
-                  <Select
-                    value={priceMax}
-                    label="Price max"
-                    onChange={(e) => setPriceMax(e.target.value)}
-                  >
-                    <MenuItem value="">Any</MenuItem>
-                    <MenuItem value="5000">$5,000</MenuItem>
-                    <MenuItem value="10000">$10,000</MenuItem>
-                    <MenuItem value="20000">$20,000</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} sm={6} md={4}>
-                <Button
-                  variant="text"
-                  color="error"
-                  onClick={handleClearAll}
-                  sx={{ textTransform: 'none' }}
-                >
-                  Clear all
-                </Button>
-              </Grid>
-            </Grid>
-          </CardContent>
-        </Card>
-
-        {/* Bike Categories */}
-        <Paper
-          sx={{
-            padding: 3,
-            borderRadius: 3,
-            backgroundColor: 'rgba(255, 255, 255, 0.95)',
-            backdropFilter: 'blur(10px)',
-          }}
-        >
-          <Grid container spacing={2}>
-            {bikeCategories.map((category) => (
-              <Grid item xs={6} sm={4} md={3} lg={1.7} key={category.name}>
-                <Box
-                  sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    cursor: 'pointer',
-                    padding: 1,
-                    borderRadius: 2,
-                    transition: 'all 0.2s',
-                    '&:hover': {
-                      backgroundColor: 'rgba(0,0,0,0.05)',
-                      transform: 'translateY(-2px)',
-                    },
-                  }}
-                >
-                  <Box
-                    component="img"
-                    src={category.image}
-                    alt={category.name}
-                    sx={{
-                      width: 60,
-                      height: 60,
-                      objectFit: 'contain',
-                      marginBottom: 1,
-                    }}
-                  />
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      textAlign: 'center',
-                      fontWeight: 500,
-                      color: '#333',
-                    }}
-                  >
-                    {category.name}
-                  </Typography>
-                </Box>
-              </Grid>
-            ))}
-          </Grid>
-        </Paper>
+          <Typography
+            variant="h1"
+            sx={{
+              fontWeight: 'bold',
+              fontSize: { xs: '3rem', md: '5rem' },
+              textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
+              marginBottom: 2,
+            }}
+          >
+            Find your next bike
+          </Typography>
+          <Typography
+            variant="h4"
+            sx={{
+              opacity: 0.9,
+              textShadow: '1px 1px 2px rgba(0,0,0,0.5)',
+              marginBottom: 4,
+            }}
+          >
+            Discover the perfect ride for your adventure
+          </Typography>
+        </Box>
       </Container>
+
+      {/* Search Filter Card - Positioned at Bottom */}
+      <Box
+        sx={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 2,
+          pb: 4,
+        }}
+      >
+        <Container maxWidth="lg">
+          <Card
+            sx={{
+              borderRadius: 3,
+              boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+              marginBottom: 2,
+            }}
+          >
+            <CardContent sx={{ padding: 3 }}>
+              <Typography
+                variant="h3"
+                sx={{
+                  textAlign: 'center',
+                  marginBottom: 3,
+                  fontWeight: 'bold',
+                  color: '#333',
+                }}
+              >
+                Search Filters
+              </Typography>
+              
+              {/* Top Row Filters */}
+              <Grid container spacing={2} sx={{ marginBottom: 2 }}>
+                <Grid item xs={12} sm={6} md={2}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Make</InputLabel>
+                    <Select
+                      value={make}
+                      label="Make"
+                      onChange={(e) => setMake(e.target.value)}
+                    >
+                      <MenuItem value="all">All makes</MenuItem>
+                      <MenuItem value="honda">Honda</MenuItem>
+                      <MenuItem value="yamaha">Yamaha</MenuItem>
+                      <MenuItem value="kawasaki">Kawasaki</MenuItem>
+                      <MenuItem value="suzuki">Suzuki</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={6} md={2}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Model</InputLabel>
+                    <Select
+                      value={model}
+                      label="Model"
+                      onChange={(e) => setModel(e.target.value)}
+                      disabled={make === 'all'}
+                    >
+                      <MenuItem value="all">All models</MenuItem>
+                      <MenuItem value="cbr">CBR</MenuItem>
+                      <MenuItem value="cb">CB</MenuItem>
+                      <MenuItem value="vfr">VFR</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={6} md={2}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Category</InputLabel>
+                    <Select
+                      value={category}
+                      label="Category"
+                      onChange={(e) => setCategory(e.target.value)}
+                    >
+                      <MenuItem value="all">All categories</MenuItem>
+                      <MenuItem value="sport">Sport</MenuItem>
+                      <MenuItem value="cruiser">Cruiser</MenuItem>
+                      <MenuItem value="touring">Touring</MenuItem>
+                      <MenuItem value="dirt">Dirt</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Keyword"
+                    placeholder="Search by keyword..."
+                    value={keyword}
+                    onChange={(e) => setKeyword(e.target.value)}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    size="large"
+                    fullWidth
+                    sx={{
+                      height: '40px',
+                      backgroundColor: '#d32f2f',
+                      '&:hover': { backgroundColor: '#b71c1c' }
+                    }}
+                  >
+                    Show 21,842 bikes
+                  </Button>
+                </Grid>
+              </Grid>
+
+              {/* Bottom Row Filters */}
+              <Grid container spacing={2} sx={{ marginBottom: 2 }}>
+                <Grid item xs={12} sm={6} md={2}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Location</InputLabel>
+                    <Select
+                      value={location}
+                      label="Location"
+                      onChange={(e) => setLocation(e.target.value)}
+                    >
+                      <MenuItem value="all">All locations</MenuItem>
+                      <MenuItem value="seoul">Seoul</MenuItem>
+                      <MenuItem value="busan">Busan</MenuItem>
+                      <MenuItem value="daegu">Daegu</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={6} md={2}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>New and used</InputLabel>
+                    <Select
+                      value={condition}
+                      label="New and used"
+                      onChange={(e) => setCondition(e.target.value)}
+                    >
+                      <MenuItem value="all">All</MenuItem>
+                      <MenuItem value="new">New</MenuItem>
+                      <MenuItem value="used">Used</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={6} md={2}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Price min</InputLabel>
+                    <Select
+                      value={priceMin}
+                      label="Price min"
+                      onChange={(e) => setPriceMin(e.target.value)}
+                    >
+                      <MenuItem value="">Any</MenuItem>
+                      <MenuItem value="1000">$1,000</MenuItem>
+                      <MenuItem value="5000">$5,000</MenuItem>
+                      <MenuItem value="10000">$10,000</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={6} md={2}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Price max</InputLabel>
+                    <Select
+                      value={priceMax}
+                      label="Price max"
+                      onChange={(e) => setPriceMax(e.target.value)}
+                    >
+                      <MenuItem value="">Any</MenuItem>
+                      <MenuItem value="5000">$5,000</MenuItem>
+                      <MenuItem value="10000">$10,000</MenuItem>
+                      <MenuItem value="20000">$20,000</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={6} md={4}>
+                  <Button
+                    variant="text"
+                    color="error"
+                    onClick={handleClearAll}
+                    sx={{ textTransform: 'none' }}
+                  >
+                    Clear all
+                  </Button>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+
+          {/* Bike Categories */}
+          <Paper
+            sx={{
+              padding: 3,
+              borderRadius: 3,
+              backgroundColor: 'rgba(255, 255, 255, 0.95)',
+              backdropFilter: 'blur(10px)',
+            }}
+          >
+            <Grid container spacing={2}>
+              {bikeCategories.map((category) => (
+                <Grid item xs={6} sm={4} md={3} lg={1.7} key={category.name}>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      cursor: 'pointer',
+                      padding: 1,
+                      borderRadius: 2,
+                      transition: 'all 0.2s',
+                      '&:hover': {
+                        backgroundColor: 'rgba(0, 0, 0, 0.05)',
+                        transform: 'translateY(-2px)',
+                      },
+                    }}
+                  >
+                    <Box
+                      component="img"
+                      src={category.image}
+                      alt={category.name}
+                      sx={{
+                        width: 60,
+                        height: 60,
+                        objectFit: 'contain',
+                        marginBottom: 1,
+                      }}
+                    />
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        textAlign: 'center',
+                        fontWeight: 500,
+                        color: '#333',
+                      }}
+                    >
+                      {category.name}
+                    </Typography>
+                  </Box>
+                </Grid>
+              ))}
+            </Grid>
+          </Paper>
+        </Container>
+      </Box>
     </Box>
   );
 };

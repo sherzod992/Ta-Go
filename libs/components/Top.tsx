@@ -1,13 +1,28 @@
 import React from 'react';
-import { Box, Button, Typography } from '@mui/material';
+import { Box, Button, Typography, Menu, MenuItem, Avatar } from '@mui/material';
 import Link from 'next/link';
 import { useTranslation } from 'next-i18next';
 import { useReactiveVar } from '@apollo/client';
 import { userVar } from '../../apollo/store';
+import { logOut } from '../auth';
 
 const Top: React.FC = () => {
   const { t } = useTranslation();
   const user = useReactiveVar(userVar);
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+
+  const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    logOut();
+    handleClose();
+  };
 
   return (
     <Box
@@ -114,9 +129,39 @@ const Top: React.FC = () => {
       {/* Login/User Section */}
       <Box>
         {user?._id ? (
-          <Typography variant="body2">
-            Welcome, {user.memberNick || 'User'}
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Typography variant="body2">
+              Welcome, {user.memberNick || 'User'}
+            </Typography>
+            <Avatar
+              src={user.memberImage}
+              alt={user.memberNick}
+              sx={{ width: 32, height: 32, cursor: 'pointer' }}
+              onClick={handleMenu}
+            />
+            <Menu
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={handleClose}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'right',
+              }}
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+            >
+              <MenuItem onClick={handleClose}>
+                <Link href="/mypage" style={{ textDecoration: 'none', color: 'inherit' }}>
+                  My Profile
+                </Link>
+              </MenuItem>
+              <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}>
+                Logout
+              </MenuItem>
+            </Menu>
+          </Box>
         ) : (
           <Link href="/login" style={{ textDecoration: 'none' }}>
             <Button variant="contained" color="primary">

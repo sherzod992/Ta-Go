@@ -1,13 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NextPage } from 'next';
 import withLayoutBasic from '../../libs/components/layout/LayoutBasic';
+import LoginComponent from '../../libs/components/auth/LoginComponent';
 
 const LoginPage: NextPage = () => {
-  return (
-    <div style={{ padding: '2rem' }}>
-      <h1>Hello Login Page</h1>
-    </div>
-  );
+  return <LoginComponent />;
 };
 
 export default withLayoutBasic(LoginPage); 

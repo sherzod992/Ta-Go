@@ -6,6 +6,9 @@ import { sweetMixinErrorAlert } from '../types/sweetAlert';
 import { LOGIN, SIGN_UP } from '../../apollo/user/mutation';
 import { MemberAuthType } from '../enums/member.enum';
 
+// Export MemberAuthType for use in components
+export { MemberAuthType };
+
 // 인증 관련 상수들
 export const AUTH_CONSTANTS = {
 	DEFAULT_AUTH_TYPE: MemberAuthType.PHONE,
