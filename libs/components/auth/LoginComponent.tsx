@@ -25,6 +25,7 @@ import {
   signUp, 
   socialLogin, 
   MemberAuthType, 
+  MemberType,
   getAuthTypeDisplayName,
   isSocialAuthType,
   isTraditionalAuthType 
@@ -68,7 +69,7 @@ const LoginComponent: React.FC = () => {
   const [signupConfirmPassword, setSignupConfirmPassword] = useState('');
   const [signupContact, setSignupContact] = useState('');
   const [signupAuthType, setSignupAuthType] = useState<MemberAuthType>(MemberAuthType.PHONE);
-  const [signupMemberType, setSignupMemberType] = useState('USER');
+  const [signupMemberType, setSignupMemberType] = useState<MemberType>(MemberType.USER);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
@@ -115,9 +116,19 @@ const LoginComponent: React.FC = () => {
     }
 
     try {
-      await signUp(signupNick, signupPassword, signupContact, signupAuthType);
+      console.log('Signup attempt with:', {
+        nick: signupNick,
+        password: signupPassword,
+        contact: signupContact,
+        authType: signupAuthType,
+        memberType: signupMemberType
+      });
+      
+      await signUp(signupNick, signupPassword, signupContact, signupAuthType, signupMemberType);
+      console.log('Signup successful');
       router.push('/');
     } catch (err) {
+      console.error('Signup error in component:', err);
       setError('회원가입에 실패했습니다. 다시 시도해주세요.');
     } finally {
       setLoading(false);
@@ -299,10 +310,10 @@ const LoginComponent: React.FC = () => {
                 <Select
                   value={signupMemberType}
                   label="사용자 타입"
-                  onChange={(e) => setSignupMemberType(e.target.value)}
+                  onChange={(e) => setSignupMemberType(e.target.value as MemberType)}
                 >
-                  <MenuItem value="USER">일반 사용자</MenuItem>
-                  <MenuItem value="AGENT">에이전트</MenuItem>
+                  <MenuItem value={MemberType.USER}>일반 사용자</MenuItem>
+                  <MenuItem value={MemberType.AGENT}>에이전트</MenuItem>
                 </Select>
               </FormControl>
               <TextField

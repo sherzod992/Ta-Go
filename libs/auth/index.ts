@@ -4,10 +4,10 @@ import { userVar } from '../../apollo/store';
 import { CustomJwtPayload } from '../types/customJwtPayload';
 import { sweetMixinErrorAlert } from '../types/sweetAlert';
 import { LOGIN, SIGN_UP } from '../../apollo/user/mutation';
-import { MemberAuthType } from '../enums/member.enum';
+import { MemberAuthType, MemberType } from '../enums/member.enum';
 
 // Export MemberAuthType for use in components
-export { MemberAuthType };
+export { MemberAuthType, MemberType };
 
 // 인증 관련 상수들
 export const AUTH_CONSTANTS = {
@@ -77,9 +77,9 @@ const requestJwtToken = async ({
 	}
 };
 
-export const signUp = async (nick: string, password: string, phone: string, type: MemberAuthType): Promise<void> => {
+export const signUp = async (nick: string, password: string, phone: string, authType: MemberAuthType, memberType: MemberType = MemberType.USER): Promise<void> => {
 	try {
-		const { jwtToken } = await requestSignUpJwtToken({ nick, password, phone, type });
+		const { jwtToken } = await requestSignUpJwtToken({ nick, password, phone, authType, memberType });
 
 		if (jwtToken) {
 			updateStorage({ jwtToken });
@@ -96,39 +96,79 @@ const requestSignUpJwtToken = async ({
 	nick,
 	password,
 	phone,
-	type,
+	authType,
+	memberType,
 }: {
 	nick: string;
 	password: string;
 	phone: string;
-	type: MemberAuthType;
+	authType: MemberAuthType;
+	memberType: MemberType;
 }): Promise<{ jwtToken: string }> => {
 	const apolloClient = await initializeApollo();
 
 	try {
+		console.log('Sending signup mutation with variables:', {
+			memberNick: nick, 
+			memberPassword: password, 
+			memberPhone: phone, 
+			memberType: memberType,
+			memberAuthType: authType 
+		});
+		
 		const result = await apolloClient.mutate({
 			mutation: SIGN_UP,
 			variables: {
-				input: { memberNick: nick, memberPassword: password, memberPhone: phone, memberType: type },
+				input: { 
+					memberNick: nick, 
+					memberPassword: password, 
+					memberPhone: phone, 
+					memberType: memberType,
+					memberAuthType: authType 
+				},
 			},
 			fetchPolicy: 'network-only',
 		});
 
-		console.log('---------- login ----------');
+		console.log('---------- signup result ----------');
+		console.log('Full result:', result);
+		console.log('Data:', result?.data);
+		console.log('Signup data:', result?.data?.signup);
+		
 		const { accessToken } = result?.data?.signup;
+		console.log('Access token:', accessToken);
 
 		return { jwtToken: accessToken };
 	} catch (err: any) {
-		console.log('request token err', err.graphQLErrors);
-		switch (err.graphQLErrors[0].message) {
-			case 'Definer: login and password do not match':
-				await sweetMixinErrorAlert('Please check your password again');
-				break;
-			case 'Definer: user has been blocked!':
-				await sweetMixinErrorAlert('User has been blocked!');
-				break;
+		console.log('request signup token err', err);
+		
+		// GraphQL 에러가 있는 경우
+		if (err.graphQLErrors && err.graphQLErrors.length > 0) {
+			const errorMessage = err.graphQLErrors[0].message;
+			console.log('GraphQL error message:', errorMessage);
+			
+			switch (errorMessage) {
+				case 'Definer: login and password do not match':
+					await sweetMixinErrorAlert('Please check your password again');
+					break;
+				case 'Definer: user has been blocked!':
+					await sweetMixinErrorAlert('User has been blocked!');
+					break;
+				default:
+					await sweetMixinErrorAlert(errorMessage || '회원가입 중 오류가 발생했습니다.');
+					break;
+			}
+		} else if (err.networkError) {
+			// 네트워크 에러인 경우
+			console.log('Network error:', err.networkError);
+			await sweetMixinErrorAlert('네트워크 연결을 확인해주세요.');
+		} else {
+			// 기타 에러
+			console.log('Other error:', err);
+			await sweetMixinErrorAlert('회원가입 중 오류가 발생했습니다.');
 		}
-		throw new Error('token error');
+		
+		throw new Error('signup token error');
 	}
 };
 
@@ -296,11 +336,11 @@ const requestSocialJwtToken = async ({
 };
 
 // 이메일 인증 함수
-export const emailSignUp = async (nick: string, password: string, email: string): Promise<void> => {
-	return signUp(nick, password, email, MemberAuthType.EMAIL);
+export const emailSignUp = async (nick: string, password: string, email: string, memberType: MemberType = MemberType.USER): Promise<void> => {
+	return signUp(nick, password, email, MemberAuthType.EMAIL, memberType);
 };
 
 // 전화번호 인증 함수
-export const phoneSignUp = async (nick: string, password: string, phone: string): Promise<void> => {
-	return signUp(nick, password, phone, MemberAuthType.PHONE);
+export const phoneSignUp = async (nick: string, password: string, phone: string, memberType: MemberType = MemberType.USER): Promise<void> => {
+	return signUp(nick, password, phone, MemberAuthType.PHONE, memberType);
 };

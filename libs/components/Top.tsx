@@ -1,10 +1,11 @@
 import React from 'react';
-import { Box, Button, Typography, Menu, MenuItem, Avatar } from '@mui/material';
+import { Box, Button, Typography, Menu, MenuItem, Avatar, Badge, IconButton } from '@mui/material';
 import Link from 'next/link';
 import { useTranslation } from 'next-i18next';
 import { useReactiveVar } from '@apollo/client';
 import { userVar } from '../../apollo/store';
 import { logOut } from '../auth';
+import NotificationsIcon from '@mui/icons-material/Notifications';
 
 const Top: React.FC = () => {
   const { t } = useTranslation();
@@ -62,7 +63,7 @@ const Top: React.FC = () => {
             {t('Home')}
           </Box>
         </Link>
-        <Link href={'/property'} style={{ textDecoration: 'none' }}>
+        <Link href={'/property?type=buy'} style={{ textDecoration: 'none' }}>
           <Box
             component="div"
             sx={{
@@ -71,7 +72,19 @@ const Top: React.FC = () => {
               '&:hover': { backgroundColor: '#f5f5f5', borderRadius: 1 },
             }}
           >
-            {t('Properties')}
+            {t('Buy')}
+          </Box>
+        </Link>
+        <Link href={'/property?type=sell'} style={{ textDecoration: 'none' }}>
+          <Box
+            component="div"
+            sx={{
+              padding: '0.5rem 1rem',
+              cursor: 'pointer',
+              '&:hover': { backgroundColor: '#f5f5f5', borderRadius: 1 },
+            }}
+          >
+            {t('Sell')}
           </Box>
         </Link>
         <Link href={'/agent'} style={{ textDecoration: 'none' }}>
@@ -98,20 +111,6 @@ const Top: React.FC = () => {
             {t('Community')}
           </Box>
         </Link>
-        {user?._id && (
-          <Link href={'/mypage'} style={{ textDecoration: 'none' }}>
-            <Box
-              component="div"
-              sx={{
-                padding: '0.5rem 1rem',
-                cursor: 'pointer',
-                '&:hover': { backgroundColor: '#f5f5f5', borderRadius: 1 },
-              }}
-            >
-              {t('My Page')}
-            </Box>
-          </Link>
-        )}
         <Link href={'/cs'} style={{ textDecoration: 'none' }}>
           <Box
             component="div"
@@ -126,8 +125,21 @@ const Top: React.FC = () => {
         </Link>
       </Box>
 
-      {/* Login/User Section */}
-      <Box>
+      {/* Right Section - Notifications & Login/User */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        {/* Notifications */}
+        <IconButton
+          sx={{
+            color: 'text.secondary',
+            '&:hover': { backgroundColor: '#f5f5f5' },
+          }}
+        >
+          <Badge badgeContent={0} color="error">
+            <NotificationsIcon />
+          </Badge>
+        </IconButton>
+
+        {/* Login/User Section */}
         {user?._id ? (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Typography variant="body2">
