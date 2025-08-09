@@ -1,8 +1,8 @@
 module.exports = {
 	i18n: {
-		defaultLocale: 'kr',
-		locales: ['kr', 'en', 'ru'],
-		localeDetection: true,
+		defaultLocale: 'ko',
+		locales: ['ko', 'en', 'ja', 'ru'],
+		localeDetection: false,
 	},
 	trailingSlash: false,
 };

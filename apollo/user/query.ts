@@ -157,7 +157,6 @@ export const GET_PROPERTIES = gql`
             propertyRank
             propertyImages
             propertyDesc
-            propertyBarter
             propertyWarranty
             propertyFinancing
             memberId
@@ -236,7 +235,6 @@ export const GET_AGENT_PROPERTIES = gql`
 				propertyLikes
 				propertyImages
 				propertyDesc
-				propertyBarter
 				propertyWarranty
 				propertyFinancing
 				memberId
@@ -279,7 +277,6 @@ export const GET_FAVORITES = gql`
 				propertyRank
 				propertyImages
 				propertyDesc
-				propertyBarter
 				propertyWarranty
 				propertyFinancing
 				memberId
@@ -355,7 +352,6 @@ export const GET_VISITED = gql`
 				propertyRank
 				propertyImages
 				propertyDesc
-				propertyBarter
 				propertyWarranty
 				propertyFinancing
 				memberId

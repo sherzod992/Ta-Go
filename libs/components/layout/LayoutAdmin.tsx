@@ -181,4 +181,71 @@
 // 	};
 // };
 
-// export default withAdminLayout;
+import type { ComponentType } from 'react';
+import React, { useEffect } from 'react';
+import { useRouter } from 'next/router';
+import { useReactiveVar } from '@apollo/client';
+import { userVar } from '../../../apollo/store';
+import { MemberType } from '../../enums/member.enum';
+import { logOut } from '../../auth';
+import Link from 'next/link';
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import Avatar from '@mui/material/Avatar';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import Container from '@mui/material/Container';
+
+const withAdminLayout = (Component: ComponentType) => {
+  const AdminLayoutWrapper: React.FC<any> = (props) => {
+    const router = useRouter();
+    const user = useReactiveVar(userVar);
+
+    useEffect(() => {
+      if (!user || user.memberType !== MemberType.ADMIN) {
+        router.replace('/');
+      }
+    }, [user, router]);
+
+    if (!user || user.memberType !== MemberType.ADMIN) return null;
+
+    const handleLogout = () => {
+      logOut();
+      router.replace('/');
+    };
+
+    return (
+      <Box>
+        <AppBar position="static" color="default" elevation={1}>
+          <Toolbar>
+            <Typography variant="h6" sx={{ flexGrow: 1 }}>
+              Admin Console
+            </Typography>
+            <Stack direction="row" spacing={1} alignItems="center" sx={{ mr: 2 }}>
+              <Avatar src={user.memberImage || '/img/profile/defaultUser.svg'} sx={{ width: 28, height: 28 }} />
+              <Typography variant="body2">{user.memberNick}</Typography>
+            </Stack>
+            <Button onClick={handleLogout} color="inherit" size="small">Logout</Button>
+          </Toolbar>
+        </AppBar>
+        <AppBar position="static" color="transparent" elevation={0}>
+          <Toolbar sx={{ gap: 1 }}>
+            <Link href="/_admin/properties"><Button size="small">Properties</Button></Link>
+            <Link href="/_admin/community"><Button size="small">Community</Button></Link>
+            <Link href="/_admin/cs"><Button size="small">CS</Button></Link>
+          </Toolbar>
+        </AppBar>
+        <Container maxWidth="xl" sx={{ py: 3 }}>
+          {/*@ts-ignore*/}
+          <Component {...props} />
+        </Container>
+      </Box>
+    );
+  };
+
+  return AdminLayoutWrapper;
+};
+
+export default withAdminLayout;

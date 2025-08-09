@@ -19,7 +19,6 @@ export interface PropertyUpdate {
 	propertyCondition?: ConditionType;
 	propertyImages?: string[];
 	propertyDesc?: string;
-	propertyBarter?: boolean;
 	propertyWarranty?: boolean;
 	propertyFinancing?: boolean;
 	soldAt?: Date;

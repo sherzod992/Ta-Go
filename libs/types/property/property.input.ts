@@ -18,10 +18,6 @@ export interface PropertyInput {
 	propertyCondition: ConditionType;
 	propertyImages: string[];
 	propertyDesc?: string;
-	propertyBarter?: boolean;
-	propertyWarranty?: boolean;
-	propertyFinancing?: boolean;
-	memberId?: string;
 	manufacturedAt?: Date;
 }
 

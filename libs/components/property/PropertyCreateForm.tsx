@@ -18,6 +18,10 @@ import {
   IconButton,
   Alert,
   CircularProgress,
+  Rating,
+  ToggleButton,
+  ToggleButtonGroup,
+  Collapse,
 } from '@mui/material';
 import { useMutation } from '@apollo/client';
 import { CREATE_PROPERTY } from '../../../apollo/user/mutation';
@@ -36,6 +40,80 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CloseIcon from '@mui/icons-material/Close';
 
+// 오토바이 타입 이미지 매핑
+const bikeTypeImages = {
+  [PropertyType.ADVENTURE_TOURERS]: '/img/typeImages/ADVENTUREmoto.webp',
+  [PropertyType.AGRICULTURE]: '/img/typeImages/AGRICULTUREmoto.png',
+  [PropertyType.ALL_TERRAIN_VEHICLES]: '/img/typeImages/ALL_TERRAIN.jpg',
+  [PropertyType.DIRT]: '/img/typeImages/dirtbike.avif',
+  [PropertyType.ELECTRIC]: '/img/typeImages/electric.avif',
+  [PropertyType.ENDURO]: '/img/typeImages/dirt-bikes.png',
+  [PropertyType.MINI_BIKES]: '/img/typeImages/minibikes.jpg',
+  [PropertyType.SXS_UTV]: '/img/typeImages/UTVbikes.avif',
+};
+
+// 변속기 이미지 매핑
+const transmissionImages = {
+  [TransmissionType.MANUAL]: '/img/typeImages/MANUAL.avif',
+  [TransmissionType.AUTOMATIC]: '/img/typeImages/Automatic.webp',
+  [TransmissionType.CVT]: '/img/typeImages/CVT.png',
+};
+
+// 연료 타입 이미지 매핑
+const fuelTypeImages = {
+  [FuelType.GASOLINE]: '/img/typeany/gasoline.png',
+  [FuelType.ELECTRIC]: '/img/typeany/electric.png',
+  [FuelType.HYBRID]: '/img/typeany/hybrid.png',
+};
+
+// 브랜드 로고 매핑
+const brandLogos = {
+  'Honda': '/img/logo/Honda_Logo.svg',
+  'Yamaha': '/img/logo/yamaha.webp',
+  'Suzuki': '/img/logo/suzuki.jpg',
+  'Kawasaki': '/img/logo/kTm.jpeg',
+  'BMW': '/img/logo/BMWMotorrad.jpg',
+  'Ducati': '/img/logo/Ducati.webp',
+  'Harley-Davidson': '/img/logo/PWcsAzP2m-HarleyDavidson.svg',
+  'KTM': '/img/logo/kTm.jpeg',
+  'Aprilia': '/img/logo/BAprilia.jpg',
+  'MV Agusta': '/img/logo/MVAgusta.jpg',
+  'Moto Guzzi': '/img/logo/MotoGuzzi.png',
+  'Royal Enfield': '/img/logo/royalenfield.jpeg',
+  'Bajaj': '/img/logo/Bajaj-logo.jpg',
+  'TVS': '/img/logo/TVS Motor.png',
+  'Hero': '/img/logo/Hero_MotoCorp.png',
+};
+
+// 색상 옵션
+const colorOptions = [
+  { name: '빨강', value: 'red', color: '#ff0000' },
+  { name: '파랑', value: 'blue', color: '#0000ff' },
+  { name: '검정', value: 'black', color: '#000000' },
+  { name: '흰색', value: 'white', color: '#ffffff' },
+  { name: '회색', value: 'gray', color: '#808080' },
+  { name: '노랑', value: 'yellow', color: '#ffff00' },
+  { name: '초록', value: 'green', color: '#008000' },
+  { name: '주황', value: 'orange', color: '#ffa500' },
+  { name: '보라', value: 'purple', color: '#800080' },
+  { name: '갈색', value: 'brown', color: '#a52a2a' },
+];
+
+// 상태별 별점 매핑
+const conditionRatingMap = {
+  [ConditionType.EXCELLENT]: 5,
+  [ConditionType.GOOD]: 4,
+  [ConditionType.FAIR]: 3,
+  [ConditionType.POOR]: 2,
+};
+
+const ratingConditionMap = {
+  5: ConditionType.EXCELLENT,
+  4: ConditionType.GOOD,
+  3: ConditionType.FAIR,
+  2: ConditionType.POOR,
+};
+
 const PropertyCreateForm: React.FC = () => {
   const router = useRouter();
   const user = useReactiveVar(userVar);
@@ -47,8 +125,15 @@ const PropertyCreateForm: React.FC = () => {
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
 
-  // 폼 데이터 상태
-  const [formData, setFormData] = useState<Partial<PropertyInput>>({
+  // 선택 상태 관리
+  const [selectedColor, setSelectedColor] = useState<string>('');
+  const [selectedBikeType, setSelectedBikeType] = useState<string>('');
+  const [selectedTransmission, setSelectedTransmission] = useState<string>('');
+  const [selectedFuelType, setSelectedFuelType] = useState<string>('');
+  const [showMoreBrands, setShowMoreBrands] = useState(false);
+
+  // 폼 데이터 상태 - memberId를 제외한 필드만 포함
+  const [formData, setFormData] = useState({
     propertyType: PropertyType.ADVENTURE_TOURERS,
     propertyLocation: PropertyLocation.SEOUL,
     propertyAddress: '',
@@ -63,11 +148,15 @@ const PropertyCreateForm: React.FC = () => {
     propertyTransmission: TransmissionType.MANUAL,
     propertyColor: '',
     propertyCondition: ConditionType.GOOD,
+    propertyImages: [] as string[],
     propertyDesc: '',
-    propertyBarter: false,
-    propertyWarranty: false,
-    propertyFinancing: false,
   });
+
+  // 토큰 디버깅
+  const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+  console.log('Current user:', user);
+  console.log('Current token:', token);
+  console.log('User ID exists:', !!user?._id);
 
   // 로그인 체크
   if (!user?._id) {
@@ -87,28 +176,100 @@ const PropertyCreateForm: React.FC = () => {
     );
   }
 
+  // 토큰이 없으면 로그인 페이지로 리다이렉트
+  if (!token) {
+    console.log('No token found, redirecting to login');
+    router.push('/login');
+    return null;
+  }
+
+  // 이미지 압축 함수
+  const compressImage = (file: File): Promise<File> => {
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      
+      img.onload = () => {
+        // 최대 크기 설정 (400x300으로 더 작게)
+        const maxWidth = 400;
+        const maxHeight = 300;
+        let { width, height } = img;
+        
+        if (width > height) {
+          if (width > maxWidth) {
+            height = (height * maxWidth) / width;
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = (width * maxHeight) / height;
+            height = maxHeight;
+          }
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        ctx?.drawImage(img, 0, 0, width, height);
+        
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const compressedFile = new File([blob], file.name, {
+              type: 'image/jpeg',
+              lastModified: Date.now(),
+            });
+            resolve(compressedFile);
+          } else {
+            resolve(file);
+          }
+        }, 'image/jpeg', 0.5); // 50% 품질로 더 압축
+      };
+      
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
   // 이미지 업로드 처리
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files) return;
 
     const newFiles = Array.from(files);
     
-    if (images.length + newFiles.length > 10) {
-      setError('최대 10개의 이미지만 업로드할 수 있습니다.');
+    if (images.length + newFiles.length > 3) {
+      setError('최대 3개의 이미지만 업로드할 수 있습니다.');
       return;
     }
 
-    setImages(prev => [...prev, ...newFiles]);
-    
-    // 미리보기 URL 생성
-    newFiles.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setImageUrls(prev => [...prev, e.target?.result as string]);
-      };
-      reader.readAsDataURL(file);
-    });
+    // 파일 크기 검증 (각 파일 최대 500KB)
+    for (const file of newFiles) {
+      if (file.size > 500 * 1024) {
+        setError('각 이미지 파일은 500KB 이하여야 합니다.');
+        return;
+      }
+    }
+
+    try {
+      // 이미지 압축
+      const compressedFiles = await Promise.all(
+        newFiles.map(file => compressImage(file))
+      );
+
+      setImages(prev => [...prev, ...compressedFiles]);
+      
+      // 미리보기 URL 생성
+      compressedFiles.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setImageUrls(prev => [...prev, e.target?.result as string]);
+        };
+        reader.readAsDataURL(file);
+      });
+    } catch (error) {
+      setError('이미지 처리 중 오류가 발생했습니다.');
+      console.error('Image processing error:', error);
+    }
   };
 
   // 이미지 삭제
@@ -118,11 +279,35 @@ const PropertyCreateForm: React.FC = () => {
   };
 
   // 폼 데이터 변경 처리
-  const handleInputChange = (field: keyof PropertyInput, value: any) => {
+  const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({
       ...prev,
       [field]: value,
     }));
+  };
+
+  // 색상 선택 처리
+  const handleColorSelect = (color: string) => {
+    setSelectedColor(color);
+    handleInputChange('propertyColor', color);
+  };
+
+  // 오토바이 타입 선택 처리
+  const handleBikeTypeSelect = (type: string) => {
+    setSelectedBikeType(type);
+    handleInputChange('propertyType', type);
+  };
+
+  // 변속기 선택 처리
+  const handleTransmissionSelect = (transmission: string) => {
+    setSelectedTransmission(transmission);
+    handleInputChange('propertyTransmission', transmission);
+  };
+
+  // 연료 타입 선택 처리
+  const handleFuelTypeSelect = (fuelType: string) => {
+    setSelectedFuelType(fuelType);
+    handleInputChange('propertyFuelType', fuelType);
   };
 
   // 폼 제출 처리
@@ -133,51 +318,52 @@ const PropertyCreateForm: React.FC = () => {
 
     // 필수 필드 검증
     const requiredFields = [
-      'propertyTitle',
-      'propertyPrice',
-      'propertyBrand',
-      'propertyModel',
-      'propertyAddress',
+      { field: 'propertyTitle', label: '매물 제목' },
+      { field: 'propertyPrice', label: '가격' },
+      { field: 'propertyBrand', label: '브랜드' },
+      { field: 'propertyModel', label: '모델' },
+      { field: 'propertyAddress', label: '상세 주소' },
+      { field: 'propertyYear', label: '연식' },
+      { field: 'propertyMileage', label: '주행거리' },
+      { field: 'propertyEngineSize', label: '엔진 크기' },
+      { field: 'propertyColor', label: '색상' },
     ];
 
-    for (const field of requiredFields) {
-      if (!formData[field as keyof PropertyInput]) {
-        setError(`${field}은(는) 필수 입력 항목입니다.`);
+    for (const { field, label } of requiredFields) {
+      const value = formData[field as keyof PropertyInput];
+      if (!value || (typeof value === 'string' && value.trim() === '') || (typeof value === 'number' && value <= 0)) {
+        setError(`${label}은(는) 필수 입력 항목입니다.`);
         return;
       }
     }
 
-    if (images.length === 0) {
-      setError('최소 1개의 이미지를 업로드해야 합니다.');
+    // 이미지 개수 제한 (최대 3개로 제한)
+    if (images.length > 3) {
+      setError('최대 3개의 이미지만 업로드할 수 있습니다.');
       return;
     }
 
     try {
-      // 이미지를 base64로 변환 (실제로는 서버에 업로드해야 함)
-      const imageBase64Array = await Promise.all(
-        images.map(file => {
-          return new Promise<string>((resolve) => {
-            const reader = new FileReader();
-            reader.onload = (e) => resolve(e.target?.result as string);
-            reader.readAsDataURL(file);
-          });
-        })
-      );
-
-      const propertyData: PropertyInput = {
-        ...formData as PropertyInput,
-        propertyImages: imageBase64Array,
-        memberId: user._id,
+      // formData 디버깅
+      console.log('Original formData:', formData);
+      
+      // memberId를 제거하고 전송 (Backend에서 자동 설정)
+      const { memberId, ...formDataWithoutMemberId } = formData as any;
+      const inputData = {
+        ...formDataWithoutMemberId,
+        propertyImages: [] as string[],
       };
+
+      console.log('Sending property data:', inputData);
 
       const result = await createProperty({
         variables: {
-          input: propertyData,
+          input: inputData,
         },
       });
 
       if (result.data?.createProperty) {
-        setSuccess('매물이 성공적으로 등록되었습니다!');
+        setSuccess('매물이 성공적으로 등록되었습니다! (이미지는 별도 업로드가 필요합니다)');
         setTimeout(() => {
           router.push('/property?type=buy');
         }, 2000);
@@ -187,6 +373,10 @@ const PropertyCreateForm: React.FC = () => {
       console.error('Property creation error:', err);
     }
   };
+
+  // 브랜드 목록을 6개씩 나누기
+  const brandEntries = Object.entries(brandLogos);
+  const visibleBrands = showMoreBrands ? brandEntries : brandEntries.slice(0, 6);
 
   return (
     <Box sx={{ maxWidth: 800, mx: 'auto' }}>
@@ -278,24 +468,53 @@ const PropertyCreateForm: React.FC = () => {
                 value={formData.propertyPrice}
                 onChange={(e) => handleInputChange('propertyPrice', parseInt(e.target.value))}
                 required
+                InputProps={{
+                  startAdornment: <span style={{ marginRight: 8 }}>₩</span>,
+                }}
               />
             </Grid>
 
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
-                <InputLabel>오토바이 타입 *</InputLabel>
-                <Select
-                  value={formData.propertyType}
-                  onChange={(e) => handleInputChange('propertyType', e.target.value)}
-                  label="오토바이 타입 *"
-                >
-                  {Object.values(PropertyType).map((type) => (
-                    <MenuItem key={type} value={type}>
-                      {type.replace(/_/g, ' ')}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+            {/* 오토바이 타입 선택 */}
+            <Grid item xs={12}>
+              <Typography variant="h6" gutterBottom>
+                오토바이 타입 *
+              </Typography>
+              <Grid container spacing={1}>
+                {Object.entries(bikeTypeImages).map(([type, image]) => (
+                  <Grid item xs={3} sm={2} md={1.5} key={type}>
+                    <Card 
+                      sx={{ 
+                        cursor: 'pointer',
+                        border: formData.propertyType === type ? '3px solid #1976d2' : '1px solid #ddd',
+                        backgroundColor: formData.propertyType === type ? '#f3f8ff' : 'white',
+                        transition: 'all 0.3s ease',
+                        transform: selectedBikeType && selectedBikeType !== type ? 'scale(0.8) opacity(0.3)' : 'scale(1) opacity(1)',
+                        '&:hover': {
+                          borderColor: '#1976d2',
+                          transform: selectedBikeType && selectedBikeType !== type ? 'scale(0.8) opacity(0.3)' : 'scale(1.05)',
+                        },
+                      }}
+                      onClick={() => handleBikeTypeSelect(type)}
+                    >
+                      <CardContent sx={{ p: 0.5, textAlign: 'center' }}>
+                        <img
+                          src={image}
+                          alt={type}
+                          style={{
+                            width: '100%',
+                            height: 50,
+                            objectFit: 'cover',
+                            borderRadius: 4,
+                          }}
+                        />
+                        <Typography variant="caption" sx={{ mt: 0.5, display: 'block', fontSize: '0.7rem' }}>
+                          {type.replace(/_/g, ' ')}
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                ))}
+              </Grid>
             </Grid>
 
             <Grid item xs={12} md={6}>
@@ -315,14 +534,72 @@ const PropertyCreateForm: React.FC = () => {
               </FormControl>
             </Grid>
 
-            <Grid item xs={12}>
+            <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label="주소 *"
+                label="상세 주소 *"
                 value={formData.propertyAddress}
                 onChange={(e) => handleInputChange('propertyAddress', e.target.value)}
+                placeholder="예: 강남구 테헤란로 123"
                 required
               />
+            </Grid>
+
+            {/* 브랜드 선택 */}
+            <Grid item xs={12}>
+              <Typography variant="h6" gutterBottom>
+                브랜드 *
+              </Typography>
+              <Grid container spacing={1}>
+                {visibleBrands.map(([brand, logo]) => (
+                  <Grid item xs={2} key={brand}>
+                    <Box
+                      sx={{
+                        width: 60,
+                        height: 60,
+                        borderRadius: '50%',
+                        border: formData.propertyBrand === brand ? '3px solid #1976d2' : '2px solid #ddd',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: 'white',
+                        transition: 'all 0.2s',
+                        '&:hover': {
+                          transform: 'scale(1.1)',
+                          borderColor: '#1976d2',
+                        },
+                        overflow: 'hidden',
+                      }}
+                      onClick={() => handleInputChange('propertyBrand', brand)}
+                      title={brand}
+                    >
+                      <img
+                        src={logo}
+                        alt={brand}
+                        style={{
+                          width: '80%',
+                          height: '80%',
+                          objectFit: 'contain',
+                        }}
+                      />
+                    </Box>
+                    <Typography variant="caption" sx={{ display: 'block', textAlign: 'center', mt: 0.5, fontSize: '0.7rem' }}>
+                      {brand}
+                    </Typography>
+                  </Grid>
+                ))}
+              </Grid>
+              {brandEntries.length > 6 && (
+                <Button
+                  variant="text"
+                  size="small"
+                  onClick={() => setShowMoreBrands(!showMoreBrands)}
+                  sx={{ mt: 1 }}
+                >
+                  {showMoreBrands ? '접기' : `더보기 (${brandEntries.length - 6}개 더)`}
+                </Button>
+              )}
             </Grid>
 
             {/* 오토바이 상세 정보 */}
@@ -330,16 +607,6 @@ const PropertyCreateForm: React.FC = () => {
               <Typography variant="h6" gutterBottom>
                 오토바이 상세 정보
               </Typography>
-            </Grid>
-
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="브랜드 *"
-                value={formData.propertyBrand}
-                onChange={(e) => handleInputChange('propertyBrand', e.target.value)}
-                required
-              />
             </Grid>
 
             <Grid item xs={12} md={6}>
@@ -355,91 +622,175 @@ const PropertyCreateForm: React.FC = () => {
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label="연식"
+                label="연식 *"
                 type="number"
                 value={formData.propertyYear}
                 onChange={(e) => handleInputChange('propertyYear', parseInt(e.target.value))}
+                required
               />
             </Grid>
 
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label="주행거리 (km)"
+                label="주행거리 (km) *"
                 type="number"
                 value={formData.propertyMileage}
                 onChange={(e) => handleInputChange('propertyMileage', parseInt(e.target.value))}
+                required
               />
             </Grid>
 
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label="엔진 크기 (cc)"
+                label="엔진 크기 (cc) *"
                 type="number"
                 value={formData.propertyEngineSize}
                 onChange={(e) => handleInputChange('propertyEngineSize', parseInt(e.target.value))}
+                required
               />
             </Grid>
 
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="색상"
-                value={formData.propertyColor}
-                onChange={(e) => handleInputChange('propertyColor', e.target.value)}
-              />
+            {/* 색상 선택 */}
+            <Grid item xs={12}>
+              <Typography variant="h6" gutterBottom>
+                색상 *
+              </Typography>
+              <Grid container spacing={1}>
+                {colorOptions.map((color) => (
+                  <Grid item key={color.value}>
+                    <Box
+                      sx={{
+                        width: 50,
+                        height: 50,
+                        borderRadius: '50%',
+                        backgroundColor: color.color,
+                        border: formData.propertyColor === color.value ? '3px solid #1976d2' : '2px solid #ddd',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'all 0.3s ease',
+                        transform: selectedColor && selectedColor !== color.value ? 'scale(0.8) opacity(0.3)' : 'scale(1) opacity(1)',
+                        '&:hover': {
+                          transform: selectedColor && selectedColor !== color.value ? 'scale(0.8) opacity(0.3)' : 'scale(1.1)',
+                        },
+                      }}
+                      onClick={() => handleColorSelect(color.value)}
+                      title={color.name}
+                    />
+                  </Grid>
+                ))}
+              </Grid>
             </Grid>
 
+            {/* 연료 타입 선택 */}
             <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
-                <InputLabel>연료 타입</InputLabel>
-                <Select
-                  value={formData.propertyFuelType}
-                  onChange={(e) => handleInputChange('propertyFuelType', e.target.value)}
-                  label="연료 타입"
-                >
-                  {Object.values(FuelType).map((fuel) => (
-                    <MenuItem key={fuel} value={fuel}>
-                      {fuel}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+              <Typography variant="h6" gutterBottom>
+                연료 타입
+              </Typography>
+              <Grid container spacing={2}>
+                {Object.entries(fuelTypeImages).map(([fuelType, image]) => (
+                  <Grid item xs={4} key={fuelType}>
+                    <Card 
+                      sx={{ 
+                        cursor: 'pointer',
+                        border: formData.propertyFuelType === fuelType ? '3px solid #1976d2' : '1px solid #ddd',
+                        backgroundColor: formData.propertyFuelType === fuelType ? '#f3f8ff' : 'white',
+                        transition: 'all 0.3s ease',
+                        transform: selectedFuelType && selectedFuelType !== fuelType ? 'scale(0.8) opacity(0.3)' : 'scale(1) opacity(1)',
+                        '&:hover': {
+                          borderColor: '#1976d2',
+                          transform: selectedFuelType && selectedFuelType !== fuelType ? 'scale(0.8) opacity(0.3)' : 'translateY(-2px)',
+                        },
+                      }}
+                      onClick={() => handleFuelTypeSelect(fuelType)}
+                    >
+                      <CardContent sx={{ p: 1, textAlign: 'center' }}>
+                        <img
+                          src={image}
+                          alt={fuelType}
+                          style={{
+                            width: '100%',
+                            height: 60,
+                            objectFit: 'cover',
+                            borderRadius: 4,
+                          }}
+                        />
+                        <Typography variant="caption" sx={{ mt: 1, display: 'block' }}>
+                          {fuelType}
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                ))}
+              </Grid>
             </Grid>
 
+            {/* 변속기 선택 */}
             <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
-                <InputLabel>변속기</InputLabel>
-                <Select
-                  value={formData.propertyTransmission}
-                  onChange={(e) => handleInputChange('propertyTransmission', e.target.value)}
-                  label="변속기"
-                >
-                  {Object.values(TransmissionType).map((transmission) => (
-                    <MenuItem key={transmission} value={transmission}>
-                      {transmission}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+              <Typography variant="h6" gutterBottom>
+                변속기
+              </Typography>
+              <Grid container spacing={2}>
+                {Object.entries(transmissionImages).map(([transmission, image]) => (
+                  <Grid item xs={4} key={transmission}>
+                    <Card 
+                      sx={{ 
+                        cursor: 'pointer',
+                        border: formData.propertyTransmission === transmission ? '3px solid #1976d2' : '1px solid #ddd',
+                        backgroundColor: formData.propertyTransmission === transmission ? '#f3f8ff' : 'white',
+                        transition: 'all 0.3s ease',
+                        transform: selectedTransmission && selectedTransmission !== transmission ? 'scale(0.8) opacity(0.3)' : 'scale(1) opacity(1)',
+                        '&:hover': {
+                          borderColor: '#1976d2',
+                          transform: selectedTransmission && selectedTransmission !== transmission ? 'scale(0.8) opacity(0.3)' : 'translateY(-2px)',
+                        },
+                      }}
+                      onClick={() => handleTransmissionSelect(transmission)}
+                    >
+                      <CardContent sx={{ p: 1, textAlign: 'center' }}>
+                        <img
+                          src={image}
+                          alt={transmission}
+                          style={{
+                            width: '100%',
+                            height: 60,
+                            objectFit: 'cover',
+                            borderRadius: 4,
+                          }}
+                        />
+                        <Typography variant="caption" sx={{ mt: 1, display: 'block' }}>
+                          {transmission}
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                ))}
+              </Grid>
             </Grid>
 
+            {/* 상태 선택 */}
             <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
-                <InputLabel>상태</InputLabel>
-                <Select
-                  value={formData.propertyCondition}
-                  onChange={(e) => handleInputChange('propertyCondition', e.target.value)}
-                  label="상태"
-                >
-                  {Object.values(ConditionType).map((condition) => (
-                    <MenuItem key={condition} value={condition}>
-                      {condition}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+              <Typography variant="h6" gutterBottom>
+                상태
+              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Rating
+                  value={conditionRatingMap[formData.propertyCondition as ConditionType] || 0}
+                  onChange={(_, newValue) => {
+                    if (newValue) {
+                      handleInputChange('propertyCondition', ratingConditionMap[newValue as keyof typeof ratingConditionMap]);
+                    }
+                  }}
+                  max={4}
+                  size="large"
+                />
+                <Typography variant="body2" color="text.secondary">
+                  {formData.propertyCondition?.replace(/_/g, ' ')}
+                </Typography>
+              </Box>
             </Grid>
 
             {/* 추가 옵션 */}
@@ -449,41 +800,7 @@ const PropertyCreateForm: React.FC = () => {
               </Typography>
             </Grid>
 
-            <Grid item xs={12} md={4}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={formData.propertyBarter}
-                    onChange={(e) => handleInputChange('propertyBarter', e.target.checked)}
-                  />
-                }
-                label="물물교환 가능"
-              />
-            </Grid>
 
-            <Grid item xs={12} md={4}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={formData.propertyWarranty}
-                    onChange={(e) => handleInputChange('propertyWarranty', e.target.checked)}
-                  />
-                }
-                label="보증 가능"
-              />
-            </Grid>
-
-            <Grid item xs={12} md={4}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={formData.propertyFinancing}
-                    onChange={(e) => handleInputChange('propertyFinancing', e.target.checked)}
-                  />
-                }
-                label="할부 가능"
-              />
-            </Grid>
 
             {/* 상세 설명 */}
             <Grid item xs={12}>
@@ -500,7 +817,7 @@ const PropertyCreateForm: React.FC = () => {
             {/* 이미지 업로드 */}
             <Grid item xs={12}>
               <Typography variant="h6" gutterBottom>
-                이미지 업로드 (최대 10개)
+                이미지 업로드 (선택사항, 최대 3개)
               </Typography>
               
               <Box sx={{ mb: 2 }}>
@@ -517,9 +834,9 @@ const PropertyCreateForm: React.FC = () => {
                     variant="outlined"
                     component="span"
                     startIcon={<CloudUploadIcon />}
-                    disabled={images.length >= 10}
+                    disabled={images.length >= 3}
                   >
-                    이미지 업로드 ({images.length}/10)
+                    이미지 업로드 ({images.length}/3)
                   </Button>
                 </label>
               </Box>
@@ -588,6 +905,6 @@ const PropertyCreateForm: React.FC = () => {
       </Paper>
     </Box>
   );
-};
-
+  };
+  
 export default PropertyCreateForm; 

@@ -185,9 +185,6 @@ export const CREATE_PROPERTY = gql`
 			propertyRank
 			propertyImages
 			propertyDesc
-			propertyBarter
-			propertyWarranty
-			propertyFinancing
 			memberId
 			soldAt
 			deletedAt
@@ -223,9 +220,6 @@ export const UPDATE_PROPERTY = gql`
 			propertyRank
 			propertyImages
 			propertyDesc
-			propertyBarter
-			propertyWarranty
-			propertyFinancing
 			memberId
 			soldAt
 			deletedAt
