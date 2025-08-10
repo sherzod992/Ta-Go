@@ -10,8 +10,8 @@ const RecentlyVisited: React.FC = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const variables = useMemo(
-    () => ({ input: { page: page + 1, limit: rowsPerPage, memberId: user?._id } }),
-    [page, rowsPerPage, user?._id]
+    () => ({ input: { page: page + 1, limit: rowsPerPage } }),
+    [page, rowsPerPage]
   );
   const { data, loading } = useQuery(GET_VISITED, { variables, skip: typeof window === 'undefined' || !user?._id });
   const list = data?.getVisited?.list ?? [];

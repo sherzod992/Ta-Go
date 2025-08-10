@@ -1,36 +1,67 @@
 import React from 'react';
-import { Box, Typography, Container, Grid, Card, CardMedia, CardContent, Button, Chip } from '@mui/material';
+import { useTranslation } from 'next-i18next';
+import { useQuery } from '@apollo/client';
+import { 
+  Box, 
+  Typography, 
+  Container, 
+  Grid, 
+  Card, 
+  CardMedia, 
+  CardContent, 
+  Button, 
+  Chip,
+  CircularProgress,
+  Alert
+} from '@mui/material';
+import { GET_BOARD_ARTICLES } from '../../../apollo/user/query';
 
 const BikeNews: React.FC = () => {
-  const bikeNews = [
-    {
-      id: 1,
-      title: 'New Electric Bike Technology Revolutionizes Commuting',
-      image: '/img/home/home2.jpg',
-      excerpt: 'Latest developments in electric bike technology are making urban commuting faster and more eco-friendly than ever before.',
-      category: 'Technology',
-      date: '2024-01-15',
-      readTime: '5 min read'
+  const { t } = useTranslation('common');
+  
+  // GraphQL 쿼리로 최신 게시글 데이터 가져오기
+  const { data, loading, error } = useQuery(GET_BOARD_ARTICLES, {
+    variables: {
+      input: {
+        page: 1,
+        limit: 3,
+        search: {
+          articleStatus: 'ACTIVE'
+        }
+      }
     },
-    {
-      id: 2,
-      title: 'Mountain Biking Trails: Top Destinations for 2024',
-      image: '/img/home/home3.jpg',
-      excerpt: 'Discover the most exciting mountain biking trails and destinations that should be on every rider\'s bucket list this year.',
-      category: 'Travel',
-      date: '2024-01-12',
-      readTime: '8 min read'
-    },
-    {
-      id: 3,
-      title: 'Sustainable Materials in Modern Bike Manufacturing',
-      image: '/img/typeImages/type1.png',
-      excerpt: 'How bike manufacturers are incorporating sustainable materials to create environmentally friendly bicycles.',
-      category: 'Sustainability',
-      date: '2024-01-10',
-      readTime: '6 min read'
-    }
-  ];
+    fetchPolicy: 'cache-and-network',
+    errorPolicy: 'all'
+  });
+
+  const articles = data?.getBoardArticles?.list || [];
+
+  // 로딩 상태 처리
+  if (loading) {
+    return (
+      <Box sx={{ py: 8, backgroundColor: 'white', textAlign: 'center' }}>
+        <Container maxWidth="lg">
+          <CircularProgress size={60} />
+          <Typography variant="h6" sx={{ mt: 2 }}>
+            {t('Loading latest news...')}
+          </Typography>
+        </Container>
+      </Box>
+    );
+  }
+
+  // 에러 상태 처리
+  if (error) {
+    return (
+      <Box sx={{ py: 8, backgroundColor: 'white' }}>
+        <Container maxWidth="lg">
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {t('Failed to load latest news. Please try again later.')}
+          </Alert>
+        </Container>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ py: 8, backgroundColor: 'white' }}>
@@ -44,68 +75,76 @@ const BikeNews: React.FC = () => {
             color: '#333',
           }}
         >
-          Bike news
+          {t('Latest News')}
         </Typography>
         
-        <Grid container spacing={4}>
-          {bikeNews.map((news) => (
-            <Grid item xs={12} md={4} key={news.id}>
-              <Card
-                sx={{
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  transition: 'transform 0.2s',
-                  '&:hover': {
-                    transform: 'translateY(-4px)',
-                    boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
-                  },
-                }}
-              >
-                <CardMedia
-                  component="img"
-                  height="200"
-                  image={news.image}
-                  alt={news.title}
-                  sx={{ objectFit: 'cover' }}
-                />
-                <CardContent sx={{ flexGrow: 1 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                    <Chip 
-                      label={news.category} 
-                      color="secondary" 
-                      size="small"
-                    />
-                    <Typography variant="caption" color="text.secondary">
-                      {news.readTime}
+        {articles.length === 0 ? (
+          <Box sx={{ textAlign: 'center', py: 4 }}>
+            <Typography variant="h6" color="text.secondary">
+              {t('No news available at the moment')}
+            </Typography>
+          </Box>
+        ) : (
+          <Grid container spacing={4}>
+            {articles.map((article: any) => (
+              <Grid item xs={12} md={4} key={article._id}>
+                <Card
+                  sx={{
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    transition: 'transform 0.2s',
+                    '&:hover': {
+                      transform: 'translateY(-4px)',
+                      boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
+                    },
+                  }}
+                >
+                  <CardMedia
+                    component="img"
+                    height="200"
+                    image={article.articleImage || '/img/home/home2.jpg'}
+                    alt={article.articleTitle}
+                    sx={{ objectFit: 'cover' }}
+                  />
+                  <CardContent sx={{ flexGrow: 1 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                      <Chip 
+                        label={article.articleCategory} 
+                        color="secondary" 
+                        size="small"
+                      />
+                      <Typography variant="caption" color="text.secondary">
+                        {article.articleViews} {t('views')}
+                      </Typography>
+                    </Box>
+                    
+                    <Typography variant="h6" component="h3" gutterBottom>
+                      {article.articleTitle}
                     </Typography>
-                  </Box>
-                  
-                  <Typography variant="h6" component="h3" gutterBottom>
-                    {news.title}
-                  </Typography>
-                  
-                  <Typography variant="body2" color="text.secondary" paragraph>
-                    {news.excerpt}
-                  </Typography>
-                  
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 'auto' }}>
-                    <Typography variant="caption" color="text.secondary">
-                      {new Date(news.date).toLocaleDateString()}
+                    
+                    <Typography variant="body2" color="text.secondary" paragraph>
+                      {article.articleContent?.substring(0, 100)}...
                     </Typography>
-                    <Button
-                      variant="text"
-                      color="primary"
-                      size="small"
-                    >
-                      Read More
-                    </Button>
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
+                    
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 'auto' }}>
+                      <Typography variant="caption" color="text.secondary">
+                        {new Date(article.createdAt).toLocaleDateString()}
+                      </Typography>
+                      <Button
+                        variant="text"
+                        color="primary"
+                        size="small"
+                      >
+                        {t('Read more')}
+                      </Button>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        )}
       </Container>
     </Box>
   );

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'next-i18next';
 import { 
   Box, 
   Typography, 
@@ -17,6 +18,7 @@ import {
 } from '@mui/material';
 
 const HeroSection: React.FC = () => {
+  const { t } = useTranslation('common');
   const [make, setMake] = useState('all');
   const [model, setModel] = useState('all');
   const [category, setCategory] = useState('all');
@@ -27,13 +29,14 @@ const HeroSection: React.FC = () => {
   const [priceMax, setPriceMax] = useState('');
 
   const bikeCategories = [
-    { name: 'ATVs/Quads', image: '/img/typeImages/type1.png' },
-    { name: 'Cruisers', image: '/img/typeImages/type2.png' },
-    { name: 'Dirt Bikes', image: '/img/typeImages/dirt-bikes.png' },
-    { name: 'Electric', image: '/img/typeImages/type4.png' },
-    { name: 'Learner', image: '/img/typeImages/type3.png' },
-    { name: 'Road Bikes', image: '/img/typeImages/type5.png' },
-    { name: 'SxS/UTV', image: '/img/typeImages/type6.png' }
+    { name: 'Adventure Tourers', image: '/img/typeImages/ADVENTUREmoto.webp' },
+    { name: 'Agriculture', image: '/img/typeImages/AGRICULTUREmoto.png' },
+    { name: 'All Terrain Vehicles', image: '/img/typeImages/ALL_TERRAIN.jpg' },
+    { name: 'Dirt Bikes', image: '/img/typeImages/dirtbike.avif' },
+    { name: 'Electric', image: '/img/typeImages/electric.avif' },
+    { name: 'Enduro', image: '/img/typeImages/dirt-bikes.png' },
+    { name: 'Mini Bikes', image: '/img/typeImages/minibikes.jpg' },
+    { name: 'SxS/UTV', image: '/img/typeImages/UTVbikes.avif' }
   ];
 
   const handleClearAll = () => {
@@ -101,7 +104,7 @@ const HeroSection: React.FC = () => {
               marginBottom: 2,
             }}
           >
-            Find your next bike
+            {t('Find your next bike')}
           </Typography>
           <Typography
             variant="h4"
@@ -111,7 +114,7 @@ const HeroSection: React.FC = () => {
               marginBottom: 4,
             }}
           >
-            Discover the perfect ride for your adventure
+            {t('Discover the perfect ride for your adventure')}
           </Typography>
         </Box>
       </Container>
@@ -145,20 +148,20 @@ const HeroSection: React.FC = () => {
                   color: '#333',
                 }}
               >
-                Search Filters
+                {t('Search Filters')}
               </Typography>
               
               {/* Top Row Filters */}
               <Grid container spacing={2} sx={{ marginBottom: 2 }}>
                 <Grid item xs={12} sm={6} md={2}>
                   <FormControl fullWidth size="small">
-                    <InputLabel>Make</InputLabel>
+                    <InputLabel>{t('Make')}</InputLabel>
                     <Select
                       value={make}
-                      label="Make"
+                      label={t('Make')}
                       onChange={(e) => setMake(e.target.value)}
                     >
-                      <MenuItem value="all">All makes</MenuItem>
+                      <MenuItem value="all">{t('All makes')}</MenuItem>
                       <MenuItem value="honda">Honda</MenuItem>
                       <MenuItem value="yamaha">Yamaha</MenuItem>
                       <MenuItem value="kawasaki">Kawasaki</MenuItem>
@@ -168,14 +171,14 @@ const HeroSection: React.FC = () => {
                 </Grid>
                 <Grid item xs={12} sm={6} md={2}>
                   <FormControl fullWidth size="small">
-                    <InputLabel>Model</InputLabel>
+                    <InputLabel>{t('Model')}</InputLabel>
                     <Select
                       value={model}
-                      label="Model"
+                      label={t('Model')}
                       onChange={(e) => setModel(e.target.value)}
                       disabled={make === 'all'}
                     >
-                      <MenuItem value="all">All models</MenuItem>
+                      <MenuItem value="all">{t('All models')}</MenuItem>
                       <MenuItem value="cbr">CBR</MenuItem>
                       <MenuItem value="cb">CB</MenuItem>
                       <MenuItem value="vfr">VFR</MenuItem>
@@ -184,13 +187,13 @@ const HeroSection: React.FC = () => {
                 </Grid>
                 <Grid item xs={12} sm={6} md={2}>
                   <FormControl fullWidth size="small">
-                    <InputLabel>Category</InputLabel>
+                    <InputLabel>{t('Category')}</InputLabel>
                     <Select
                       value={category}
-                      label="Category"
+                      label={t('Category')}
                       onChange={(e) => setCategory(e.target.value)}
                     >
-                      <MenuItem value="all">All categories</MenuItem>
+                      <MenuItem value="all">{t('All categories')}</MenuItem>
                       <MenuItem value="sport">Sport</MenuItem>
                       <MenuItem value="cruiser">Cruiser</MenuItem>
                       <MenuItem value="touring">Touring</MenuItem>
@@ -202,8 +205,8 @@ const HeroSection: React.FC = () => {
                   <TextField
                     fullWidth
                     size="small"
-                    label="Keyword"
-                    placeholder="Search by keyword..."
+                    label={t('Keyword')}
+                    placeholder={t('Search by keyword')}
                     value={keyword}
                     onChange={(e) => setKeyword(e.target.value)}
                   />
@@ -220,7 +223,7 @@ const HeroSection: React.FC = () => {
                       '&:hover': { backgroundColor: '#b71c1c' }
                     }}
                   >
-                    Show 21,842 bikes
+                    {t('Show bikes')}
                   </Button>
                 </Grid>
               </Grid>
@@ -229,13 +232,13 @@ const HeroSection: React.FC = () => {
               <Grid container spacing={2} sx={{ marginBottom: 2 }}>
                 <Grid item xs={12} sm={6} md={2}>
                   <FormControl fullWidth size="small">
-                    <InputLabel>Location</InputLabel>
+                    <InputLabel>{t('Location')}</InputLabel>
                     <Select
                       value={location}
-                      label="Location"
+                      label={t('Location')}
                       onChange={(e) => setLocation(e.target.value)}
                     >
-                      <MenuItem value="all">All locations</MenuItem>
+                      <MenuItem value="all">{t('All locations')}</MenuItem>
                       <MenuItem value="seoul">Seoul</MenuItem>
                       <MenuItem value="busan">Busan</MenuItem>
                       <MenuItem value="daegu">Daegu</MenuItem>
@@ -244,13 +247,13 @@ const HeroSection: React.FC = () => {
                 </Grid>
                 <Grid item xs={12} sm={6} md={2}>
                   <FormControl fullWidth size="small">
-                    <InputLabel>New and used</InputLabel>
+                    <InputLabel>{t('New and used')}</InputLabel>
                     <Select
                       value={condition}
-                      label="New and used"
+                      label={t('New and used')}
                       onChange={(e) => setCondition(e.target.value)}
                     >
-                      <MenuItem value="all">All</MenuItem>
+                      <MenuItem value="all">{t('Any')}</MenuItem>
                       <MenuItem value="new">New</MenuItem>
                       <MenuItem value="used">Used</MenuItem>
                     </Select>
@@ -258,13 +261,13 @@ const HeroSection: React.FC = () => {
                 </Grid>
                 <Grid item xs={12} sm={6} md={2}>
                   <FormControl fullWidth size="small">
-                    <InputLabel>Price min</InputLabel>
+                    <InputLabel>{t('Price min')}</InputLabel>
                     <Select
                       value={priceMin}
-                      label="Price min"
+                      label={t('Price min')}
                       onChange={(e) => setPriceMin(e.target.value)}
                     >
-                      <MenuItem value="">Any</MenuItem>
+                      <MenuItem value="">{t('Any')}</MenuItem>
                       <MenuItem value="1000">$1,000</MenuItem>
                       <MenuItem value="5000">$5,000</MenuItem>
                       <MenuItem value="10000">$10,000</MenuItem>
@@ -273,13 +276,13 @@ const HeroSection: React.FC = () => {
                 </Grid>
                 <Grid item xs={12} sm={6} md={2}>
                   <FormControl fullWidth size="small">
-                    <InputLabel>Price max</InputLabel>
+                    <InputLabel>{t('Price max')}</InputLabel>
                     <Select
                       value={priceMax}
-                      label="Price max"
+                      label={t('Price max')}
                       onChange={(e) => setPriceMax(e.target.value)}
                     >
-                      <MenuItem value="">Any</MenuItem>
+                      <MenuItem value="">{t('Any')}</MenuItem>
                       <MenuItem value="5000">$5,000</MenuItem>
                       <MenuItem value="10000">$10,000</MenuItem>
                       <MenuItem value="20000">$20,000</MenuItem>
@@ -293,7 +296,7 @@ const HeroSection: React.FC = () => {
                     onClick={handleClearAll}
                     sx={{ textTransform: 'none' }}
                   >
-                    Clear all
+                    {t('Clear all')}
                   </Button>
                 </Grid>
               </Grid>

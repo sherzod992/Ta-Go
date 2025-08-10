@@ -1,7 +1,9 @@
 import React from 'react';
+import { useTranslation } from 'next-i18next';
 import { Box, Typography, Container, Grid, Card, CardContent, Avatar, Rating, Chip } from '@mui/material';
 
 const ExpertReviews: React.FC = () => {
+  const { t } = useTranslation('common');
   const expertReviews = [
     {
       id: 1,
@@ -44,7 +46,7 @@ const ExpertReviews: React.FC = () => {
             color: '#333',
           }}
         >
-          Expert bike reviews
+          {t('Expert Reviews')}
         </Typography>
         
         <Grid container spacing={4}>
@@ -73,7 +75,7 @@ const ExpertReviews: React.FC = () => {
                         {review.expertName}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        Expert Reviewer
+                        {t('Expert')}
                       </Typography>
                     </Box>
                   </Box>
