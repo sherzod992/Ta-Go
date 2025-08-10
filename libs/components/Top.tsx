@@ -7,7 +7,6 @@ import { useReactiveVar } from '@apollo/client';
 import { userVar } from '../../apollo/store';
 import { logOut } from '../auth';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-import LanguageIcon from '@mui/icons-material/Language';
 
 const Top: React.FC = () => {
   const { t } = useTranslation();
@@ -164,10 +163,7 @@ const Top: React.FC = () => {
               '&:hover': { backgroundColor: '#f5f5f5' },
             }}
           >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <span style={{ fontSize: '1.2rem' }}>{currentLanguage.flag}</span>
-              <LanguageIcon sx={{ fontSize: '1rem' }} />
-            </Box>
+            <span style={{ fontSize: '1.5rem' }}>{currentLanguage.flag}</span>
           </IconButton>
         </Tooltip>
         <Menu

@@ -113,7 +113,6 @@ export const GET_PROPERTY = gql`
 			propertyRank
 			propertyImages
 			propertyDesc
-			propertyBarter
 			propertyWarranty
 			propertyFinancing
 			memberId

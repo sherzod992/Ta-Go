@@ -255,8 +255,7 @@ export const LIKE_TARGET_PROPERTY = gql`
 			propertyRank
 			propertyImages
 			propertyDesc
-			propertyBarter
-			propertyWarranty
+ 			propertyWarranty
 			propertyFinancing
 			memberId
 			soldAt

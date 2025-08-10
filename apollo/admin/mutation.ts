@@ -71,7 +71,6 @@ export const UPDATE_PROPERTY_BY_ADMIN = gql`
         propertyRank
         propertyImages
         propertyDesc
-        propertyBarter
         propertyRent
         propertyFinancing
         propertyWarranty
@@ -110,12 +109,11 @@ export const REMOVE_PROPERTY_BY_ADMIN = gql`
 			propertyLikes
 			propertyComments
 			propertyRank
-			propertyImages
-			propertyDesc
-			propertyBarter
-			propertyRent
-			propertyFinancing
-			propertyWarranty
+			            propertyImages
+            propertyDesc
+            propertyRent
+            propertyFinancing
+            propertyWarranty
 			memberId
 			soldAt
 			deletedAt

@@ -78,7 +78,6 @@ export const GET_ALL_PROPERTIES_BY_ADMIN = gql`
             propertyRank
             propertyImages
             propertyDesc
-            propertyBarter
             propertyRent
             propertyFinancing
             propertyWarranty

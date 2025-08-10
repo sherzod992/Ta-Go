@@ -124,6 +124,7 @@ const PropertyCreateForm: React.FC = () => {
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
+  const [isUploading, setIsUploading] = useState<boolean>(false);
 
   // 선택 상태 관리
   const [selectedColor, setSelectedColor] = useState<string>('');
@@ -315,6 +316,7 @@ const PropertyCreateForm: React.FC = () => {
     event.preventDefault();
     setError('');
     setSuccess('');
+    setIsUploading(true);
 
     // 필수 필드 검증
     const requiredFields = [
@@ -333,6 +335,7 @@ const PropertyCreateForm: React.FC = () => {
       const value = formData[field as keyof PropertyInput];
       if (!value || (typeof value === 'string' && value.trim() === '') || (typeof value === 'number' && value <= 0)) {
         setError(`${label}은(는) 필수 입력 항목입니다.`);
+        setIsUploading(false);
         return;
       }
     }
@@ -340,21 +343,38 @@ const PropertyCreateForm: React.FC = () => {
     // 이미지 개수 제한 (최대 3개로 제한)
     if (images.length > 3) {
       setError('최대 3개의 이미지만 업로드할 수 있습니다.');
+      setIsUploading(false);
       return;
     }
 
     try {
       // formData 디버깅
       console.log('Original formData:', formData);
+      console.log('Uploaded images:', images);
+      console.log('Image URLs:', imageUrls);
+      
+      // 이미지를 Base64로 변환하여 propertyImages에 포함
+      const imagePromises = images.map(file => {
+        return new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            resolve(e.target?.result as string);
+          };
+          reader.readAsDataURL(file);
+        });
+      });
+
+      const imageDataUrls = await Promise.all(imagePromises);
       
       // memberId를 제거하고 전송 (Backend에서 자동 설정)
       const { memberId, ...formDataWithoutMemberId } = formData as any;
       const inputData = {
         ...formDataWithoutMemberId,
-        propertyImages: [] as string[],
+        propertyImages: imageDataUrls,
       };
 
       console.log('Sending property data:', inputData);
+      console.log('Image data URLs:', imageDataUrls);
 
       const result = await createProperty({
         variables: {
@@ -363,7 +383,7 @@ const PropertyCreateForm: React.FC = () => {
       });
 
       if (result.data?.createProperty) {
-        setSuccess('매물이 성공적으로 등록되었습니다! (이미지는 별도 업로드가 필요합니다)');
+        setSuccess('매물이 성공적으로 등록되었습니다!');
         setTimeout(() => {
           router.push('/property?type=buy');
         }, 2000);
@@ -371,6 +391,8 @@ const PropertyCreateForm: React.FC = () => {
     } catch (err) {
       setError('매물 등록 중 오류가 발생했습니다.');
       console.error('Property creation error:', err);
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -885,10 +907,14 @@ const PropertyCreateForm: React.FC = () => {
                   type="submit"
                   variant="contained"
                   size="large"
-                  disabled={loading}
+                  disabled={loading || isUploading}
                   sx={{ minWidth: 200 }}
                 >
-                  {loading ? <CircularProgress size={24} /> : '매물 등록하기'}
+                  {loading || isUploading ? (
+                    <CircularProgress size={24} />
+                  ) : (
+                    '매물 등록하기'
+                  )}
                 </Button>
                 <Button
                   variant="outlined"

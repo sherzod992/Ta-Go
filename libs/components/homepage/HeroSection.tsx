@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'next-i18next';
+import { useQuery } from '@apollo/client';
+import { useRouter } from 'next/router';
 import { 
   Box, 
   Typography, 
@@ -14,11 +16,15 @@ import {
   TextField, 
   Button, 
   Chip,
-  Paper
+  Paper,
+  CircularProgress
 } from '@mui/material';
+import { GET_PROPERTIES } from '../../../apollo/user/query';
+import { PropertyLocation, PropertyType, PropertyStatus, ConditionType } from '../../enums/property.enum';
 
 const HeroSection: React.FC = () => {
   const { t } = useTranslation('common');
+  const router = useRouter();
   const [make, setMake] = useState('all');
   const [model, setModel] = useState('all');
   const [category, setCategory] = useState('all');
@@ -29,15 +35,81 @@ const HeroSection: React.FC = () => {
   const [priceMax, setPriceMax] = useState('');
 
   const bikeCategories = [
-    { name: 'Adventure Tourers', image: '/img/typeImages/ADVENTUREmoto.webp' },
-    { name: 'Agriculture', image: '/img/typeImages/AGRICULTUREmoto.png' },
-    { name: 'All Terrain Vehicles', image: '/img/typeImages/ALL_TERRAIN.jpg' },
-    { name: 'Dirt Bikes', image: '/img/typeImages/dirtbike.avif' },
-    { name: 'Electric', image: '/img/typeImages/electric.avif' },
-    { name: 'Enduro', image: '/img/typeImages/dirt-bikes.png' },
-    { name: 'Mini Bikes', image: '/img/typeImages/minibikes.jpg' },
-    { name: 'SxS/UTV', image: '/img/typeImages/UTVbikes.avif' }
+    { name: 'Adventure Tourers', value: PropertyType.ADVENTURE_TOURERS, image: '/img/typeImages/ADVENTUREmoto.webp' },
+    { name: 'Agriculture', value: PropertyType.AGRICULTURE, image: '/img/typeImages/AGRICULTUREmoto.png' },
+    { name: 'All Terrain Vehicles', value: PropertyType.ALL_TERRAIN_VEHICLES, image: '/img/typeImages/ALL_TERRAIN.jpg' },
+    { name: 'Dirt Bikes', value: PropertyType.DIRT, image: '/img/typeImages/dirtbike.avif' },
+    { name: 'Electric', value: PropertyType.ELECTRIC, image: '/img/typeImages/electric.avif' },
+    { name: 'Enduro', value: PropertyType.ENDURO, image: '/img/typeImages/dirt-bikes.png' },
+    { name: 'Mini Bikes', value: PropertyType.MINI_BIKES, image: '/img/typeImages/minibikes.jpg' },
+    { name: 'SxS/UTV', value: PropertyType.SXS_UTV, image: '/img/typeImages/UTVbikes.avif' }
   ];
+
+  // 검색 필터 변수 생성
+  const searchVariables = useMemo(() => {
+    const search: any = {};
+
+    if (make !== 'all') search.brandList = [make];
+    if (category !== 'all') {
+      // 카테고리 이름을 enum 값으로 변환
+      const categoryMap: { [key: string]: PropertyType } = {
+        'Adventure Tourers': PropertyType.ADVENTURE_TOURERS,
+        'Agriculture': PropertyType.AGRICULTURE,
+        'All Terrain Vehicles': PropertyType.ALL_TERRAIN_VEHICLES,
+        'Dirt Bikes': PropertyType.DIRT,
+        'Electric': PropertyType.ELECTRIC,
+        'Enduro': PropertyType.ENDURO,
+        'Mini Bikes': PropertyType.MINI_BIKES,
+        'SxS/UTV': PropertyType.SXS_UTV
+      };
+      const selectedCategory = categoryMap[category];
+      if (selectedCategory) {
+        search.typeList = [selectedCategory];
+      }
+    }
+    if (keyword) search.text = keyword;
+    if (location !== 'all') {
+      // 위치 이름을 enum 값으로 변환
+      const locationMap: { [key: string]: PropertyLocation } = {
+        'seoul': PropertyLocation.SEOUL,
+        'busan': PropertyLocation.BUSAN,
+        'daegu': PropertyLocation.DAEGU
+      };
+      search.locationList = [locationMap[location]];
+    }
+    if (condition !== 'all') {
+      // 상태 이름을 enum 값으로 변환
+      const conditionMap: { [key: string]: ConditionType } = {
+        'new': ConditionType.EXCELLENT,
+        'used': ConditionType.GOOD
+      };
+      search.options = [conditionMap[condition]];
+    }
+    if (priceMin || priceMax) {
+      search.pricesRange = {
+        start: priceMin ? parseInt(priceMin) : 0,
+        end: priceMax ? parseInt(priceMax) : 50000000
+      };
+    }
+
+    return {
+      input: {
+        page: 1,
+        limit: 1000, // 충분히 큰 수로 설정하여 모든 결과를 가져옴
+        search
+      }
+    };
+  }, [make, model, category, keyword, location, condition, priceMin, priceMax]);
+
+  // GraphQL 쿼리 실행
+  const { data, loading, error } = useQuery(GET_PROPERTIES, {
+    variables: searchVariables,
+    fetchPolicy: 'cache-and-network',
+    errorPolicy: 'all'
+  });
+
+  // 검색 결과 개수
+  const searchResultCount = data?.getProperties?.list?.length || 0;
 
   const handleClearAll = () => {
     setMake('all');
@@ -48,6 +120,23 @@ const HeroSection: React.FC = () => {
     setCondition('all');
     setPriceMin('');
     setPriceMax('');
+  };
+
+  const handleShowBikes = () => {
+    if (searchResultCount > 0) {
+      // 검색 결과가 있을 때만 페이지 이동
+      const queryParams = new URLSearchParams();
+      if (make !== 'all') queryParams.append('make', make);
+      if (model !== 'all') queryParams.append('model', model);
+      if (category !== 'all') queryParams.append('category', category);
+      if (keyword) queryParams.append('keyword', keyword);
+      if (location !== 'all') queryParams.append('location', location);
+      if (condition !== 'all') queryParams.append('condition', condition);
+      if (priceMin) queryParams.append('priceMin', priceMin);
+      if (priceMax) queryParams.append('priceMax', priceMax);
+      
+      router.push(`/property?${queryParams.toString()}`);
+    }
   };
 
   return (
@@ -217,16 +306,38 @@ const HeroSection: React.FC = () => {
                     color="primary"
                     size="large"
                     fullWidth
+                    disabled={searchResultCount === 0}
+                    onClick={handleShowBikes}
                     sx={{
                       height: '40px',
-                      backgroundColor: '#d32f2f',
-                      '&:hover': { backgroundColor: '#b71c1c' }
+                      backgroundColor: searchResultCount === 0 ? 'rgba(0, 0, 0, 0.12)' : '#d32f2f',
+                      color: searchResultCount === 0 ? 'rgba(0, 0, 0, 0.26)' : 'white',
+                      '&:hover': { 
+                        backgroundColor: searchResultCount === 0 ? 'rgba(0, 0, 0, 0.12)' : '#b71c1c' 
+                      },
+                      '&:disabled': {
+                        backgroundColor: 'rgba(0, 0, 0, 0.12)',
+                        color: 'rgba(0, 0, 0, 0.26)'
+                      }
                     }}
                   >
-                    {t('Show bikes')}
+                    {loading ? (
+                      <CircularProgress size={20} color="inherit" />
+                    ) : (
+                      `${t('Show bikes')} (${searchResultCount})`
+                    )}
                   </Button>
                 </Grid>
               </Grid>
+
+              {/* 검색 결과 안내 */}
+              {!loading && searchResultCount === 0 && (
+                <Box sx={{ mb: 2, p: 2, backgroundColor: 'rgba(255, 193, 7, 0.1)', borderRadius: 1, border: '1px solid #ffc107' }}>
+                  <Typography variant="body2" color="warning.main">
+                    {t('No bikes found')} - {t('Try adjusting your search criteria')}
+                  </Typography>
+                </Box>
+              )}
 
               {/* Bottom Row Filters */}
               <Grid container spacing={2} sx={{ marginBottom: 2 }}>
@@ -313,9 +424,13 @@ const HeroSection: React.FC = () => {
             }}
           >
             <Grid container spacing={2}>
-              {bikeCategories.map((category) => (
-                <Grid item xs={6} sm={4} md={3} lg={1.7} key={category.name}>
+              {bikeCategories.map((categoryItem) => (
+                <Grid item xs={6} sm={4} md={3} lg={1.7} key={categoryItem.name}>
                   <Box
+                    onClick={() => {
+                      setCategory(categoryItem.name);
+                      // 카테고리 선택 시 자동으로 검색 결과 확인
+                    }}
                     sx={{
                       display: 'flex',
                       flexDirection: 'column',
@@ -324,6 +439,8 @@ const HeroSection: React.FC = () => {
                       padding: 1,
                       borderRadius: 2,
                       transition: 'all 0.2s',
+                      backgroundColor: category === categoryItem.name ? 'rgba(25, 118, 210, 0.1)' : 'transparent',
+                      border: category === categoryItem.name ? '2px solid #1976d2' : '2px solid transparent',
                       '&:hover': {
                         backgroundColor: 'rgba(0, 0, 0, 0.05)',
                         transform: 'translateY(-2px)',
@@ -332,8 +449,8 @@ const HeroSection: React.FC = () => {
                   >
                     <Box
                       component="img"
-                      src={category.image}
-                      alt={category.name}
+                      src={categoryItem.image}
+                      alt={categoryItem.name}
                       sx={{
                         width: 60,
                         height: 60,
@@ -346,10 +463,10 @@ const HeroSection: React.FC = () => {
                       sx={{
                         textAlign: 'center',
                         fontWeight: 500,
-                        color: '#333',
+                        color: category === categoryItem.name ? '#1976d2' : '#333',
                       }}
                     >
-                      {category.name}
+                      {categoryItem.name}
                     </Typography>
                   </Box>
                 </Grid>

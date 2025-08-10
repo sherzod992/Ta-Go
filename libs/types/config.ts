@@ -1,6 +1,6 @@
 export const REACT_APP_API_URL = `${process.env.REACT_APP_API_URL}`;
 
-export const availableOptions = ['propertyBarter', 'propertyWarranty', 'propertyFinancing'];
+export const availableOptions = ['propertyWarranty', 'propertyFinancing'];
 
 const thisYear = new Date().getFullYear();
 

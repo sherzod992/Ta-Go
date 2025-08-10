@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'next-i18next';
 import { useQuery } from '@apollo/client';
+import { useRouter } from 'next/router';
 import { 
   Box, 
   Typography, 
@@ -18,6 +19,7 @@ import { PropertyType } from '../../enums/property.enum';
 
 const SuggestedBikes: React.FC = () => {
   const { t } = useTranslation('common');
+  const router = useRouter();
   
   // GraphQL 쿼리로 추천 매물 데이터 가져오기
   const { data, loading, error } = useQuery(GET_PROPERTIES, {
@@ -94,11 +96,13 @@ const SuggestedBikes: React.FC = () => {
                     display: 'flex',
                     flexDirection: 'column',
                     transition: 'transform 0.2s',
+                    cursor: 'pointer',
                     '&:hover': {
                       transform: 'translateY(-4px)',
                       boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
                     },
                   }}
+                  onClick={() => router.push(`/property/${property._id}`)}
                 >
                   <CardMedia
                     component="img"
@@ -122,6 +126,10 @@ const SuggestedBikes: React.FC = () => {
                       color="primary"
                       sx={{ mt: 2 }}
                       fullWidth
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        router.push(`/property/${property._id}`);
+                      }}
                     >
                       {t('View Details')}
                     </Button>

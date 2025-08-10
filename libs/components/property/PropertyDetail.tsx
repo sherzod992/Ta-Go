@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useQuery } from '@apollo/client';
 import {
   Box,
   Typography,
@@ -27,6 +28,7 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
+  CircularProgress,
 } from '@mui/material';
 import {
   LocationOn as LocationIcon,
@@ -52,6 +54,7 @@ import {
   TransmissionType,
   ConditionType,
 } from '../../enums/property.enum';
+import { GET_PROPERTY } from '../../../apollo/user/query';
 
 // 하드코드된 매물 상세 데이터
 const mockPropertyDetail = {
@@ -154,9 +157,22 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-const PropertyDetail: React.FC = () => {
+interface PropertyDetailProps {
+  propertyId?: string;
+}
+
+const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) => {
+  // GraphQL 쿼리로 매물 데이터 가져오기
+  const { data, loading, error } = useQuery(GET_PROPERTY, {
+    variables: { input: propertyId || '' },
+    skip: !propertyId,
+    fetchPolicy: 'cache-and-network',
+  });
+
+  const property = data?.getProperty;
+  
   const [selectedImage, setSelectedImage] = useState(0);
-  const [isFavorite, setIsFavorite] = useState(mockPropertyDetail.isFavorite);
+  const [isFavorite, setIsFavorite] = useState(false);
   const [contactDialogOpen, setContactDialogOpen] = useState(false);
   const [tabValue, setTabValue] = useState(0);
   const [contactForm, setContactForm] = useState({
@@ -184,8 +200,8 @@ const PropertyDetail: React.FC = () => {
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
-        title: mockPropertyDetail.title,
-        text: mockPropertyDetail.description,
+        title: property?.propertyTitle || '매물 정보',
+        text: property?.propertyDesc || '매물 상세 정보',
         url: window.location.href,
       });
     } else {
@@ -194,19 +210,56 @@ const PropertyDetail: React.FC = () => {
     }
   };
 
+  // 로딩 상태 처리
+  if (loading) {
+    return (
+      <Box sx={{ p: 3, textAlign: 'center' }}>
+        <CircularProgress size={60} />
+        <Typography variant="h6" sx={{ mt: 2 }}>
+          매물 정보를 불러오는 중...
+        </Typography>
+      </Box>
+    );
+  }
+
+  // 에러 상태 처리
+  if (error) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Alert severity="error">
+          매물 정보를 불러오는데 실패했습니다. 다시 시도해주세요.
+        </Alert>
+      </Box>
+    );
+  }
+
+  // 매물이 없는 경우
+  if (!property) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Alert severity="warning">
+          해당 매물을 찾을 수 없습니다.
+        </Alert>
+      </Box>
+    );
+  }
+
   return (
     <Box sx={{ p: 3, maxWidth: 1200, mx: 'auto' }}>
       {/* 헤더 */}
       <Box sx={{ mb: 3 }}>
         <Typography variant="h4" component="h1" gutterBottom>
-          {mockPropertyDetail.title}
+          {property.propertyTitle}
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Rating value={mockPropertyDetail.rating} precision={0.1} readOnly />
+          <Rating value={4.5} precision={0.1} readOnly />
           <Typography variant="body2">
-            {mockPropertyDetail.rating} ({mockPropertyDetail.sellerReviews}개 리뷰)
+            4.5 (15개 리뷰)
           </Typography>
         </Box>
+        <Typography variant="body2" color="text.secondary">
+          {property.propertyBrand} {property.propertyModel} ({property.propertyYear}년)
+        </Typography>
       </Box>
 
       <Grid container spacing={3}>
@@ -216,13 +269,13 @@ const PropertyDetail: React.FC = () => {
             <CardMedia
               component="img"
               height="400"
-              image={mockPropertyDetail.images[selectedImage]}
-              alt={mockPropertyDetail.title}
+              image={property.propertyImages?.[selectedImage] || '/img/typeImages/type1.png'}
+              alt={property.propertyTitle}
               sx={{ objectFit: 'cover' }}
             />
             <CardContent>
               <Grid container spacing={1}>
-                {mockPropertyDetail.images.map((image, index) => (
+                {(property.propertyImages || ['/img/typeImages/type1.png']).map((image, index) => (
                   <Grid item key={index}>
                     <Card
                       sx={{
@@ -238,7 +291,7 @@ const PropertyDetail: React.FC = () => {
                         component="img"
                         height="100%"
                         image={image}
-                        alt={`${mockPropertyDetail.title} ${index + 1}`}
+                        alt={`${property.propertyTitle} ${index + 1}`}
                         sx={{ objectFit: 'cover' }}
                       />
                     </Card>
@@ -254,7 +307,7 @@ const PropertyDetail: React.FC = () => {
           <Paper sx={{ p: 3, height: 'fit-content' }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
               <Typography variant="h4" color="primary">
-                {formatPrice(mockPropertyDetail.price)}
+                {formatPrice(property.propertyPrice)}
               </Typography>
               <Box>
                 <IconButton onClick={() => setIsFavorite(!isFavorite)} color={isFavorite ? 'error' : 'default'}>
@@ -270,10 +323,10 @@ const PropertyDetail: React.FC = () => {
             </Box>
 
             <Box sx={{ mb: 3 }}>
-              <Chip label={mockPropertyDetail.type} sx={{ mr: 1, mb: 1 }} />
-              <Chip label={mockPropertyDetail.fuelType} sx={{ mr: 1, mb: 1 }} />
-              <Chip label={mockPropertyDetail.condition} sx={{ mr: 1, mb: 1 }} />
-              <Chip label={mockPropertyDetail.color} sx={{ mb: 1 }} />
+              <Chip label={property.propertyType} sx={{ mr: 1, mb: 1 }} />
+              <Chip label={property.propertyFuelType} sx={{ mr: 1, mb: 1 }} />
+              <Chip label={property.propertyCondition} sx={{ mr: 1, mb: 1 }} />
+              <Chip label={property.propertyColor} sx={{ mb: 1 }} />
             </Box>
 
             <List dense>
@@ -281,25 +334,25 @@ const PropertyDetail: React.FC = () => {
                 <ListItemIcon>
                   <YearIcon />
                 </ListItemIcon>
-                <ListItemText primary="연식" secondary={`${mockPropertyDetail.year}년`} />
+                <ListItemText primary="연식" secondary={`${property.propertyYear}년`} />
               </ListItem>
               <ListItem>
                 <ListItemIcon>
                   <SpeedIcon />
                 </ListItemIcon>
-                <ListItemText primary="주행거리" secondary={formatMileage(mockPropertyDetail.mileage)} />
+                <ListItemText primary="주행거리" secondary={formatMileage(property.propertyMileage)} />
               </ListItem>
               <ListItem>
                 <ListItemIcon>
                   <LocationIcon />
                 </ListItemIcon>
-                <ListItemText primary="위치" secondary={mockPropertyDetail.location} />
+                <ListItemText primary="위치" secondary={property.propertyLocation} />
               </ListItem>
               <ListItem>
                 <ListItemIcon>
                   <BikeIcon />
                 </ListItemIcon>
-                <ListItemText primary="변속기" secondary={mockPropertyDetail.transmission} />
+                <ListItemText primary="변속기" secondary={property.propertyTransmission} />
               </ListItem>
             </List>
 
@@ -311,13 +364,18 @@ const PropertyDetail: React.FC = () => {
               </Typography>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                 <Typography variant="body1" sx={{ mr: 1 }}>
-                  {mockPropertyDetail.seller}
+                  {property.memberData?.memberFullName || property.memberData?.memberNick || '판매자'}
                 </Typography>
-                <Rating value={mockPropertyDetail.sellerRating} size="small" readOnly />
+                <Rating value={4.5} size="small" readOnly />
                 <Typography variant="body2" sx={{ ml: 1 }}>
-                  ({mockPropertyDetail.sellerReviews}개 리뷰)
+                  (15개 리뷰)
                 </Typography>
               </Box>
+              {property.memberData?.memberPhone && (
+                <Typography variant="body2" color="text.secondary">
+                  연락처: {property.memberData.memberPhone}
+                </Typography>
+              )}
             </Box>
 
             <Box sx={{ display: 'flex', gap: 2 }}>
@@ -337,7 +395,7 @@ const PropertyDetail: React.FC = () => {
 
             <Alert severity="info" sx={{ mt: 2 }}>
               <Typography variant="body2">
-                <strong>보증:</strong> {mockPropertyDetail.warranty}
+                <strong>보증:</strong> {property.propertyWarranty ? '보증 가능' : '보증 없음'}
               </Typography>
             </Alert>
           </Paper>
@@ -355,7 +413,7 @@ const PropertyDetail: React.FC = () => {
 
         <TabPanel value={tabValue} index={0}>
           <Typography variant="body1" paragraph>
-            {mockPropertyDetail.description}
+            {property.propertyDesc || '상세한 사항은 판매자에게 연락하세요.'}
           </Typography>
           
           <Accordion>
@@ -364,31 +422,88 @@ const PropertyDetail: React.FC = () => {
             </AccordionSummary>
             <AccordionDetails>
               <Grid container spacing={1}>
-                {mockPropertyDetail.features.map((feature, index) => (
-                  <Grid item xs={12} sm={6} key={index}>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <CheckIcon color="success" sx={{ mr: 1 }} />
-                      <Typography>{feature}</Typography>
-                    </Box>
-                  </Grid>
-                ))}
+                <Grid item xs={12} sm={6}>
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <CheckIcon color="success" sx={{ mr: 1 }} />
+                    <Typography>브랜드: {property.propertyBrand}</Typography>
+                  </Box>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <CheckIcon color="success" sx={{ mr: 1 }} />
+                    <Typography>모델: {property.propertyModel}</Typography>
+                  </Box>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <CheckIcon color="success" sx={{ mr: 1 }} />
+                    <Typography>엔진 크기: {property.propertyEngineSize}cc</Typography>
+                  </Box>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <CheckIcon color="success" sx={{ mr: 1 }} />
+                    <Typography>색상: {property.propertyColor}</Typography>
+                  </Box>
+                </Grid>
               </Grid>
             </AccordionDetails>
           </Accordion>
         </TabPanel>
 
         <TabPanel value={tabValue} index={1}>
+          <Typography variant="body2" color="text.secondary" paragraph>
+            상세한 제원 정보는 판매자에게 연락하세요.
+          </Typography>
           <Grid container spacing={2}>
-            {Object.entries(mockPropertyDetail.specifications).map(([key, value]) => (
-              <Grid item xs={12} sm={6} key={key}>
-                <Paper sx={{ p: 2 }}>
-                  <Typography variant="subtitle2" color="text.secondary">
-                    {key}
-                  </Typography>
-                  <Typography variant="h6">{value}</Typography>
-                </Paper>
-              </Grid>
-            ))}
+            <Grid item xs={12} sm={6}>
+              <Paper sx={{ p: 2 }}>
+                <Typography variant="subtitle2" color="text.secondary">
+                  브랜드
+                </Typography>
+                <Typography variant="h6">{property.propertyBrand}</Typography>
+              </Paper>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Paper sx={{ p: 2 }}>
+                <Typography variant="subtitle2" color="text.secondary">
+                  모델
+                </Typography>
+                <Typography variant="h6">{property.propertyModel}</Typography>
+              </Paper>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Paper sx={{ p: 2 }}>
+                <Typography variant="subtitle2" color="text.secondary">
+                  엔진 크기
+                </Typography>
+                <Typography variant="h6">{property.propertyEngineSize}cc</Typography>
+              </Paper>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Paper sx={{ p: 2 }}>
+                <Typography variant="subtitle2" color="text.secondary">
+                  연료 타입
+                </Typography>
+                <Typography variant="h6">{property.propertyFuelType}</Typography>
+              </Paper>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Paper sx={{ p: 2 }}>
+                <Typography variant="subtitle2" color="text.secondary">
+                  변속기
+                </Typography>
+                <Typography variant="h6">{property.propertyTransmission}</Typography>
+              </Paper>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Paper sx={{ p: 2 }}>
+                <Typography variant="subtitle2" color="text.secondary">
+                  연식
+                </Typography>
+                <Typography variant="h6">{property.propertyYear}년</Typography>
+              </Paper>
+            </Grid>
           </Grid>
         </TabPanel>
 
@@ -396,43 +511,28 @@ const PropertyDetail: React.FC = () => {
           <Typography variant="h6" gutterBottom>
             정비 이력
           </Typography>
-          <List>
-            {mockPropertyDetail.history.map((item, index) => (
-              <ListItem key={index}>
-                <ListItemIcon>
-                  <InfoIcon />
-                </ListItemIcon>
-                <ListItemText
-                  primary={item.event}
-                  secondary={`${item.date} - ${formatMileage(item.mileage)}`}
-                />
-              </ListItem>
-            ))}
-          </List>
-
-          <Divider sx={{ my: 2 }} />
-
-          <Typography variant="h6" gutterBottom>
-            최근 정비 상태
+          <Typography variant="body2" color="text.secondary" paragraph>
+            상세한 정비 이력은 판매자에게 연락하세요.
           </Typography>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
-              <Paper sx={{ p: 2 }}>
-                <Typography variant="subtitle2" color="text.secondary">
-                  타이어 상태
-                </Typography>
-                <Typography variant="h6">{mockPropertyDetail.maintenance.tireCondition}</Typography>
-              </Paper>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Paper sx={{ p: 2 }}>
-                <Typography variant="subtitle2" color="text.secondary">
-                  브레이크 상태
-                </Typography>
-                <Typography variant="h6">{mockPropertyDetail.maintenance.brakeCondition}</Typography>
-              </Paper>
-            </Grid>
-          </Grid>
+          
+          <Alert severity="info" sx={{ mb: 2 }}>
+            <Typography variant="body2">
+              정비 이력 및 상세한 사항은 판매자 연락처로 문의해주세요.
+            </Typography>
+          </Alert>
+
+          <Box sx={{ textAlign: 'center', py: 4 }}>
+            <PhoneIcon sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
+            <Typography variant="h6" gutterBottom>
+              판매자 연락처
+            </Typography>
+            <Typography variant="h5" color="primary" gutterBottom>
+              {property.memberData?.memberPhone || '연락처 정보 없음'}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {property.memberData?.memberFullName || property.memberData?.memberNick || '판매자'}
+            </Typography>
+          </Box>
         </TabPanel>
 
         <TabPanel value={tabValue} index={3}>
@@ -443,26 +543,36 @@ const PropertyDetail: React.FC = () => {
             <Grid item xs={12} sm={6}>
               <Alert severity="success" icon={<CheckIcon />}>
                 <Typography variant="body2">
-                  <strong>할부 가능:</strong> {mockPropertyDetail.financing}
+                  <strong>할부 가능:</strong> {property.propertyFinancing ? '가능' : '불가능'}
                 </Typography>
               </Alert>
             </Grid>
             <Grid item xs={12} sm={6}>
               <Alert severity="info" icon={<InfoIcon />}>
                 <Typography variant="body2">
-                  <strong>교환 가능:</strong> {mockPropertyDetail.tradeIn}
+                  <strong>보증:</strong> {property.propertyWarranty ? '보증 가능' : '보증 없음'}
                 </Typography>
               </Alert>
             </Grid>
           </Grid>
 
           <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
-            보유 서류
+            추가 정보
           </Typography>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-            {mockPropertyDetail.documents.map((doc, index) => (
-              <Chip key={index} label={doc} color="primary" variant="outlined" />
-            ))}
+          <Typography variant="body2" color="text.secondary" paragraph>
+            상세한 구매 혜택 및 추가 정보는 판매자에게 연락하세요.
+          </Typography>
+          
+          <Box sx={{ textAlign: 'center', py: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              판매자 연락처
+            </Typography>
+            <Typography variant="h5" color="primary" gutterBottom>
+              {property.memberData?.memberPhone || '연락처 정보 없음'}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {property.memberData?.memberFullName || property.memberData?.memberNick || '판매자'}
+            </Typography>
           </Box>
         </TabPanel>
       </Paper>

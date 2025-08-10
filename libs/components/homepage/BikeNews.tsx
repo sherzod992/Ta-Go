@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'next-i18next';
 import { useQuery } from '@apollo/client';
+import { useRouter } from 'next/router';
 import { 
   Box, 
   Typography, 
@@ -18,6 +19,7 @@ import { GET_BOARD_ARTICLES } from '../../../apollo/user/query';
 
 const BikeNews: React.FC = () => {
   const { t } = useTranslation('common');
+  const router = useRouter();
   
   // GraphQL 쿼리로 최신 게시글 데이터 가져오기
   const { data, loading, error } = useQuery(GET_BOARD_ARTICLES, {
@@ -94,11 +96,13 @@ const BikeNews: React.FC = () => {
                     display: 'flex',
                     flexDirection: 'column',
                     transition: 'transform 0.2s',
+                    cursor: 'pointer',
                     '&:hover': {
                       transform: 'translateY(-4px)',
                       boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
                     },
                   }}
+                  onClick={() => router.push(`/community/${article._id}`)}
                 >
                   <CardMedia
                     component="img"
@@ -131,13 +135,17 @@ const BikeNews: React.FC = () => {
                       <Typography variant="caption" color="text.secondary">
                         {new Date(article.createdAt).toLocaleDateString()}
                       </Typography>
-                      <Button
-                        variant="text"
-                        color="primary"
-                        size="small"
-                      >
-                        {t('Read more')}
-                      </Button>
+                                          <Button
+                      variant="text"
+                      color="primary"
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        router.push(`/community/${article._id}`);
+                      }}
+                    >
+                      {t('Read more')}
+                    </Button>
                     </Box>
                   </CardContent>
                 </Card>

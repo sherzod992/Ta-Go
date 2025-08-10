@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'next-i18next';
 import { useQuery } from '@apollo/client';
+import { useRouter } from 'next/router';
 import { 
   Box, 
   Typography, 
@@ -17,6 +18,7 @@ import { GET_PROPERTIES } from '../../../apollo/user/query';
 
 const NewBikeShowroom: React.FC = () => {
   const { t } = useTranslation('common');
+  const router = useRouter();
   
   // GraphQL 쿼리로 신차 매물 데이터 가져오기
   const { data, loading, error } = useQuery(GET_PROPERTIES, {
@@ -94,11 +96,13 @@ const NewBikeShowroom: React.FC = () => {
                     display: 'flex',
                     flexDirection: 'column',
                     transition: 'transform 0.2s',
+                    cursor: 'pointer',
                     '&:hover': {
                       transform: 'translateY(-4px)',
                       boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
                     },
                   }}
+                  onClick={() => router.push(`/property/${bike._id}`)}
                 >
                   <CardMedia
                     component="img"
@@ -117,15 +121,19 @@ const NewBikeShowroom: React.FC = () => {
                     <Typography variant="h4" color="primary" fontWeight="bold" gutterBottom>
                       ${bike.propertyPrice?.toLocaleString()}
                     </Typography>
-                    <Button
-                      variant="outlined"
-                      color="primary"
-                      size="large"
-                      sx={{ mt: 2 }}
-                      fullWidth
-                    >
-                      {t('View Details')}
-                    </Button>
+                                      <Button
+                    variant="outlined"
+                    color="primary"
+                    size="large"
+                    sx={{ mt: 2 }}
+                    fullWidth
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      router.push(`/property/${bike._id}`);
+                    }}
+                  >
+                    {t('View Details')}
+                  </Button>
                   </CardContent>
                 </Card>
               </Grid>
