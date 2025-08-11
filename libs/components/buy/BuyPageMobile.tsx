@@ -69,13 +69,32 @@ const BuyPageMobile: React.FC = () => {
   const [filters, setFilters] = useState({
     keyword: '',
     brand: 'all',
-    type: 'all',
     location: 'all',
     condition: 'all',
     priceRange: [0, 50000000],
     yearRange: [1990, new Date().getFullYear()],
     mileageRange: [0, 100000],
   });
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  
+  const bikeCategories = [
+    { name: 'Adventure Tourers', value: PropertyType.ADVENTURE_TOURERS, image: '/img/typeImages/ADVENTUREmoto.webp' },
+    { name: 'Agriculture', value: PropertyType.AGRICULTURE, image: '/img/typeImages/AGRICULTUREmoto.png' },
+    { name: 'All Terrain Vehicles', value: PropertyType.ALL_TERRAIN_VEHICLES, image: '/img/typeImages/ALL_TERRAIN.jpg' },
+    { name: 'Dirt Bikes', value: PropertyType.DIRT, image: '/img/typeImages/dirtbike.avif' },
+    { name: 'Electric', value: PropertyType.ELECTRIC, image: '/img/typeImages/electric.avif' },
+    { name: 'Enduro', value: PropertyType.ENDURO, image: '/img/typeImages/dirt-bikes.png' },
+    { name: 'Mini Bikes', value: PropertyType.MINI_BIKES, image: '/img/typeImages/minibikes.jpg' },
+    { name: 'SxS/UTV', value: PropertyType.SXS_UTV, image: '/img/typeImages/UTVbikes.avif' }
+  ];
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('ko-KR', {
+      style: 'currency',
+      currency: 'KRW',
+      minimumFractionDigits: 0,
+    }).format(price);
+  };
   
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [sortBy, setSortBy] = useState('latest');
@@ -88,8 +107,8 @@ const BuyPageMobile: React.FC = () => {
 
     if (filters.keyword) search.text = filters.keyword;
     if (filters.brand !== 'all') search.brandList = [filters.brand];
-    if (filters.type !== 'all') {
-      const typeMap: { [key: string]: PropertyType } = {
+    if (selectedCategory !== 'all') {
+      const categoryMap: { [key: string]: PropertyType } = {
         'Adventure Tourers': PropertyType.ADVENTURE_TOURERS,
         'Agriculture': PropertyType.AGRICULTURE,
         'All Terrain Vehicles': PropertyType.ALL_TERRAIN_VEHICLES,
@@ -99,7 +118,7 @@ const BuyPageMobile: React.FC = () => {
         'Mini Bikes': PropertyType.MINI_BIKES,
         'SxS/UTV': PropertyType.SXS_UTV
       };
-      const selectedType = typeMap[filters.type];
+      const selectedType = categoryMap[selectedCategory];
       if (selectedType) {
         search.typeList = [selectedType];
       }
@@ -145,7 +164,7 @@ const BuyPageMobile: React.FC = () => {
         search
       }
     };
-  }, [filters]);
+  }, [filters, selectedCategory]);
 
   // GraphQL 쿼리 실행
   const { data, loading, error } = useQuery(GET_PROPERTIES, {
@@ -220,14 +239,6 @@ const BuyPageMobile: React.FC = () => {
     router.push(`/property/${propertyId}`);
   };
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('ko-KR', {
-      style: 'currency',
-      currency: 'KRW',
-      minimumFractionDigits: 0,
-    }).format(price);
-  };
-
   const formatMileage = (mileage: number) => {
     return `${mileage.toLocaleString()}km`;
   };
@@ -245,30 +256,149 @@ const BuyPageMobile: React.FC = () => {
           </Typography>
         </Paper>
 
-        {/* 검색 및 필터 */}
+        {/* 검색 필터 */}
         <Paper className="search-section" sx={{ p: 2, mb: 2 }}>
-          <Grid container spacing={2}>
-            <Grid item xs={9}>
+          {/* Top Row Filters */}
+          <Grid container spacing={2} sx={{ marginBottom: 2 }}>
+            <Grid item xs={12} sm={6} md={3}>
+              <FormControl fullWidth size="small">
+                <InputLabel>{t('Brand')}</InputLabel>
+                <Select
+                  value={filters.brand}
+                  label={t('Brand')}
+                  onChange={(e) => setFilters({ ...filters, brand: e.target.value })}
+                >
+                  <MenuItem value="all">{t('All brands')}</MenuItem>
+                  <MenuItem value="Honda">Honda</MenuItem>
+                  <MenuItem value="Yamaha">Yamaha</MenuItem>
+                  <MenuItem value="Suzuki">Suzuki</MenuItem>
+                  <MenuItem value="Kawasaki">Kawasaki</MenuItem>
+                  <MenuItem value="BMW">BMW</MenuItem>
+                  <MenuItem value="Ducati">Ducati</MenuItem>
+                  <MenuItem value="KTM">KTM</MenuItem>
+                  <MenuItem value="Harley-Davidson">Harley-Davidson</MenuItem>
+                  <MenuItem value="Triumph">Triumph</MenuItem>
+                  <MenuItem value="Aprilia">Aprilia</MenuItem>
+                  <MenuItem value="Moto Guzzi">Moto Guzzi</MenuItem>
+                  <MenuItem value="MV Agusta">MV Agusta</MenuItem>
+                  <MenuItem value="Royal Enfield">Royal Enfield</MenuItem>
+                  <MenuItem value="Zero">Zero</MenuItem>
+                  <MenuItem value="Hero">Hero</MenuItem>
+                  <MenuItem value="TVS">TVS</MenuItem>
+                  <MenuItem value="Bajaj">Bajaj</MenuItem>
+                  <MenuItem value="other">{t('Other')}</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
               <TextField
                 fullWidth
                 size="small"
-                placeholder={t('Search motorcycles...')}
+                label={t('Keyword')}
+                placeholder={t('Search by keyword')}
                 value={filters.keyword}
                 onChange={(e) => setFilters({ ...filters, keyword: e.target.value })}
-                InputProps={{
-                  startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />,
-                }}
               />
             </Grid>
-            <Grid item xs={3}>
-              <Button
-                fullWidth
-                variant="outlined"
-                onClick={() => setFilterDrawerOpen(true)}
-                startIcon={<FilterIcon />}
-              >
-                {t('Filter')}
-              </Button>
+            <Grid item xs={12} sm={6} md={3}>
+              <FormControl fullWidth size="small">
+                <InputLabel>{t('Location')}</InputLabel>
+                <Select
+                  value={filters.location}
+                  label={t('Location')}
+                  onChange={(e) => setFilters({ ...filters, location: e.target.value })}
+                >
+                  <MenuItem value="all">{t('All locations')}</MenuItem>
+                  <MenuItem value="seoul">Seoul</MenuItem>
+                  <MenuItem value="busan">Busan</MenuItem>
+                  <MenuItem value="daegu">Daegu</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <FormControl fullWidth size="small">
+                <InputLabel>{t('New and used')}</InputLabel>
+                <Select
+                  value={filters.condition}
+                  label={t('New and used')}
+                  onChange={(e) => setFilters({ ...filters, condition: e.target.value })}
+                >
+                  <MenuItem value="all">{t('Any')}</MenuItem>
+                  <MenuItem value="new">New</MenuItem>
+                  <MenuItem value="used">Used</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
+
+          {/* Motorcycle Types Row */}
+          <Grid container spacing={1} sx={{ marginBottom: 2 }}>
+            {bikeCategories.map((categoryItem) => (
+              <Grid item xs={6} sm={4} md={1.5} key={categoryItem.name}>
+                <Box
+                  onClick={() => {
+                    setSelectedCategory(selectedCategory === categoryItem.name ? 'all' : categoryItem.name);
+                  }}
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    cursor: 'pointer',
+                    padding: 1,
+                    borderRadius: 2,
+                    transition: 'all 0.2s',
+                    backgroundColor: selectedCategory === categoryItem.name ? 'rgba(25, 118, 210, 0.1)' : 'transparent',
+                    border: selectedCategory === categoryItem.name ? '2px solid #1976d2' : '2px solid transparent',
+                    '&:hover': {
+                      backgroundColor: 'rgba(0, 0, 0, 0.05)',
+                      transform: 'translateY(-2px)',
+                    },
+                  }}
+                >
+                  <Box
+                    component="img"
+                    src={categoryItem.image}
+                    alt={categoryItem.name}
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      objectFit: 'contain',
+                      marginBottom: 0.5,
+                    }}
+                  />
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      textAlign: 'center',
+                      fontWeight: 500,
+                      color: selectedCategory === categoryItem.name ? '#1976d2' : '#333',
+                      fontSize: '0.7rem',
+                    }}
+                  >
+                    {categoryItem.name}
+                  </Typography>
+                </Box>
+              </Grid>
+            ))}
+          </Grid>
+
+          {/* Price Range Filter */}
+          <Grid container spacing={2} sx={{ marginBottom: 2 }}>
+            <Grid item xs={12}>
+              <Box>
+                <Typography variant="body2" gutterBottom>
+                  {t('Price Range')}: {formatPrice(filters.priceRange[0])} - {formatPrice(filters.priceRange[1])}
+                </Typography>
+                <Slider
+                  value={filters.priceRange}
+                  onChange={(_, value) => setFilters({ ...filters, priceRange: value as number[] })}
+                  valueLabelDisplay="auto"
+                  min={0}
+                  max={50000000}
+                  step={1000000}
+                  valueLabelFormat={(value) => formatPrice(value)}
+                />
+              </Box>
             </Grid>
           </Grid>
         </Paper>
@@ -339,7 +469,7 @@ const BuyPageMobile: React.FC = () => {
                       cursor: 'pointer',
                       display: viewMode === 'list' ? 'flex' : 'block',
                       flexDirection: viewMode === 'list' ? 'row' : 'column',
-                      height: viewMode === 'list' ? '120px' : 'auto',
+                      height: viewMode === 'list' ? 'auto' : 'auto',
                       overflow: 'hidden'
                     }}
                   >
@@ -361,7 +491,7 @@ const BuyPageMobile: React.FC = () => {
                       flexDirection: 'column',
                       justifyContent: 'space-between',
                       p: viewMode === 'list' ? 2 : 3,
-                      minHeight: viewMode === 'list' ? '120px' : 'auto'
+                      minHeight: viewMode === 'list' ? 'auto' : 'auto'
                     }}>
                       {viewMode === 'list' ? (
                         // 리스트 모드 레이아웃
@@ -369,10 +499,11 @@ const BuyPageMobile: React.FC = () => {
                           display: 'flex', 
                           flexDirection: 'column',
                           height: '100%',
-                          justifyContent: 'space-between'
+                          justifyContent: 'space-between',
+                          gap: 1
                         }}>
                           {/* 제목과 즐겨찾기 버튼 */}
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                             <Typography 
                               variant="h6" 
                               component="h3" 
@@ -405,37 +536,51 @@ const BuyPageMobile: React.FC = () => {
                             </IconButton>
                           </Box>
 
-                          {/* 상세 정보 */}
-                          <Box sx={{ 
-                            display: 'flex', 
-                            flexDirection: 'column',
-                            gap: 0.5,
-                            flex: 1
-                          }}>
-                            {/* 브랜드와 모델 */}
-                            <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                              {property.propertyBrand} {property.propertyModel}
-                            </Typography>
-                            
-                            {/* 연식과 주행거리 */}
-                            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                <YearIcon sx={{ fontSize: '1rem', color: 'text.secondary' }} />
-                                <Typography variant="body2" color="text.secondary">
-                                  {property.propertyYear}
-                                </Typography>
-                              </Box>
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                <SpeedIcon sx={{ fontSize: '1rem', color: 'text.secondary' }} />
-                                <Typography variant="body2" color="text.secondary">
-                                  {formatMileage(property.propertyMileage)}
-                                </Typography>
-                              </Box>
+                          {/* 브랜드와 모델 */}
+                          <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                            {property.propertyBrand} {property.propertyModel}
+                          </Typography>
+                          
+                          {/* 연식과 주행거리 */}
+                          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                              <YearIcon sx={{ fontSize: '1rem', color: 'text.secondary' }} />
+                              <Typography variant="body2" color="text.secondary">
+                                {property.propertyYear}
+                              </Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                              <SpeedIcon sx={{ fontSize: '1rem', color: 'text.secondary' }} />
+                              <Typography variant="body2" color="text.secondary">
+                                {formatMileage(property.propertyMileage)}
+                              </Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                              <LocationIcon sx={{ fontSize: '1rem', color: 'text.secondary' }} />
+                              <Typography variant="body2" color="text.secondary">
+                                {property.propertyLocation}
+                              </Typography>
                             </Box>
                           </Box>
 
+                          {/* 설명 */}
+                          <Typography 
+                            variant="body2" 
+                            color="text.secondary" 
+                            sx={{ 
+                              flexGrow: 1,
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              display: '-webkit-box',
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: 'vertical',
+                            }}
+                          >
+                            {property.propertyDesc}
+                          </Typography>
+
                           {/* 가격 */}
-                          <Box sx={{ mt: 'auto', pt: 1 }}>
+                          <Box sx={{ mt: 'auto' }}>
                             <Typography variant="h6" color="primary" sx={{ fontWeight: 'bold' }}>
                               {formatPrice(property.propertyPrice)}
                             </Typography>
@@ -533,22 +678,19 @@ const BuyPageMobile: React.FC = () => {
             
             <ListItem>
               <FormControl fullWidth>
-                <InputLabel>{t('Category')}</InputLabel>
-                <Select
-                  value={filters.type}
-                  label={t('Category')}
-                  onChange={(e) => setFilters({ ...filters, type: e.target.value })}
-                >
-                  <MenuItem value="all">{t('All categories')}</MenuItem>
-                  <MenuItem value="Adventure Tourers">{t('Adventure Tourers')}</MenuItem>
-                  <MenuItem value="Agriculture">{t('Agriculture')}</MenuItem>
-                  <MenuItem value="All Terrain Vehicles">{t('All Terrain Vehicles')}</MenuItem>
-                  <MenuItem value="Dirt Bikes">{t('Dirt Bikes')}</MenuItem>
-                  <MenuItem value="Electric">{t('Electric')}</MenuItem>
-                  <MenuItem value="Enduro">{t('Enduro')}</MenuItem>
-                  <MenuItem value="Mini Bikes">{t('Mini Bikes')}</MenuItem>
-                  <MenuItem value="SxS/UTV">{t('SxS/UTV')}</MenuItem>
-                </Select>
+                <InputLabel>{t('Motorcycle Types')}</InputLabel>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                  {bikeCategories.map((categoryItem) => (
+                    <Chip
+                      key={categoryItem.name}
+                      label={categoryItem.name}
+                      onClick={() => setSelectedCategory(selectedCategory === categoryItem.name ? 'all' : categoryItem.name)}
+                      color={selectedCategory === categoryItem.name ? 'primary' : 'default'}
+                      variant={selectedCategory === categoryItem.name ? 'filled' : 'outlined'}
+                      sx={{ cursor: 'pointer' }}
+                    />
+                  ))}
+                </Box>
               </FormControl>
             </ListItem>
             

@@ -65,7 +65,6 @@ const BuyPageDesktop: React.FC = () => {
   const [filters, setFilters] = useState({
     keyword: '',
     brand: 'all',
-    type: 'all',
     location: 'all',
     condition: 'all',
     fuelType: 'all',
@@ -75,6 +74,26 @@ const BuyPageDesktop: React.FC = () => {
     mileageRange: [0, 100000],
     engineSizeRange: [50, 2000],
   });
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  
+  const bikeCategories = [
+    { name: 'Adventure Tourers', value: PropertyType.ADVENTURE_TOURERS, image: '/img/typeImages/ADVENTUREmoto.webp' },
+    { name: 'Agriculture', value: PropertyType.AGRICULTURE, image: '/img/typeImages/AGRICULTUREmoto.png' },
+    { name: 'All Terrain Vehicles', value: PropertyType.ALL_TERRAIN_VEHICLES, image: '/img/typeImages/ALL_TERRAIN.jpg' },
+    { name: 'Dirt Bikes', value: PropertyType.DIRT, image: '/img/typeImages/dirtbike.avif' },
+    { name: 'Electric', value: PropertyType.ELECTRIC, image: '/img/typeImages/electric.avif' },
+    { name: 'Enduro', value: PropertyType.ENDURO, image: '/img/typeImages/dirt-bikes.png' },
+    { name: 'Mini Bikes', value: PropertyType.MINI_BIKES, image: '/img/typeImages/minibikes.jpg' },
+    { name: 'SxS/UTV', value: PropertyType.SXS_UTV, image: '/img/typeImages/UTVbikes.avif' }
+  ];
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('ko-KR', {
+      style: 'currency',
+      currency: 'KRW',
+      minimumFractionDigits: 0,
+    }).format(price);
+  };
   
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid');
   const [sortBy, setSortBy] = useState('latest');
@@ -87,8 +106,8 @@ const BuyPageDesktop: React.FC = () => {
 
     if (filters.keyword) search.text = filters.keyword;
     if (filters.brand !== 'all') search.brandList = [filters.brand];
-    if (filters.type !== 'all') {
-      const typeMap: { [key: string]: PropertyType } = {
+    if (selectedCategory !== 'all') {
+      const categoryMap: { [key: string]: PropertyType } = {
         'Adventure Tourers': PropertyType.ADVENTURE_TOURERS,
         'Agriculture': PropertyType.AGRICULTURE,
         'All Terrain Vehicles': PropertyType.ALL_TERRAIN_VEHICLES,
@@ -98,7 +117,7 @@ const BuyPageDesktop: React.FC = () => {
         'Mini Bikes': PropertyType.MINI_BIKES,
         'SxS/UTV': PropertyType.SXS_UTV
       };
-      const selectedType = typeMap[filters.type];
+      const selectedType = categoryMap[selectedCategory];
       if (selectedType) {
         search.typeList = [selectedType];
       }
@@ -164,7 +183,7 @@ const BuyPageDesktop: React.FC = () => {
         search
       }
     };
-  }, [filters, page]);
+  }, [filters, selectedCategory, page]);
 
   // GraphQL 쿼리 실행
   const { data, loading, error } = useQuery(GET_PROPERTIES, {
@@ -243,7 +262,6 @@ const BuyPageDesktop: React.FC = () => {
     setFilters({
       keyword: '',
       brand: 'all',
-      type: 'all',
       location: 'all',
       condition: 'all',
       fuelType: 'all',
@@ -253,15 +271,8 @@ const BuyPageDesktop: React.FC = () => {
       mileageRange: [0, 100000],
       engineSizeRange: [50, 2000],
     });
+    setSelectedCategory('all');
     setPage(1);
-  };
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('ko-KR', {
-      style: 'currency',
-      currency: 'KRW',
-      minimumFractionDigits: 0,
-    }).format(price);
   };
 
   const formatMileage = (mileage: number) => {
@@ -330,33 +341,78 @@ const BuyPageDesktop: React.FC = () => {
                       <MenuItem value="Kawasaki">Kawasaki</MenuItem>
                       <MenuItem value="BMW">BMW</MenuItem>
                       <MenuItem value="Ducati">Ducati</MenuItem>
+                      <MenuItem value="KTM">KTM</MenuItem>
+                      <MenuItem value="Harley-Davidson">Harley-Davidson</MenuItem>
+                      <MenuItem value="Triumph">Triumph</MenuItem>
+                      <MenuItem value="Aprilia">Aprilia</MenuItem>
+                      <MenuItem value="Moto Guzzi">Moto Guzzi</MenuItem>
+                      <MenuItem value="MV Agusta">MV Agusta</MenuItem>
+                      <MenuItem value="Royal Enfield">Royal Enfield</MenuItem>
+                      <MenuItem value="Zero">Zero</MenuItem>
+                      <MenuItem value="Hero">Hero</MenuItem>
+                      <MenuItem value="TVS">TVS</MenuItem>
+                      <MenuItem value="Bajaj">Bajaj</MenuItem>
+                      <MenuItem value="other">{t('Other')}</MenuItem>
                     </Select>
                   </FormControl>
                 </AccordionDetails>
               </Accordion>
 
-              {/* 카테고리 */}
+              {/* 오토바이 타입 */}
               <Accordion defaultExpanded>
                 <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                  <Typography variant="subtitle1">{t('Category')}</Typography>
+                  <Typography variant="subtitle1">{t('Motorcycle Types')}</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
-                  <FormControl fullWidth size="small">
-                    <Select
-                      value={filters.type}
-                      onChange={(e) => setFilters({ ...filters, type: e.target.value })}
-                    >
-                      <MenuItem value="all">{t('All categories')}</MenuItem>
-                      <MenuItem value="Adventure Tourers">{t('Adventure Tourers')}</MenuItem>
-                      <MenuItem value="Agriculture">{t('Agriculture')}</MenuItem>
-                      <MenuItem value="All Terrain Vehicles">{t('All Terrain Vehicles')}</MenuItem>
-                      <MenuItem value="Dirt Bikes">{t('Dirt Bikes')}</MenuItem>
-                      <MenuItem value="Electric">{t('Electric')}</MenuItem>
-                      <MenuItem value="Enduro">{t('Enduro')}</MenuItem>
-                      <MenuItem value="Mini Bikes">{t('Mini Bikes')}</MenuItem>
-                      <MenuItem value="SxS/UTV">{t('SxS/UTV')}</MenuItem>
-                    </Select>
-                  </FormControl>
+                  <Grid container spacing={1}>
+                    {bikeCategories.map((categoryItem) => (
+                      <Grid item xs={6} key={categoryItem.name}>
+                        <Box
+                          onClick={() => {
+                            setSelectedCategory(selectedCategory === categoryItem.name ? 'all' : categoryItem.name);
+                          }}
+                          sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            cursor: 'pointer',
+                            padding: 1,
+                            borderRadius: 2,
+                            transition: 'all 0.2s',
+                            backgroundColor: selectedCategory === categoryItem.name ? 'rgba(25, 118, 210, 0.1)' : 'transparent',
+                            border: selectedCategory === categoryItem.name ? '2px solid #1976d2' : '2px solid transparent',
+                            '&:hover': {
+                              backgroundColor: 'rgba(0, 0, 0, 0.05)',
+                              transform: 'translateY(-2px)',
+                            },
+                          }}
+                        >
+                          <Box
+                            component="img"
+                            src={categoryItem.image}
+                            alt={categoryItem.name}
+                            sx={{
+                              width: 40,
+                              height: 40,
+                              objectFit: 'contain',
+                              marginBottom: 0.5,
+                            }}
+                          />
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              textAlign: 'center',
+                              fontWeight: 500,
+                              color: selectedCategory === categoryItem.name ? '#1976d2' : '#333',
+                              fontSize: '0.7rem',
+                            }}
+                          >
+                            {categoryItem.name}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                    ))}
+                  </Grid>
                 </AccordionDetails>
               </Accordion>
 
@@ -518,7 +574,7 @@ const BuyPageDesktop: React.FC = () => {
                           onClick={() => handlePropertyClick(property._id)}
                           sx={{ 
                             cursor: 'pointer',
-                            height: viewMode === 'list' ? '160px' : '100%',
+                            height: viewMode === 'list' ? 'auto' : '100%',
                             display: 'flex',
                             flexDirection: viewMode === 'list' ? 'row' : 'column',
                             transition: 'transform 0.2s ease, box-shadow 0.2s ease',
@@ -546,7 +602,7 @@ const BuyPageDesktop: React.FC = () => {
                             display: 'flex', 
                             flexDirection: 'column',
                             p: viewMode === 'list' ? 3 : 3,
-                            minHeight: viewMode === 'list' ? '160px' : 'auto'
+                            minHeight: viewMode === 'list' ? 'auto' : 'auto'
                           }}>
                             {viewMode === 'list' ? (
                               // 리스트 모드 레이아웃
@@ -554,10 +610,11 @@ const BuyPageDesktop: React.FC = () => {
                                 display: 'flex', 
                                 flexDirection: 'column',
                                 height: '100%',
-                                justifyContent: 'space-between'
+                                justifyContent: 'space-between',
+                                gap: 2
                               }}>
                                 {/* 제목과 즐겨찾기 버튼 */}
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                   <Typography 
                                     variant="h5" 
                                     component="h3" 
@@ -590,43 +647,51 @@ const BuyPageDesktop: React.FC = () => {
                                   </IconButton>
                                 </Box>
 
-                                {/* 상세 정보 */}
-                                <Box sx={{ 
-                                  display: 'flex', 
-                                  flexDirection: 'column',
-                                  gap: 1,
-                                  flex: 1
-                                }}>
-                                  {/* 브랜드와 모델 */}
-                                  <Typography variant="body1" color="text.secondary" sx={{ fontWeight: 500 }}>
-                                    {property.propertyBrand} {property.propertyModel}
-                                  </Typography>
-                                  
-                                  {/* 연식과 주행거리 */}
-                                  <Box sx={{ display: 'flex', gap: 3, alignItems: 'center' }}>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                      <YearIcon sx={{ fontSize: '1.2rem', color: 'text.secondary' }} />
-                                      <Typography variant="body2" color="text.secondary">
-                                        {property.propertyYear}
-                                      </Typography>
-                                    </Box>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                      <SpeedIcon sx={{ fontSize: '1.2rem', color: 'text.secondary' }} />
-                                      <Typography variant="body2" color="text.secondary">
-                                        {formatMileage(property.propertyMileage)}
-                                      </Typography>
-                                    </Box>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                      <LocationIcon sx={{ fontSize: '1.2rem', color: 'text.secondary' }} />
-                                      <Typography variant="body2" color="text.secondary">
-                                        {property.propertyLocation}
-                                      </Typography>
-                                    </Box>
+                                {/* 브랜드와 모델 */}
+                                <Typography variant="body1" color="text.secondary" sx={{ fontWeight: 500 }}>
+                                  {property.propertyBrand} {property.propertyModel}
+                                </Typography>
+                                
+                                {/* 연식, 주행거리, 위치 */}
+                                <Box sx={{ display: 'flex', gap: 3, alignItems: 'center', flexWrap: 'wrap' }}>
+                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <YearIcon sx={{ fontSize: '1.2rem', color: 'text.secondary' }} />
+                                    <Typography variant="body2" color="text.secondary">
+                                      {property.propertyYear}
+                                    </Typography>
+                                  </Box>
+                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <SpeedIcon sx={{ fontSize: '1.2rem', color: 'text.secondary' }} />
+                                    <Typography variant="body2" color="text.secondary">
+                                      {formatMileage(property.propertyMileage)}
+                                    </Typography>
+                                  </Box>
+                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <LocationIcon sx={{ fontSize: '1.2rem', color: 'text.secondary' }} />
+                                    <Typography variant="body2" color="text.secondary">
+                                      {property.propertyLocation}
+                                    </Typography>
                                   </Box>
                                 </Box>
 
+                                {/* 설명 */}
+                                <Typography 
+                                  variant="body2" 
+                                  color="text.secondary" 
+                                  sx={{ 
+                                    flexGrow: 1,
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    display: '-webkit-box',
+                                    WebkitLineClamp: 2,
+                                    WebkitBoxOrient: 'vertical',
+                                  }}
+                                >
+                                  {property.propertyDesc}
+                                </Typography>
+
                                 {/* 가격 */}
-                                <Box sx={{ mt: 'auto', pt: 2 }}>
+                                <Box sx={{ mt: 'auto' }}>
                                   <Typography variant="h4" color="primary" sx={{ fontWeight: 'bold' }}>
                                     {formatPrice(property.propertyPrice)}
                                   </Typography>

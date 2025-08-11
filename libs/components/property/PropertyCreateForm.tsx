@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'next-i18next';
 import {
   Box,
   Typography,
@@ -40,17 +41,17 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CloseIcon from '@mui/icons-material/Close';
 
-// 오토바이 타입 이미지 매핑
-const bikeTypeImages = {
-  [PropertyType.ADVENTURE_TOURERS]: '/img/typeImages/ADVENTUREmoto.webp',
-  [PropertyType.AGRICULTURE]: '/img/typeImages/AGRICULTUREmoto.png',
-  [PropertyType.ALL_TERRAIN_VEHICLES]: '/img/typeImages/ALL_TERRAIN.jpg',
-  [PropertyType.DIRT]: '/img/typeImages/dirtbike.avif',
-  [PropertyType.ELECTRIC]: '/img/typeImages/electric.avif',
-  [PropertyType.ENDURO]: '/img/typeImages/dirt-bikes.png',
-  [PropertyType.MINI_BIKES]: '/img/typeImages/minibikes.jpg',
-  [PropertyType.SXS_UTV]: '/img/typeImages/UTVbikes.avif',
-};
+// 오토바이 타입 배열 (홈페이지와 동일한 구조)
+const bikeCategories = [
+  { name: 'Adventure Tourers', value: PropertyType.ADVENTURE_TOURERS, image: '/img/typeImages/ADVENTUREmoto.webp' },
+  { name: 'Agriculture', value: PropertyType.AGRICULTURE, image: '/img/typeImages/AGRICULTUREmoto.png' },
+  { name: 'All Terrain Vehicles', value: PropertyType.ALL_TERRAIN_VEHICLES, image: '/img/typeImages/ALL_TERRAIN.jpg' },
+  { name: 'Dirt Bikes', value: PropertyType.DIRT, image: '/img/typeImages/dirtbike.avif' },
+  { name: 'Electric', value: PropertyType.ELECTRIC, image: '/img/typeImages/electric.avif' },
+  { name: 'Enduro', value: PropertyType.ENDURO, image: '/img/typeImages/dirt-bikes.png' },
+  { name: 'Mini Bikes', value: PropertyType.MINI_BIKES, image: '/img/typeImages/minibikes.jpg' },
+  { name: 'SxS/UTV', value: PropertyType.SXS_UTV, image: '/img/typeImages/UTVbikes.avif' }
+];
 
 // 변속기 이미지 매핑
 const transmissionImages = {
@@ -115,6 +116,7 @@ const ratingConditionMap = {
 };
 
 const PropertyCreateForm: React.FC = () => {
+  const { t } = useTranslation('common');
   const router = useRouter();
   const user = useReactiveVar(userVar);
   const [createProperty, { loading }] = useMutation(CREATE_PROPERTY);
@@ -139,12 +141,12 @@ const PropertyCreateForm: React.FC = () => {
     propertyLocation: PropertyLocation.SEOUL,
     propertyAddress: '',
     propertyTitle: '',
-    propertyPrice: 0,
+    propertyPrice: '',
     propertyBrand: '',
     propertyModel: '',
     propertyYear: new Date().getFullYear(),
-    propertyMileage: 0,
-    propertyEngineSize: 0,
+    propertyMileage: '',
+    propertyEngineSize: '',
     propertyFuelType: FuelType.GASOLINE,
     propertyTransmission: TransmissionType.MANUAL,
     propertyColor: '',
@@ -370,6 +372,9 @@ const PropertyCreateForm: React.FC = () => {
       const { memberId, ...formDataWithoutMemberId } = formData as any;
       const inputData = {
         ...formDataWithoutMemberId,
+        propertyPrice: parseInt(formData.propertyPrice as string) || 0,
+        propertyMileage: parseInt(formData.propertyMileage as string) || 0,
+        propertyEngineSize: parseInt(formData.propertyEngineSize as string) || 0,
         propertyImages: imageDataUrls,
       };
 
@@ -485,10 +490,11 @@ const PropertyCreateForm: React.FC = () => {
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label="가격 *"
+                label={t('Price')}
+                placeholder={t('Enter price')}
                 type="number"
                 value={formData.propertyPrice}
-                onChange={(e) => handleInputChange('propertyPrice', parseInt(e.target.value))}
+                onChange={(e) => handleInputChange('propertyPrice', e.target.value)}
                 required
                 InputProps={{
                   startAdornment: <span style={{ marginRight: 8 }}>₩</span>,
@@ -499,41 +505,52 @@ const PropertyCreateForm: React.FC = () => {
             {/* 오토바이 타입 선택 */}
             <Grid item xs={12}>
               <Typography variant="h6" gutterBottom>
-                오토바이 타입 *
+                {t('Motorcycle Types')} *
               </Typography>
               <Grid container spacing={1}>
-                {Object.entries(bikeTypeImages).map(([type, image]) => (
-                  <Grid item xs={3} sm={2} md={1.5} key={type}>
-                    <Card 
-                      sx={{ 
+                {bikeCategories.map((categoryItem) => (
+                  <Grid item xs={6} sm={4} md={1.5} key={categoryItem.value}>
+                    <Box
+                      onClick={() => handleBikeTypeSelect(categoryItem.value)}
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
                         cursor: 'pointer',
-                        border: formData.propertyType === type ? '3px solid #1976d2' : '1px solid #ddd',
-                        backgroundColor: formData.propertyType === type ? '#f3f8ff' : 'white',
-                        transition: 'all 0.3s ease',
-                        transform: selectedBikeType && selectedBikeType !== type ? 'scale(0.8) opacity(0.3)' : 'scale(1) opacity(1)',
+                        padding: 1,
+                        borderRadius: 2,
+                        transition: 'all 0.2s',
+                        backgroundColor: formData.propertyType === categoryItem.value ? 'rgba(25, 118, 210, 0.1)' : 'transparent',
+                        border: formData.propertyType === categoryItem.value ? '2px solid #1976d2' : '2px solid transparent',
                         '&:hover': {
-                          borderColor: '#1976d2',
-                          transform: selectedBikeType && selectedBikeType !== type ? 'scale(0.8) opacity(0.3)' : 'scale(1.05)',
+                          backgroundColor: 'rgba(0, 0, 0, 0.05)',
+                          transform: 'translateY(-2px)',
                         },
                       }}
-                      onClick={() => handleBikeTypeSelect(type)}
                     >
-                      <CardContent sx={{ p: 0.5, textAlign: 'center' }}>
-                        <img
-                          src={image}
-                          alt={type}
-                          style={{
-                            width: '100%',
-                            height: 50,
-                            objectFit: 'cover',
-                            borderRadius: 4,
-                          }}
-                        />
-                        <Typography variant="caption" sx={{ mt: 0.5, display: 'block', fontSize: '0.7rem' }}>
-                          {type.replace(/_/g, ' ')}
-                        </Typography>
-                      </CardContent>
-                    </Card>
+                      <Box
+                        component="img"
+                        src={categoryItem.image}
+                        alt={categoryItem.name}
+                        sx={{
+                          width: 40,
+                          height: 40,
+                          objectFit: 'contain',
+                          marginBottom: 0.5,
+                        }}
+                      />
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          textAlign: 'center',
+                          fontWeight: 500,
+                          color: formData.propertyType === categoryItem.value ? '#1976d2' : '#333',
+                          fontSize: '0.7rem',
+                        }}
+                      >
+                        {categoryItem.name}
+                      </Typography>
+                    </Box>
                   </Grid>
                 ))}
               </Grid>
@@ -541,17 +558,28 @@ const PropertyCreateForm: React.FC = () => {
 
             <Grid item xs={12} md={6}>
               <FormControl fullWidth>
-                <InputLabel>지역 *</InputLabel>
+                <InputLabel>{t('Location')} *</InputLabel>
                 <Select
                   value={formData.propertyLocation}
                   onChange={(e) => handleInputChange('propertyLocation', e.target.value)}
-                  label="지역 *"
+                  label={t('Location')}
                 >
-                  {Object.values(PropertyLocation).map((location) => (
-                    <MenuItem key={location} value={location}>
-                      {location.replace(/_/g, ' ')}
-                    </MenuItem>
-                  ))}
+                  <MenuItem value={PropertyLocation.SEOUL}>{t('Seoul')}</MenuItem>
+                  <MenuItem value={PropertyLocation.BUSAN}>{t('Busan')}</MenuItem>
+                  <MenuItem value={PropertyLocation.INCHEON}>{t('Incheon')}</MenuItem>
+                  <MenuItem value={PropertyLocation.DAEGU}>{t('Daegu')}</MenuItem>
+                  <MenuItem value={PropertyLocation.GYEONGGI}>{t('Gyeonggi')}</MenuItem>
+                  <MenuItem value={PropertyLocation.GWANGJU}>{t('Gwangju')}</MenuItem>
+                  <MenuItem value={PropertyLocation.JEONBUK}>{t('Jeonbuk')}</MenuItem>
+                  <MenuItem value={PropertyLocation.DAEJEON}>{t('Daejeon')}</MenuItem>
+                  <MenuItem value={PropertyLocation.JEJU}>{t('Jeju')}</MenuItem>
+                  <MenuItem value={PropertyLocation.ULSAN}>{t('Ulsan')}</MenuItem>
+                  <MenuItem value={PropertyLocation.GANGWON}>{t('Gangwon')}</MenuItem>
+                  <MenuItem value={PropertyLocation.CHUNGBUK}>{t('Chungbuk')}</MenuItem>
+                  <MenuItem value={PropertyLocation.CHUNGNAM}>{t('Chungnam')}</MenuItem>
+                  <MenuItem value={PropertyLocation.JEONNAM}>{t('Jeonnam')}</MenuItem>
+                  <MenuItem value={PropertyLocation.GYEONGBUK}>{t('Gyeongbuk')}</MenuItem>
+                  <MenuItem value={PropertyLocation.GYEONGNAM}>{t('Gyeongnam')}</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
@@ -655,22 +683,30 @@ const PropertyCreateForm: React.FC = () => {
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label="주행거리 (km) *"
+                label={t('Mileage')}
+                placeholder={t('Enter mileage')}
                 type="number"
                 value={formData.propertyMileage}
-                onChange={(e) => handleInputChange('propertyMileage', parseInt(e.target.value))}
+                onChange={(e) => handleInputChange('propertyMileage', e.target.value)}
                 required
+                InputProps={{
+                  endAdornment: <span style={{ marginLeft: 8 }}>km</span>,
+                }}
               />
             </Grid>
 
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label="엔진 크기 (cc) *"
+                label={t('Engine Size')}
+                placeholder={t('Enter engine size')}
                 type="number"
                 value={formData.propertyEngineSize}
-                onChange={(e) => handleInputChange('propertyEngineSize', parseInt(e.target.value))}
+                onChange={(e) => handleInputChange('propertyEngineSize', e.target.value)}
                 required
+                InputProps={{
+                  endAdornment: <span style={{ marginLeft: 8 }}>cc</span>,
+                }}
               />
             </Grid>
 

@@ -17,7 +17,8 @@ import {
   Button, 
   Chip,
   Paper,
-  CircularProgress
+  CircularProgress,
+  Slider
 } from '@mui/material';
 import { GET_PROPERTIES } from '../../../apollo/user/query';
 import { PropertyLocation, PropertyType, PropertyStatus, ConditionType } from '../../enums/property.enum';
@@ -25,14 +26,12 @@ import { PropertyLocation, PropertyType, PropertyStatus, ConditionType } from '.
 const HeroSection: React.FC = () => {
   const { t } = useTranslation('common');
   const router = useRouter();
-  const [make, setMake] = useState('all');
-  const [model, setModel] = useState('all');
-  const [category, setCategory] = useState('all');
+  const [brand, setBrand] = useState('all');
   const [keyword, setKeyword] = useState('');
   const [location, setLocation] = useState('all');
   const [condition, setCondition] = useState('all');
-  const [priceMin, setPriceMin] = useState('');
-  const [priceMax, setPriceMax] = useState('');
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 50000000]);
+  const [selectedCategory, setSelectedCategory] = useState('all');
 
   const bikeCategories = [
     { name: 'Adventure Tourers', value: PropertyType.ADVENTURE_TOURERS, image: '/img/typeImages/ADVENTUREmoto.webp' },
@@ -45,12 +44,21 @@ const HeroSection: React.FC = () => {
     { name: 'SxS/UTV', value: PropertyType.SXS_UTV, image: '/img/typeImages/UTVbikes.avif' }
   ];
 
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('ko-KR', {
+      style: 'currency',
+      currency: 'KRW',
+      minimumFractionDigits: 0,
+    }).format(price);
+  };
+
   // 검색 필터 변수 생성
   const searchVariables = useMemo(() => {
     const search: any = {};
 
-    if (make !== 'all') search.brandList = [make];
-    if (category !== 'all') {
+    if (brand !== 'all') search.brandList = [brand];
+    if (keyword) search.text = keyword;
+    if (selectedCategory !== 'all') {
       // 카테고리 이름을 enum 값으로 변환
       const categoryMap: { [key: string]: PropertyType } = {
         'Adventure Tourers': PropertyType.ADVENTURE_TOURERS,
@@ -62,12 +70,11 @@ const HeroSection: React.FC = () => {
         'Mini Bikes': PropertyType.MINI_BIKES,
         'SxS/UTV': PropertyType.SXS_UTV
       };
-      const selectedCategory = categoryMap[category];
-      if (selectedCategory) {
-        search.typeList = [selectedCategory];
+      const selectedType = categoryMap[selectedCategory];
+      if (selectedType) {
+        search.typeList = [selectedType];
       }
     }
-    if (keyword) search.text = keyword;
     if (location !== 'all') {
       // 위치 이름을 enum 값으로 변환
       const locationMap: { [key: string]: PropertyLocation } = {
@@ -85,10 +92,10 @@ const HeroSection: React.FC = () => {
       };
       search.options = [conditionMap[condition]];
     }
-    if (priceMin || priceMax) {
+    if (priceRange[0] > 0 || priceRange[1] < 50000000) {
       search.pricesRange = {
-        start: priceMin ? parseInt(priceMin) : 0,
-        end: priceMax ? parseInt(priceMax) : 50000000
+        start: priceRange[0],
+        end: priceRange[1]
       };
     }
 
@@ -99,7 +106,7 @@ const HeroSection: React.FC = () => {
         search
       }
     };
-  }, [make, model, category, keyword, location, condition, priceMin, priceMax]);
+  }, [brand, keyword, selectedCategory, location, condition, priceRange]);
 
   // GraphQL 쿼리 실행
   const { data, loading, error } = useQuery(GET_PROPERTIES, {
@@ -112,28 +119,25 @@ const HeroSection: React.FC = () => {
   const searchResultCount = data?.getProperties?.list?.length || 0;
 
   const handleClearAll = () => {
-    setMake('all');
-    setModel('all');
-    setCategory('all');
+    setBrand('all');
     setKeyword('');
+    setSelectedCategory('all');
     setLocation('all');
     setCondition('all');
-    setPriceMin('');
-    setPriceMax('');
+    setPriceRange([0, 50000000]);
   };
 
   const handleShowBikes = () => {
     if (searchResultCount > 0) {
       // 검색 결과가 있을 때만 페이지 이동
       const queryParams = new URLSearchParams();
-      if (make !== 'all') queryParams.append('make', make);
-      if (model !== 'all') queryParams.append('model', model);
-      if (category !== 'all') queryParams.append('category', category);
+      if (brand !== 'all') queryParams.append('brand', brand);
       if (keyword) queryParams.append('keyword', keyword);
+      if (selectedCategory !== 'all') queryParams.append('category', selectedCategory);
       if (location !== 'all') queryParams.append('location', location);
       if (condition !== 'all') queryParams.append('condition', condition);
-      if (priceMin) queryParams.append('priceMin', priceMin);
-      if (priceMax) queryParams.append('priceMax', priceMax);
+      if (priceRange[0] > 0) queryParams.append('priceMin', priceRange[0].toString());
+      if (priceRange[1] < 50000000) queryParams.append('priceMax', priceRange[1].toString());
       
       router.push(`/property?${queryParams.toString()}`);
     }
@@ -242,51 +246,33 @@ const HeroSection: React.FC = () => {
               
               {/* Top Row Filters */}
               <Grid container spacing={2} sx={{ marginBottom: 2 }}>
-                <Grid item xs={12} sm={6} md={2}>
+                <Grid item xs={12} sm={6} md={3}>
                   <FormControl fullWidth size="small">
-                    <InputLabel>{t('Make')}</InputLabel>
+                    <InputLabel>{t('Brand')}</InputLabel>
                     <Select
-                      value={make}
-                      label={t('Make')}
-                      onChange={(e) => setMake(e.target.value)}
+                      value={brand}
+                      label={t('Brand')}
+                      onChange={(e) => setBrand(e.target.value)}
                     >
-                      <MenuItem value="all">{t('All makes')}</MenuItem>
-                      <MenuItem value="honda">Honda</MenuItem>
-                      <MenuItem value="yamaha">Yamaha</MenuItem>
-                      <MenuItem value="kawasaki">Kawasaki</MenuItem>
-                      <MenuItem value="suzuki">Suzuki</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} sm={6} md={2}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>{t('Model')}</InputLabel>
-                    <Select
-                      value={model}
-                      label={t('Model')}
-                      onChange={(e) => setModel(e.target.value)}
-                      disabled={make === 'all'}
-                    >
-                      <MenuItem value="all">{t('All models')}</MenuItem>
-                      <MenuItem value="cbr">CBR</MenuItem>
-                      <MenuItem value="cb">CB</MenuItem>
-                      <MenuItem value="vfr">VFR</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} sm={6} md={2}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>{t('Category')}</InputLabel>
-                    <Select
-                      value={category}
-                      label={t('Category')}
-                      onChange={(e) => setCategory(e.target.value)}
-                    >
-                      <MenuItem value="all">{t('All categories')}</MenuItem>
-                      <MenuItem value="sport">Sport</MenuItem>
-                      <MenuItem value="cruiser">Cruiser</MenuItem>
-                      <MenuItem value="touring">Touring</MenuItem>
-                      <MenuItem value="dirt">Dirt</MenuItem>
+                      <MenuItem value="all">{t('All brands')}</MenuItem>
+                      <MenuItem value="Honda">Honda</MenuItem>
+                      <MenuItem value="Yamaha">Yamaha</MenuItem>
+                      <MenuItem value="Suzuki">Suzuki</MenuItem>
+                      <MenuItem value="Kawasaki">Kawasaki</MenuItem>
+                      <MenuItem value="BMW">BMW</MenuItem>
+                      <MenuItem value="Ducati">Ducati</MenuItem>
+                      <MenuItem value="KTM">KTM</MenuItem>
+                      <MenuItem value="Harley-Davidson">Harley-Davidson</MenuItem>
+                      <MenuItem value="Triumph">Triumph</MenuItem>
+                      <MenuItem value="Aprilia">Aprilia</MenuItem>
+                      <MenuItem value="Moto Guzzi">Moto Guzzi</MenuItem>
+                      <MenuItem value="MV Agusta">MV Agusta</MenuItem>
+                      <MenuItem value="Royal Enfield">Royal Enfield</MenuItem>
+                      <MenuItem value="Zero">Zero</MenuItem>
+                      <MenuItem value="Hero">Hero</MenuItem>
+                      <MenuItem value="TVS">TVS</MenuItem>
+                      <MenuItem value="Bajaj">Bajaj</MenuItem>
+                      <MenuItem value="other">{t('Other')}</MenuItem>
                     </Select>
                   </FormControl>
                 </Grid>
@@ -301,6 +287,91 @@ const HeroSection: React.FC = () => {
                   />
                 </Grid>
                 <Grid item xs={12} sm={6} md={3}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>{t('Location')}</InputLabel>
+                    <Select
+                      value={location}
+                      label={t('Location')}
+                      onChange={(e) => setLocation(e.target.value)}
+                    >
+                      <MenuItem value="all">{t('All locations')}</MenuItem>
+                      <MenuItem value="seoul">Seoul</MenuItem>
+                      <MenuItem value="busan">Busan</MenuItem>
+                      <MenuItem value="daegu">Daegu</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>{t('New and used')}</InputLabel>
+                    <Select
+                      value={condition}
+                      label={t('New and used')}
+                      onChange={(e) => setCondition(e.target.value)}
+                    >
+                      <MenuItem value="all">{t('Any')}</MenuItem>
+                      <MenuItem value="new">New</MenuItem>
+                      <MenuItem value="used">Used</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+              </Grid>
+
+              {/* Motorcycle Types Row */}
+              <Grid container spacing={1} sx={{ marginBottom: 2 }}>
+                {bikeCategories.map((categoryItem) => (
+                  <Grid item xs={6} sm={4} md={1.5} key={categoryItem.name}>
+                    <Box
+                      onClick={() => {
+                        // 카테고리 선택 시 검색 필터에 추가
+                        setSelectedCategory(selectedCategory === categoryItem.name ? 'all' : categoryItem.name);
+                      }}
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        cursor: 'pointer',
+                        padding: 1,
+                        borderRadius: 2,
+                        transition: 'all 0.2s',
+                        backgroundColor: selectedCategory === categoryItem.name ? 'rgba(25, 118, 210, 0.1)' : 'transparent',
+                        border: selectedCategory === categoryItem.name ? '2px solid #1976d2' : '2px solid transparent',
+                        '&:hover': {
+                          backgroundColor: 'rgba(0, 0, 0, 0.05)',
+                          transform: 'translateY(-2px)',
+                        },
+                      }}
+                    >
+                      <Box
+                        component="img"
+                        src={categoryItem.image}
+                        alt={categoryItem.name}
+                        sx={{
+                          width: 40,
+                          height: 40,
+                          objectFit: 'contain',
+                          marginBottom: 0.5,
+                        }}
+                      />
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          textAlign: 'center',
+                          fontWeight: 500,
+                          color: selectedCategory === categoryItem.name ? '#1976d2' : '#333',
+                          fontSize: '0.7rem',
+                        }}
+                      >
+                        {categoryItem.name}
+                      </Typography>
+                    </Box>
+                  </Grid>
+                ))}
+              </Grid>
+
+              {/* Action Buttons Row */}
+              <Grid container spacing={2} sx={{ marginBottom: 2 }}>
+                <Grid item xs={12} sm={6} md={6}>
                   <Button
                     variant="contained"
                     color="primary"
@@ -328,6 +399,16 @@ const HeroSection: React.FC = () => {
                     )}
                   </Button>
                 </Grid>
+                <Grid item xs={12} sm={6} md={6}>
+                  <Button
+                    variant="text"
+                    color="error"
+                    onClick={handleClearAll}
+                    sx={{ textTransform: 'none', height: '40px' }}
+                  >
+                    {t('Clear all')}
+                  </Button>
+                </Grid>
               </Grid>
 
               {/* 검색 결과 안내 */}
@@ -339,140 +420,29 @@ const HeroSection: React.FC = () => {
                 </Box>
               )}
 
-              {/* Bottom Row Filters */}
+              {/* Price Range Filter */}
               <Grid container spacing={2} sx={{ marginBottom: 2 }}>
-                <Grid item xs={12} sm={6} md={2}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>{t('Location')}</InputLabel>
-                    <Select
-                      value={location}
-                      label={t('Location')}
-                      onChange={(e) => setLocation(e.target.value)}
-                    >
-                      <MenuItem value="all">{t('All locations')}</MenuItem>
-                      <MenuItem value="seoul">Seoul</MenuItem>
-                      <MenuItem value="busan">Busan</MenuItem>
-                      <MenuItem value="daegu">Daegu</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} sm={6} md={2}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>{t('New and used')}</InputLabel>
-                    <Select
-                      value={condition}
-                      label={t('New and used')}
-                      onChange={(e) => setCondition(e.target.value)}
-                    >
-                      <MenuItem value="all">{t('Any')}</MenuItem>
-                      <MenuItem value="new">New</MenuItem>
-                      <MenuItem value="used">Used</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} sm={6} md={2}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>{t('Price min')}</InputLabel>
-                    <Select
-                      value={priceMin}
-                      label={t('Price min')}
-                      onChange={(e) => setPriceMin(e.target.value)}
-                    >
-                      <MenuItem value="">{t('Any')}</MenuItem>
-                      <MenuItem value="1000">$1,000</MenuItem>
-                      <MenuItem value="5000">$5,000</MenuItem>
-                      <MenuItem value="10000">$10,000</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} sm={6} md={2}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>{t('Price max')}</InputLabel>
-                    <Select
-                      value={priceMax}
-                      label={t('Price max')}
-                      onChange={(e) => setPriceMax(e.target.value)}
-                    >
-                      <MenuItem value="">{t('Any')}</MenuItem>
-                      <MenuItem value="5000">$5,000</MenuItem>
-                      <MenuItem value="10000">$10,000</MenuItem>
-                      <MenuItem value="20000">$20,000</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <Button
-                    variant="text"
-                    color="error"
-                    onClick={handleClearAll}
-                    sx={{ textTransform: 'none' }}
-                  >
-                    {t('Clear all')}
-                  </Button>
+                <Grid item xs={12}>
+                  <Box>
+                    <Typography variant="body2" gutterBottom>
+                      {t('Price Range')}: {formatPrice(priceRange[0])} - {formatPrice(priceRange[1])}
+                    </Typography>
+                    <Slider
+                      value={priceRange}
+                      onChange={(_, value) => setPriceRange(value as [number, number])}
+                      valueLabelDisplay="auto"
+                      min={0}
+                      max={50000000}
+                      step={1000000}
+                      valueLabelFormat={(value) => formatPrice(value)}
+                    />
+                  </Box>
                 </Grid>
               </Grid>
             </CardContent>
           </Card>
 
-          {/* Bike Categories */}
-          <Paper
-            sx={{
-              padding: 3,
-              borderRadius: 3,
-              backgroundColor: 'rgba(255, 255, 255, 0.95)',
-              backdropFilter: 'blur(10px)',
-            }}
-          >
-            <Grid container spacing={2}>
-              {bikeCategories.map((categoryItem) => (
-                <Grid item xs={6} sm={4} md={3} lg={1.7} key={categoryItem.name}>
-                  <Box
-                    onClick={() => {
-                      setCategory(categoryItem.name);
-                      // 카테고리 선택 시 자동으로 검색 결과 확인
-                    }}
-                    sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      cursor: 'pointer',
-                      padding: 1,
-                      borderRadius: 2,
-                      transition: 'all 0.2s',
-                      backgroundColor: category === categoryItem.name ? 'rgba(25, 118, 210, 0.1)' : 'transparent',
-                      border: category === categoryItem.name ? '2px solid #1976d2' : '2px solid transparent',
-                      '&:hover': {
-                        backgroundColor: 'rgba(0, 0, 0, 0.05)',
-                        transform: 'translateY(-2px)',
-                      },
-                    }}
-                  >
-                    <Box
-                      component="img"
-                      src={categoryItem.image}
-                      alt={categoryItem.name}
-                      sx={{
-                        width: 60,
-                        height: 60,
-                        objectFit: 'contain',
-                        marginBottom: 1,
-                      }}
-                    />
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        textAlign: 'center',
-                        fontWeight: 500,
-                        color: category === categoryItem.name ? '#1976d2' : '#333',
-                      }}
-                    >
-                      {categoryItem.name}
-                    </Typography>
-                  </Box>
-                </Grid>
-              ))}
-            </Grid>
-          </Paper>
+
         </Container>
       </Box>
     </Box>
