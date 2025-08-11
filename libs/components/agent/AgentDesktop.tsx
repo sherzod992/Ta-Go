@@ -56,7 +56,7 @@ import {
 } from '@mui/icons-material';
 import { useTranslation } from 'next-i18next';
 import { useQuery } from '@apollo/client';
-import { GET_AGENTS } from '../../../apollo/user/query';
+import { GET_AGENTS, GET_MEMBER_PROPERTY_STATS } from '../../../apollo/user/query';
 import { PropertyLocation, PropertyType } from '../../enums/property.enum';
 import { MemberType } from '../../enums/member.enum';
 
@@ -87,6 +87,15 @@ const AgentDesktop: React.FC = () => {
     errorPolicy: 'all',
   });
 
+  // 각 agent의 매물 통계 정보를 가져오는 쿼리들
+  const agentIds = data?.getAgents?.list?.map((agent: any) => agent._id) || [];
+  
+  const { data: statsData } = useQuery(GET_MEMBER_PROPERTY_STATS, {
+    variables: { memberId: agentIds[0] || '' },
+    skip: agentIds.length === 0,
+    errorPolicy: 'all',
+  });
+
   // 에이전트 데이터 처리
   const agents = useMemo(() => {
     if (!data?.getAgents?.list) return [];
@@ -108,10 +117,10 @@ const AgentDesktop: React.FC = () => {
         filteredAgents.sort((a: any, b: any) => (b.memberRank || 0) - (a.memberRank || 0));
         break;
       case 'property-count':
-        filteredAgents.sort((a: any, b: any) => (Array.isArray(b.memberProperties) ? b.memberProperties.length : 0) - (Array.isArray(a.memberProperties) ? a.memberProperties.length : 0));
+        filteredAgents.sort((a: any, b: any) => (b.memberProperties?.length || 0) - (a.memberProperties?.length || 0));
         break;
       case 'follower-count':
-        filteredAgents.sort((a: any, b: any) => (Array.isArray(b.memberFollowers) ? b.memberFollowers.length : 0) - (Array.isArray(a.memberFollowers) ? a.memberFollowers.length : 0));
+        filteredAgents.sort((a: any, b: any) => (b.memberFollowers?.length || 0) - (a.memberFollowers?.length || 0));
         break;
       case 'name':
         filteredAgents.sort((a: any, b: any) => (a.memberFullName || '').localeCompare(b.memberFullName || ''));
@@ -133,9 +142,9 @@ const AgentDesktop: React.FC = () => {
   };
 
   const getAgentScore = (agent: any) => {
-    const propertyCount = Array.isArray(agent.memberProperties) ? agent.memberProperties.length : 0;
-    const articleCount = Array.isArray(agent.memberArticles) ? agent.memberArticles.length : 0;
-    const followerCount = Array.isArray(agent.memberFollowers) ? agent.memberFollowers.length : 0;
+    const propertyCount = agent.memberProperties?.length || 0;
+    const articleCount = agent.memberArticles?.length || 0;
+    const followerCount = agent.memberFollowers?.length || 0;
     const likeCount = agent.memberLikes || 0;
     const viewCount = agent.memberViews || 0;
     
@@ -336,11 +345,11 @@ const AgentDesktop: React.FC = () => {
                         </Box>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <BikeIcon />
-                          <Typography variant="body1">매물 {Array.isArray(agent.memberProperties) ? agent.memberProperties.length : 0}개</Typography>
+                          <Typography variant="body1">매물 {agent.memberProperties?.length || 0}개</Typography>
                         </Box>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <PersonIcon />
-                          <Typography variant="body1">팔로워 {Array.isArray(agent.memberFollowers) ? agent.memberFollowers.length : 0}명</Typography>
+                          <Typography variant="body1">팔로워 {agent.memberFollowers?.length || 0}명</Typography>
                         </Box>
                       </Box>
 
@@ -460,7 +469,7 @@ const AgentDesktop: React.FC = () => {
                     <Grid item xs={6}>
                       <Box sx={{ textAlign: 'center', p: 3, border: 1, borderColor: 'divider', borderRadius: 2 }}>
                         <Typography variant="h4" color="primary">
-                          {Array.isArray(selectedAgent.memberProperties) ? selectedAgent.memberProperties.length : 0}
+                          {selectedAgent.memberProperties?.length || 0}
                         </Typography>
                         <Typography variant="body1">등록 매물</Typography>
                       </Box>
@@ -468,7 +477,7 @@ const AgentDesktop: React.FC = () => {
                     <Grid item xs={6}>
                       <Box sx={{ textAlign: 'center', p: 3, border: 1, borderColor: 'divider', borderRadius: 2 }}>
                         <Typography variant="h4" color="primary">
-                          {Array.isArray(selectedAgent.memberFollowers) ? selectedAgent.memberFollowers.length : 0}
+                          {selectedAgent.memberFollowers?.length || 0}
                         </Typography>
                         <Typography variant="body1">팔로워</Typography>
                       </Box>
@@ -476,7 +485,7 @@ const AgentDesktop: React.FC = () => {
                     <Grid item xs={6}>
                       <Box sx={{ textAlign: 'center', p: 3, border: 1, borderColor: 'divider', borderRadius: 2 }}>
                         <Typography variant="h4" color="primary">
-                          {Array.isArray(selectedAgent.memberArticles) ? selectedAgent.memberArticles.length : 0}
+                          {selectedAgent.memberArticles?.length || 0}
                         </Typography>
                         <Typography variant="body1">게시글</Typography>
                       </Box>

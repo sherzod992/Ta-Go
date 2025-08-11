@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from '@apollo/client';
 import {
   Box,
@@ -29,6 +29,7 @@ import {
   AccordionSummary,
   AccordionDetails,
   CircularProgress,
+  Skeleton,
 } from '@mui/material';
 import {
   LocationOn as LocationIcon,
@@ -54,7 +55,7 @@ import {
   TransmissionType,
   ConditionType,
 } from '../../enums/property.enum';
-import { GET_PROPERTY } from '../../../apollo/user/query';
+import { GET_PROPERTY, GET_MEMBER, GET_MEMBER_PROPERTIES, GET_MEMBER_PROPERTY_STATS } from '../../../apollo/user/query';
 
 // 하드코드된 매물 상세 데이터
 const mockPropertyDetail = {
@@ -171,10 +172,53 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) => {
 
   const property = data?.getProperty;
   
+  // memberData가 없을 때 별도로 member 정보 가져오기
+  const { data: memberData, loading: memberLoading } = useQuery(GET_MEMBER, {
+    variables: { input: property?.memberId || '' },
+    skip: !property?.memberId || !!property?.memberData,
+    fetchPolicy: 'cache-and-network',
+  });
+
+  // 판매자 정보 (memberData가 있으면 사용, 없으면 별도 쿼리 결과 사용)
+  const sellerInfo = property?.memberData || memberData?.getMember;
+
+  // 판매자의 매물 통계 정보 가져오기
+  const { data: propertyStats, loading: statsLoading } = useQuery(GET_MEMBER_PROPERTY_STATS, {
+    variables: { memberId: sellerInfo?._id || '' },
+    skip: !sellerInfo?._id,
+    fetchPolicy: 'cache-and-network',
+  });
+
+  // 판매자의 다른 매물 목록 가져오기 (최대 4개)
+  const { data: otherProperties, loading: otherPropertiesLoading } = useQuery(GET_MEMBER_PROPERTIES, {
+    variables: { 
+      targetMemberId: sellerInfo?._id || '', 
+      page: 1, 
+      limit: 4 
+    },
+    skip: !sellerInfo?._id,
+    fetchPolicy: 'cache-and-network',
+  });
+
+  // 매물 통계 정보
+  const stats = propertyStats?.getMemberPropertyStats;
+  
+  // 디버깅을 위한 로그
+  console.log('Property data:', property);
+  console.log('Member data:', property?.memberData);
+  console.log('Seller info:', sellerInfo);
+  console.log('Property stats:', stats);
+  console.log('Other properties:', otherProperties?.getMemberProperties?.list);
+  
   const [selectedImage, setSelectedImage] = useState(0);
-  const [isFavorite, setIsFavorite] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(Boolean(property?.meLiked) || false);
   const [contactDialogOpen, setContactDialogOpen] = useState(false);
   const [tabValue, setTabValue] = useState(0);
+
+  // 좋아요 상태 업데이트
+  useEffect(() => {
+    setIsFavorite(Boolean(property?.meLiked) || false);
+  }, [property?.meLiked]);
   const [contactForm, setContactForm] = useState({
     name: '',
     phone: '',
@@ -358,25 +402,136 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) => {
 
             <Divider sx={{ my: 2 }} />
 
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="h6" gutterBottom>
+            {/* 판매자 정보 카드 */}
+            <Card sx={{ mb: 3, p: 2 }}>
+              <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
                 판매자 정보
               </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <Typography variant="body1" sx={{ mr: 1 }}>
-                  {property.memberData?.memberFullName || property.memberData?.memberNick || '판매자'}
-                </Typography>
-                <Rating value={4.5} size="small" readOnly />
-                <Typography variant="body2" sx={{ ml: 1 }}>
-                  (15개 리뷰)
-                </Typography>
+              
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Box sx={{ 
+                  width: 60, 
+                  height: 60, 
+                  borderRadius: '50%', 
+                  backgroundColor: 'primary.main',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white',
+                  fontSize: '1.5rem',
+                  fontWeight: 'bold',
+                  mr: 2
+                }}>
+                  {sellerInfo?.memberFullName?.charAt(0) || 
+                   sellerInfo?.memberNick?.charAt(0) || '판'}
+                </Box>
+                <Box sx={{ flex: 1 }}>
+                  <Typography variant="h6" gutterBottom>
+                    {sellerInfo?.memberFullName || sellerInfo?.memberNick || '판매자'}
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                    <Rating value={4.5} size="small" readOnly />
+                    <Typography variant="body2" sx={{ ml: 1 }}>
+                      4.5 (15개 리뷰)
+                    </Typography>
+                  </Box>
+                  <Typography variant="body2" color="text.secondary">
+                    {sellerInfo?.memberAddress || '위치 정보 없음'}
+                  </Typography>
+                </Box>
               </Box>
-              {property.memberData?.memberPhone && (
-                <Typography variant="body2" color="text.secondary">
-                  연락처: {property.memberData.memberPhone}
-                </Typography>
+
+              <Grid container spacing={2} sx={{ mb: 2 }}>
+                <Grid item xs={6}>
+                  <Box sx={{ textAlign: 'center', p: 2, border: 1, borderColor: 'divider', borderRadius: 1 }}>
+                    {statsLoading ? (
+                      <Skeleton variant="text" width="60%" height={32} />
+                    ) : (
+                      <Typography variant="h6" color="primary">
+                        {stats?.activeProperties || 0}
+                      </Typography>
+                    )}
+                    <Typography variant="body2">활성 매물</Typography>
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ textAlign: 'center', p: 2, border: 1, borderColor: 'divider', borderRadius: 1 }}>
+                    {statsLoading ? (
+                      <Skeleton variant="text" width="60%" height={32} />
+                    ) : (
+                      <Typography variant="h6" color="primary">
+                        {stats?.totalViews || 0}
+                      </Typography>
+                    )}
+                    <Typography variant="body2">총 조회수</Typography>
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ textAlign: 'center', p: 2, border: 1, borderColor: 'divider', borderRadius: 1 }}>
+                    {statsLoading ? (
+                      <Skeleton variant="text" width="60%" height={32} />
+                    ) : (
+                      <Typography variant="h6" color="primary">
+                        {stats?.totalLikes || 0}
+                      </Typography>
+                    )}
+                    <Typography variant="body2">총 좋아요</Typography>
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ textAlign: 'center', p: 2, border: 1, borderColor: 'divider', borderRadius: 1 }}>
+                    {statsLoading ? (
+                      <Skeleton variant="text" width="60%" height={32} />
+                    ) : (
+                      <Typography variant="h6" color="primary">
+                        {stats?.soldProperties || 0}
+                      </Typography>
+                    )}
+                    <Typography variant="body2">판매 완료</Typography>
+                  </Box>
+                </Grid>
+              </Grid>
+
+              {sellerInfo?.memberPhone && (
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                  <PhoneIcon sx={{ mr: 1, color: 'text.secondary' }} />
+                  <Typography variant="body2">
+                    {sellerInfo.memberPhone}
+                  </Typography>
+                </Box>
               )}
-            </Box>
+              
+              {sellerInfo?.memberEmail && (
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                  <EmailIcon sx={{ mr: 1, color: 'text.secondary' }} />
+                  <Typography variant="body2">
+                    {sellerInfo.memberEmail}
+                  </Typography>
+                </Box>
+              )}
+
+              {sellerInfo?.memberDesc && (
+                <Box sx={{ mt: 2, p: 2, backgroundColor: 'grey.50', borderRadius: 1 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    {sellerInfo.memberDesc}
+                  </Typography>
+                </Box>
+              )}
+
+              <Box sx={{ mt: 2 }}>
+                <Button
+                  variant="outlined"
+                  fullWidth
+                  startIcon={<BikeIcon />}
+                  onClick={() => {
+                    // 판매자의 다른 매물 페이지로 이동
+                    window.open(`/property?memberId=${sellerInfo?._id}`, '_blank');
+                  }}
+                >
+                  판매자의 다른 매물 보기
+                </Button>
+              </Box>
+            </Card>
 
             <Box sx={{ display: 'flex', gap: 2 }}>
               <Button
@@ -409,6 +564,7 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) => {
           <Tab label="제원" />
           <Tab label="정비이력" />
           <Tab label="특징" />
+          <Tab label="판매자 매물" icon={<BikeIcon />} iconPosition="start" />
         </Tabs>
 
         <TabPanel value={tabValue} index={0}>
@@ -521,18 +677,144 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) => {
             </Typography>
           </Alert>
 
-          <Box sx={{ textAlign: 'center', py: 4 }}>
-            <PhoneIcon sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
+          {/* 판매자 상세 정보 */}
+          <Card sx={{ p: 3, mb: 3 }}>
             <Typography variant="h6" gutterBottom>
-              판매자 연락처
+              판매자 상세 정보
             </Typography>
-            <Typography variant="h5" color="primary" gutterBottom>
-              {property.memberData?.memberPhone || '연락처 정보 없음'}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {property.memberData?.memberFullName || property.memberData?.memberNick || '판매자'}
-            </Typography>
-          </Box>
+            
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={6}>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <Box sx={{ 
+                    width: 80, 
+                    height: 80, 
+                    borderRadius: '50%', 
+                    backgroundColor: 'primary.main',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'white',
+                    fontSize: '2rem',
+                    fontWeight: 'bold',
+                    mr: 3
+                  }}>
+                    {sellerInfo?.memberFullName?.charAt(0) || 
+                     sellerInfo?.memberNick?.charAt(0) || '판'}
+                  </Box>
+                  <Box>
+                    <Typography variant="h5" gutterBottom>
+                      {sellerInfo?.memberFullName || sellerInfo?.memberNick || '판매자'}
+                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                      <Rating value={4.5} readOnly />
+                      <Typography variant="body2" sx={{ ml: 1 }}>
+                        4.5 (15개 리뷰)
+                      </Typography>
+                    </Box>
+                    <Typography variant="body2" color="text.secondary">
+                      {sellerInfo?.memberAddress || '위치 정보 없음'}
+                    </Typography>
+                  </Box>
+                </Box>
+              </Grid>
+              
+              <Grid item xs={12} md={6}>
+                <Grid container spacing={2}>
+                  <Grid item xs={6}>
+                    <Box sx={{ textAlign: 'center', p: 2, border: 1, borderColor: 'divider', borderRadius: 1 }}>
+                      <Typography variant="h4" color="primary">
+                        {stats?.activeProperties || 0}
+                      </Typography>
+                      <Typography variant="body2">활성 매물</Typography>
+                    </Box>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Box sx={{ textAlign: 'center', p: 2, border: 1, borderColor: 'divider', borderRadius: 1 }}>
+                      <Typography variant="h4" color="primary">
+                        {stats?.totalViews || 0}
+                      </Typography>
+                      <Typography variant="body2">총 조회수</Typography>
+                    </Box>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Box sx={{ textAlign: 'center', p: 2, border: 1, borderColor: 'divider', borderRadius: 1 }}>
+                      <Typography variant="h4" color="primary">
+                        {stats?.totalLikes || 0}
+                      </Typography>
+                      <Typography variant="body2">총 좋아요</Typography>
+                    </Box>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Box sx={{ textAlign: 'center', p: 2, border: 1, borderColor: 'divider', borderRadius: 1 }}>
+                      <Typography variant="h4" color="primary">
+                        {stats?.soldProperties || 0}
+                      </Typography>
+                      <Typography variant="body2">판매 완료</Typography>
+                    </Box>
+                  </Grid>
+                </Grid>
+              </Grid>
+            </Grid>
+
+            {sellerInfo?.memberDesc && (
+              <Box sx={{ mt: 3, p: 3, backgroundColor: 'grey.50', borderRadius: 1 }}>
+                <Typography variant="h6" gutterBottom>
+                  판매자 소개
+                </Typography>
+                <Typography variant="body1">
+                  {sellerInfo.memberDesc}
+                </Typography>
+              </Box>
+            )}
+
+            <Box sx={{ mt: 3, textAlign: 'center' }}>
+              <Typography variant="h6" gutterBottom>
+                연락처 정보
+              </Typography>
+              <Box sx={{ display: 'flex', justifyContent: 'center', gap: 3, mb: 2 }}>
+                {sellerInfo?.memberPhone && (
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <PhoneIcon sx={{ mr: 1, color: 'primary.main' }} />
+                    <Typography variant="h6" color="primary">
+                      {sellerInfo.memberPhone}
+                    </Typography>
+                  </Box>
+                )}
+                {sellerInfo?.memberEmail && (
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <EmailIcon sx={{ mr: 1, color: 'primary.main' }} />
+                    <Typography variant="h6" color="primary">
+                      {sellerInfo.memberEmail}
+                    </Typography>
+                  </Box>
+                )}
+              </Box>
+              
+              <Button
+                variant="contained"
+                color="primary"
+                size="large"
+                startIcon={<BikeIcon />}
+                onClick={() => {
+                  window.open(`/property?memberId=${sellerInfo?._id}`, '_blank');
+                }}
+                sx={{ mr: 2 }}
+              >
+                판매자의 다른 매물 보기
+              </Button>
+              
+              <Button
+                variant="outlined"
+                color="primary"
+                size="large"
+                startIcon={<PhoneIcon />}
+                onClick={() => setContactDialogOpen(true)}
+              >
+                판매자에게 연락하기
+              </Button>
+            </Box>
+          </Card>
         </TabPanel>
 
         <TabPanel value={tabValue} index={3}>
@@ -557,23 +839,321 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) => {
           </Grid>
 
           <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
-            추가 정보
-          </Typography>
-          <Typography variant="body2" color="text.secondary" paragraph>
-            상세한 구매 혜택 및 추가 정보는 판매자에게 연락하세요.
+            판매자 신뢰도
           </Typography>
           
-          <Box sx={{ textAlign: 'center', py: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              판매자 연락처
-            </Typography>
-            <Typography variant="h5" color="primary" gutterBottom>
-              {property.memberData?.memberPhone || '연락처 정보 없음'}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {property.memberData?.memberFullName || property.memberData?.memberNick || '판매자'}
-            </Typography>
-          </Box>
+          {statsLoading ? (
+            <Grid container spacing={2} sx={{ mb: 3 }}>
+              {[1, 2, 3, 4].map((item) => (
+                <Grid item xs={12} sm={6} md={3} key={item}>
+                  <Card sx={{ p: 2, textAlign: 'center' }}>
+                    <Skeleton variant="text" width="60%" height={48} />
+                    <Skeleton variant="text" width="40%" height={20} />
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          ) : (
+            <Grid container spacing={2} sx={{ mb: 3 }}>
+              <Grid item xs={12} sm={6} md={3}>
+                <Card sx={{ p: 2, textAlign: 'center' }}>
+                  <Typography variant="h4" color="primary">
+                    {stats?.activeProperties || 0}
+                  </Typography>
+                  <Typography variant="body2">활성 매물</Typography>
+                </Card>
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <Card sx={{ p: 2, textAlign: 'center' }}>
+                  <Typography variant="h4" color="primary">
+                    {stats?.totalViews || 0}
+                  </Typography>
+                  <Typography variant="body2">총 조회수</Typography>
+                </Card>
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <Card sx={{ p: 2, textAlign: 'center' }}>
+                  <Typography variant="h4" color="primary">
+                    {stats?.totalLikes || 0}
+                  </Typography>
+                  <Typography variant="body2">총 좋아요</Typography>
+                </Card>
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <Card sx={{ p: 2, textAlign: 'center' }}>
+                  <Typography variant="h4" color="primary">
+                    {stats?.soldProperties || 0}
+                  </Typography>
+                  <Typography variant="body2">판매 완료</Typography>
+                </Card>
+              </Grid>
+            </Grid>
+          )}
+
+          {stats && (
+            <Alert severity="info" sx={{ mb: 3 }}>
+              <Typography variant="body2">
+                <strong>매물 통계:</strong> 총 {stats.totalProperties}개의 매물을 등록했으며, 
+                {stats.activeProperties}개가 현재 활성 상태입니다. 
+                총 {stats.totalViews}회 조회되었고 {stats.totalLikes}개의 좋아요를 받았습니다.
+              </Typography>
+            </Alert>
+          )}
+
+          {stats && (
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="h6" gutterBottom>
+                매물 통계 요약
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <Paper sx={{ p: 2, textAlign: 'center' }}>
+                    <Typography variant="h5" color="primary">
+                      {stats.totalProperties}
+                    </Typography>
+                    <Typography variant="body2">총 등록 매물</Typography>
+                  </Paper>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Paper sx={{ p: 2, textAlign: 'center' }}>
+                    <Typography variant="h5" color="success.main">
+                      {stats.activeProperties}
+                    </Typography>
+                    <Typography variant="body2">현재 활성 매물</Typography>
+                  </Paper>
+                </Grid>
+              </Grid>
+            </Box>
+          )}
+
+          <Typography variant="h6" gutterBottom>
+            판매자 소개
+          </Typography>
+          {sellerInfo?.memberDesc ? (
+            <Card sx={{ p: 3, mb: 3 }}>
+              <Typography variant="body1">
+                {sellerInfo.memberDesc}
+              </Typography>
+            </Card>
+          ) : (
+            <Alert severity="info" sx={{ mb: 3 }}>
+              <Typography variant="body2">
+                판매자 소개 정보가 없습니다. 연락처로 문의해주세요.
+              </Typography>
+            </Alert>
+          )}
+
+          <Typography variant="h6" gutterBottom>
+            연락처 정보
+          </Typography>
+          <Card sx={{ p: 3, textAlign: 'center' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 4, mb: 3 }}>
+              {sellerInfo?.memberPhone && (
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <PhoneIcon sx={{ mr: 1, color: 'primary.main', fontSize: '2rem' }} />
+                  <Box>
+                    <Typography variant="h6" color="primary">
+                      {sellerInfo.memberPhone}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      전화번호
+                    </Typography>
+                  </Box>
+                </Box>
+              )}
+              {sellerInfo?.memberEmail && (
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <EmailIcon sx={{ mr: 1, color: 'primary.main', fontSize: '2rem' }} />
+                  <Box>
+                    <Typography variant="h6" color="primary">
+                      {sellerInfo.memberEmail}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      이메일
+                    </Typography>
+                  </Box>
+                </Box>
+              )}
+            </Box>
+            
+            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
+              <Button
+                variant="contained"
+                color="primary"
+                size="large"
+                startIcon={<BikeIcon />}
+                onClick={() => {
+                  window.open(`/property?memberId=${sellerInfo?._id}`, '_blank');
+                }}
+              >
+                판매자의 다른 매물 보기
+              </Button>
+              
+              <Button
+                variant="outlined"
+                color="primary"
+                size="large"
+                startIcon={<PhoneIcon />}
+                onClick={() => setContactDialogOpen(true)}
+              >
+                판매자에게 연락하기
+              </Button>
+            </Box>
+          </Card>
+        </TabPanel>
+
+        <TabPanel value={tabValue} index={4}>
+          <Typography variant="h6" gutterBottom>
+            판매자의 다른 매물 ({otherProperties?.getMemberProperties?.metaCounter?.total || 0}개)
+          </Typography>
+          
+          {otherPropertiesLoading ? (
+            <Grid container spacing={3}>
+              {[1, 2, 3, 4].map((item) => (
+                <Grid item xs={12} sm={6} md={3} key={item}>
+                  <Card sx={{ height: '100%' }}>
+                    <Skeleton variant="rectangular" height={200} />
+                    <CardContent sx={{ p: 2 }}>
+                      <Skeleton variant="text" width="80%" height={24} />
+                      <Skeleton variant="text" width="60%" height={32} />
+                      <Skeleton variant="text" width="70%" height={20} />
+                      <Skeleton variant="text" width="50%" height={20} />
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+                      ) : otherProperties?.getMemberProperties?.list?.length > 0 ? (
+              <Grid container spacing={3}>
+                {otherProperties.getMemberProperties.list
+                  .filter((otherProperty: any) => otherProperty._id !== property?._id) // 현재 매물 제외
+                  .slice(0, 4) // 최대 4개만 표시
+                  .map((otherProperty: any) => (
+                  <Grid item xs={12} sm={6} md={3} key={otherProperty._id}>
+                    <Card sx={{ 
+                      height: 400, 
+                      cursor: 'pointer', 
+                      transition: 'all 0.3s ease', 
+                      boxShadow: 2,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      borderRadius: 2,
+                      overflow: 'hidden',
+                      '&:hover': { 
+                        transform: 'translateY(-4px)',
+                        boxShadow: 6
+                      } 
+                    }} onClick={() => {
+                      window.open(`/property/${otherProperty._id}`, '_blank');
+                    }}>
+                      <CardMedia
+                        component="img"
+                        height="200"
+                        image={otherProperty.propertyImages?.[0] || '/img/typeImages/type1.png'}
+                        alt={otherProperty.propertyTitle}
+                        sx={{ 
+                          objectFit: 'cover',
+                          position: 'relative',
+                          transition: 'transform 0.3s ease',
+                          '&:hover': {
+                            transform: 'scale(1.05)'
+                          }
+                        }}
+                      />
+                                              <CardContent sx={{ p: 2, display: 'flex', flexDirection: 'column', flex: 1 }}>
+                          <Typography variant="h6" noWrap gutterBottom sx={{ fontWeight: 'bold' }}>
+                            {otherProperty.propertyTitle}
+                          </Typography>
+                          <Typography variant="h5" color="primary" gutterBottom sx={{ fontWeight: 'bold' }}>
+                            {formatPrice(otherProperty.propertyPrice)}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary" gutterBottom sx={{ fontWeight: 'medium' }}>
+                            {otherProperty.propertyBrand} {otherProperty.propertyModel}
+                          </Typography>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1, p: 1, backgroundColor: 'grey.50', borderRadius: 1 }}>
+                          <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 'medium' }}>
+                            {otherProperty.propertyYear}년
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 'medium' }}>
+                            {formatMileage(otherProperty.propertyMileage)}
+                          </Typography>
+                        </Box>
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 1, display: 'flex', alignItems: 'center' }}>
+                          <LocationIcon sx={{ mr: 0.5, fontSize: '1rem' }} />
+                          {otherProperty.propertyLocation}
+                        </Typography>
+                        <Box sx={{ mt: 1 }}>
+                          <Chip 
+                            label={otherProperty.propertyStatus === 'ACTIVE' ? '판매중' : '판매완료'} 
+                            size="small" 
+                            color={otherProperty.propertyStatus === 'ACTIVE' ? 'primary' : 'default'}
+                            sx={{ 
+                              fontWeight: 'bold',
+                              '& .MuiChip-label': {
+                                px: 1
+                              }
+                            }}
+                          />
+                        </Box>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1, p: 1, backgroundColor: 'grey.50', borderRadius: 1 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Typography variant="body2" color="text.secondary" sx={{ mr: 1, fontWeight: 'medium' }}>
+                              👁️ {otherProperty.propertyViews || 0}
+                            </Typography>
+                          </Box>
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <IconButton size="small" disabled>
+                              {Boolean(otherProperty.meLiked) ? <FavoriteIcon color="error" fontSize="small" /> : <FavoriteBorderIcon fontSize="small" />}
+                            </IconButton>
+                            <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 'medium' }}>
+                              {otherProperty.propertyLikes || 0}
+                            </Typography>
+                          </Box>
+                        </Box>
+                        <Typography variant="caption" color="text.secondary" sx={{ mt: 'auto', display: 'block', textAlign: 'center', pt: 1, borderTop: 1, borderColor: 'divider', fontWeight: 'medium' }}>
+                          📅 {new Date(otherProperty.createdAt).toLocaleDateString('ko-KR')}
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                ))}
+            </Grid>
+          ) : (
+            <Alert severity="info" sx={{ mt: 2 }}>
+              <Typography variant="body2">
+                {otherProperties?.getMemberProperties?.list?.filter((p: any) => p._id !== property?._id).length === 0 
+                  ? '이 판매자의 다른 매물이 아직 없습니다. 첫 번째 매물을 구매해보세요! 🏍️' 
+                  : '현재 표시할 다른 매물이 없습니다. 곧 새로운 매물이 등록될 예정입니다! 🚀'}
+              </Typography>
+            </Alert>
+          )}
+
+          {otherProperties?.getMemberProperties?.metaCounter?.total > 4 && (
+            <Box sx={{ textAlign: 'center', mt: 3 }}>
+              <Button
+                variant="contained"
+                color="primary"
+                size="large"
+                startIcon={<BikeIcon />}
+                onClick={() => {
+                  window.open(`/property?memberId=${sellerInfo?._id}`, '_blank');
+                }}
+                sx={{ 
+                  px: 4, 
+                  py: 1.5,
+                  borderRadius: 2,
+                  boxShadow: 2,
+                  '&:hover': {
+                    boxShadow: 4,
+                    transform: 'translateY(-2px)'
+                  },
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                모든 매물 보기 ({otherProperties.getMemberProperties.metaCounter.total}개)
+              </Button>
+            </Box>
+          )}
         </TabPanel>
       </Paper>
 

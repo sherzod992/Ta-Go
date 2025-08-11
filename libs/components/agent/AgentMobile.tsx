@@ -107,10 +107,10 @@ const AgentMobile: React.FC = () => {
         filteredAgents.sort((a: any, b: any) => (b.memberRank || 0) - (a.memberRank || 0));
         break;
       case 'property-count':
-        filteredAgents.sort((a: any, b: any) => (Array.isArray(b.memberProperties) ? b.memberProperties.length : 0) - (Array.isArray(a.memberProperties) ? a.memberProperties.length : 0));
+        filteredAgents.sort((a: any, b: any) => (b.memberProperties?.length || 0) - (a.memberProperties?.length || 0));
         break;
       case 'follower-count':
-        filteredAgents.sort((a: any, b: any) => (Array.isArray(b.memberFollowers) ? b.memberFollowers.length : 0) - (Array.isArray(a.memberFollowers) ? a.memberFollowers.length : 0));
+        filteredAgents.sort((a: any, b: any) => (b.memberFollowers?.length || 0) - (a.memberFollowers?.length || 0));
         break;
       case 'name':
         filteredAgents.sort((a: any, b: any) => (a.memberFullName || '').localeCompare(b.memberFullName || ''));
@@ -132,9 +132,9 @@ const AgentMobile: React.FC = () => {
   };
 
   const getAgentScore = (agent: any) => {
-    const propertyCount = Array.isArray(agent.memberProperties) ? agent.memberProperties.length : 0;
-    const articleCount = Array.isArray(agent.memberArticles) ? agent.memberArticles.length : 0;
-    const followerCount = Array.isArray(agent.memberFollowers) ? agent.memberFollowers.length : 0;
+    const propertyCount = agent.memberProperties?.length || 0;
+    const articleCount = agent.memberArticles?.length || 0;
+    const followerCount = agent.memberFollowers?.length || 0;
     const likeCount = agent.memberLikes || 0;
     const viewCount = agent.memberViews || 0;
     
@@ -288,11 +288,11 @@ const AgentMobile: React.FC = () => {
                     </Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                       <BikeIcon sx={{ fontSize: 'small' }} />
-                      <Typography variant="body2">매물 {Array.isArray(agent.memberProperties) ? agent.memberProperties.length : 0}개</Typography>
+                                              <Typography variant="body2">매물 {agent.memberProperties?.length || 0}개</Typography>
                     </Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                       <PersonIcon sx={{ fontSize: 'small' }} />
-                      <Typography variant="body2">팔로워 {Array.isArray(agent.memberFollowers) ? agent.memberFollowers.length : 0}명</Typography>
+                                              <Typography variant="body2">팔로워 {agent.memberFollowers?.length || 0}명</Typography>
                     </Box>
                   </Box>
 
@@ -471,7 +471,7 @@ const AgentMobile: React.FC = () => {
                 <Grid item xs={6}>
                   <Box sx={{ textAlign: 'center', p: 2, border: 1, borderColor: 'divider', borderRadius: 1 }}>
                     <Typography variant="h6" color="primary">
-                      {Array.isArray(selectedAgent.memberProperties) ? selectedAgent.memberProperties.length : 0}
+                                              {selectedAgent.memberProperties?.length || 0}
                     </Typography>
                     <Typography variant="body2">등록 매물</Typography>
                   </Box>
@@ -479,7 +479,7 @@ const AgentMobile: React.FC = () => {
                 <Grid item xs={6}>
                   <Box sx={{ textAlign: 'center', p: 2, border: 1, borderColor: 'divider', borderRadius: 1 }}>
                     <Typography variant="h6" color="primary">
-                      {Array.isArray(selectedAgent.memberFollowers) ? selectedAgent.memberFollowers.length : 0}
+                                              {selectedAgent.memberFollowers?.length || 0}
                     </Typography>
                     <Typography variant="body2">팔로워</Typography>
                   </Box>

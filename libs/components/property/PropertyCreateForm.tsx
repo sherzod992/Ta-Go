@@ -36,6 +36,7 @@ import {
   TransmissionType,
   ConditionType,
 } from '../../enums/property.enum';
+import { MemberType } from '../../enums/member.enum';
 import { PropertyInput } from '../../types/property/property.input';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -316,6 +317,13 @@ const PropertyCreateForm: React.FC = () => {
   // 폼 제출 처리
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    
+    // Admin 권한 확인
+    if (user?.memberType === MemberType.ADMIN) {
+      setError('관리자 계정으로는 매물을 등록할 수 없습니다.');
+      return;
+    }
+    
     setError('');
     setSuccess('');
     setIsUploading(true);

@@ -39,11 +39,7 @@ export const GET_AGENTS = gql`
             createdAt
             updatedAt
             accessToken
-            meLiked {
-                memberId
-                likeRefId
-                myFavorite
-            }
+            meLiked
         }
         metaCounter {
             total
@@ -80,6 +76,44 @@ export const GET_MEMBER = gql`
       createdAt
       updatedAt
       accessToken
+    }
+  }
+`;
+
+export const GET_MEMBER_PROPERTIES = gql`
+  query GetMemberProperties($targetMemberId: String!, $page: Int, $limit: Int) {
+    getMemberProperties(targetMemberId: $targetMemberId, page: $page, limit: $limit) {
+      list {
+        _id
+        propertyTitle
+        propertyPrice
+        propertyBrand
+        propertyModel
+        propertyYear
+        propertyMileage
+        propertyLocation
+        propertyStatus
+        propertyViews
+        propertyLikes
+        propertyImages
+        meLiked
+        createdAt
+      }
+      metaCounter {
+        total
+      }
+    }
+  }
+`;
+
+export const GET_MEMBER_PROPERTY_STATS = gql`
+  query GetMemberPropertyStats($memberId: String!) {
+    getMemberPropertyStats(memberId: $memberId) {
+      totalProperties
+      activeProperties
+      soldProperties
+      totalViews
+      totalLikes
     }
   }
 `;
@@ -121,11 +155,40 @@ export const GET_PROPERTY = gql`
 			manufacturedAt
 			createdAt
 			updatedAt
-			meLiked {
-				memberId
-				likeRefId
-				myFavorite
+			memberData {
+				_id
+				memberType
+				memberStatus
+				memberAuthType
+				memberPhone
+				memberEmail
+				memberNick
+				memberFullName
+				memberImage
+				memberAddress
+				memberDesc
+				socialId
+				socialProvider
+				socialAccessToken
+				socialRefreshToken
+				socialTokenExpiresAt
+				memberProperties
+				memberArticles
+				memberFollowers
+				memberFollowings
+				memberPoints
+				memberLikes
+				memberViews
+				memberComments
+				memberRank
+				memberWarnings
+				memberBlocks
+				deletedAt
+				createdAt
+				updatedAt
+				accessToken
 			}
+			meLiked
 		}
 	}
 `;
@@ -197,11 +260,7 @@ export const GET_PROPERTIES = gql`
                 updatedAt
                 accessToken
             }
-            meLiked {
-                memberId
-                likeRefId
-                myFavorite
-            }
+            meLiked
         }
         metaCounter {
             total
@@ -451,11 +510,7 @@ export const GET_BOARD_ARTICLE = gql`
             createdAt
             updatedAt
             accessToken
-            meLiked {
-                memberId
-                likeRefId
-                myFavorite
-            }
+            meLiked
 		}
 	}
 }
@@ -477,11 +532,7 @@ export const GET_BOARD_ARTICLES = gql`
 				memberId
 				createdAt
 				updatedAt
-				meLiked {
-					memberId
-					likeRefId
-					myFavorite
-				}
+				meLiked
 				memberData {
 					_id
 					memberType
@@ -684,11 +735,7 @@ export const GET_MEMBER_FOLLOWINGS = gql`
 					createdAt
 					updatedAt
 					accessToken
-					meLiked {
-						memberId
-						likeRefId
-						myFavorite
-					}
+					meLiked
 					meFollowed {
 						followingId
 						followerId
