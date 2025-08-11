@@ -1,0 +1,383 @@
+/** PC AGENT STYLES **/
+
+.agent-desktop {
+  background-color: #f8f9fa;
+  min-height: 100vh;
+  padding: 2rem 0;
+
+  // 헤더 스타일
+  .MuiContainer-root {
+    .MuiBox-root:first-child {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 20px;
+      padding: 3rem 2rem;
+      margin-bottom: 3rem;
+      
+      .MuiTypography-h3 {
+        font-weight: 800;
+        margin-bottom: 1rem;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      
+      .MuiTypography-h6 {
+        opacity: 0.9;
+        font-weight: 400;
+      }
+    }
+  }
+
+  // 사이드바 필터
+  .MuiGrid-item:first-child {
+    .MuiPaper-root {
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      background: white;
+      
+      .MuiTypography-h6 {
+        color: #2c3e50;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #e3f2fd;
+      }
+      
+      .MuiTextField-root {
+        .MuiOutlinedInput-root {
+          border-radius: 12px;
+          background-color: #f8f9fa;
+          
+          &:hover {
+            background-color: #e9ecef;
+          }
+          
+          &.Mui-focused {
+            background-color: white;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+          }
+        }
+      }
+      
+      .MuiFormControl-root {
+        .MuiOutlinedInput-root {
+          border-radius: 12px;
+          background-color: #f8f9fa;
+          
+          &:hover {
+            background-color: #e9ecef;
+          }
+          
+          &.Mui-focused {
+            background-color: white;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+          }
+        }
+        
+        .MuiInputLabel-root {
+          color: #6c757d;
+          font-weight: 500;
+        }
+      }
+      
+      .MuiToggleButtonGroup-root {
+        .MuiToggleButton-root {
+          border-radius: 8px;
+          min-width: 60px;
+          height: 40px;
+          
+          &.Mui-selected {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            
+            &:hover {
+              background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // 메인 콘텐츠
+  .MuiGrid-item:last-child {
+    .agent-card {
+      border-radius: 20px;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      background: white;
+      overflow: hidden;
+      
+      &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+      }
+      
+      .MuiCardContent-root {
+        padding: 2rem;
+      }
+      
+      .agent-avatar {
+        border: 4px solid #e3f2fd;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        
+        &:hover {
+          transform: scale(1.05);
+          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+      }
+      
+      .MuiTypography-h5 {
+        font-weight: 800;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+      }
+      
+      .MuiTypography-body1 {
+        color: #6c757d;
+        line-height: 1.6;
+      }
+      
+      .MuiRating-root {
+        .MuiRating-iconFilled {
+          color: #ff9800;
+        }
+        
+        .MuiRating-iconHover {
+          color: #f57c00;
+        }
+      }
+      
+      .MuiChip-root {
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        color: #1976d2;
+        font-weight: 600;
+        border-radius: 20px;
+        padding: 8px 16px;
+        margin-right: 0.75rem;
+        margin-bottom: 0.75rem;
+        transition: all 0.3s ease;
+        
+        &:hover {
+          background: linear-gradient(135deg, #bbdefb 0%, #90caf9 100%);
+          transform: translateY(-1px);
+          box-shadow: 0 2px 8px rgba(25, 118, 210, 0.2);
+        }
+      }
+      
+      .contact-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 12px;
+        text-transform: none;
+        font-weight: 700;
+        font-size: 1rem;
+        padding: 12px 24px;
+        box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+        transition: all 0.3s ease;
+        
+        &:hover {
+          background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+          box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+          transform: translateY(-1px);
+        }
+      }
+      
+      .properties-btn {
+        border-radius: 12px;
+        text-transform: none;
+        font-weight: 600;
+        font-size: 1rem;
+        padding: 12px 24px;
+        border: 2px solid #667eea;
+        color: #667eea;
+        transition: all 0.3s ease;
+        
+        &:hover {
+          background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+          border-color: #5a6fd8;
+          color: #5a6fd8;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+      }
+    }
+  }
+
+  // 연락처 다이얼로그
+  .MuiDialog-paper {
+    border-radius: 20px;
+    overflow: hidden;
+    
+    .MuiDialogTitle-root {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      font-weight: 800;
+      font-size: 1.5rem;
+      padding: 2rem;
+    }
+    
+    .MuiDialogContent-root {
+      padding: 2rem;
+      
+      .MuiAvatar-root {
+        border: 4px solid #e3f2fd;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      }
+      
+      .MuiTypography-h4 {
+        font-weight: 800;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+      }
+      
+      .MuiListItem-root {
+        border-radius: 12px;
+        margin-bottom: 0.75rem;
+        transition: all 0.3s ease;
+        
+        &:hover {
+          background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+          transform: translateX(4px);
+        }
+        
+        .MuiListItemAvatar-root {
+          .MuiSvgIcon-root {
+            color: #667eea;
+          }
+        }
+        
+        .MuiListItemText-primary {
+          font-weight: 600;
+          color: #2c3e50;
+        }
+        
+        .MuiListItemText-secondary {
+          color: #6c757d;
+          font-size: 1rem;
+        }
+      }
+      
+      .MuiGrid-container {
+        .MuiBox-root {
+          border-radius: 16px;
+          background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+          border: 2px solid #dee2e6;
+          transition: all 0.3s ease;
+          
+          &:hover {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.2);
+          }
+          
+          .MuiTypography-h4 {
+            color: #667eea;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+          }
+          
+          .MuiTypography-body1 {
+            color: #6c757d;
+            font-weight: 500;
+          }
+        }
+      }
+    }
+    
+    .MuiDialogActions-root {
+      padding: 1.5rem 2rem;
+      background-color: #f8f9fa;
+      
+      .MuiButton-root {
+        border-radius: 12px;
+        text-transform: none;
+        font-weight: 600;
+        padding: 10px 24px;
+        
+        &.MuiButton-contained {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          
+          &:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+          }
+        }
+      }
+    }
+  }
+
+  // 빈 상태
+  .MuiBox-root:last-child {
+    .MuiTypography-h5 {
+      color: #6c757d;
+      font-weight: 700;
+    }
+    
+    .MuiTypography-body1 {
+      color: #adb5bd;
+    }
+  }
+
+  // 로딩 상태
+  .MuiCircularProgress-root {
+    color: #667eea;
+  }
+
+  // 에러 상태
+  .MuiAlert-root {
+    border-radius: 16px;
+    border: none;
+    box-shadow: 0 4px 16px rgba(220, 53, 69, 0.1);
+    
+    .MuiAlert-icon {
+      color: #dc3545;
+    }
+  }
+
+  // 반응형 조정
+  @media (max-width: 1200px) {
+    .MuiContainer-root {
+      .MuiBox-root:first-child {
+        padding: 2rem 1.5rem;
+        
+        .MuiTypography-h3 {
+          font-size: 2.5rem;
+        }
+      }
+    }
+    
+    .agent-card {
+      .MuiCardContent-root {
+        padding: 1.5rem;
+      }
+      
+      .agent-avatar {
+        width: 70px !important;
+        height: 70px !important;
+      }
+    }
+  }
+
+  @media (max-width: 960px) {
+    .MuiContainer-root {
+      .MuiBox-root:first-child {
+        padding: 1.5rem;
+        
+        .MuiTypography-h3 {
+          font-size: 2rem;
+        }
+      }
+    }
+    
+    .agent-card {
+      .MuiCardContent-root {
+        padding: 1.25rem;
+      }
+      
+      .agent-avatar {
+        width: 60px !important;
+        height: 60px !important;
+      }
+    }
+  }
+}

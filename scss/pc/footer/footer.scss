@@ -1,0 +1,77 @@
+.footer-pc {
+  background-color: #1a1a1a;
+  color: white;
+  padding: 3rem 0;
+  margin-top: auto;
+
+  .footer-content {
+    .company-info {
+      .company-name {
+        margin-bottom: 1rem;
+      }
+
+      .company-description {
+        margin-bottom: 1.5rem;
+        opacity: 0.8;
+        line-height: 1.6;
+      }
+
+      .social-links {
+        display: flex;
+        gap: 0.5rem;
+
+        .social-icon {
+          color: inherit;
+          
+          &:hover {
+            opacity: 0.8;
+            transform: scale(1.1);
+            transition: all 0.2s ease;
+          }
+        }
+      }
+    }
+
+    .footer-section {
+      .section-title {
+        margin-bottom: 1rem;
+        font-weight: 600;
+      }
+
+      .section-links {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+
+        .footer-link {
+          color: inherit;
+          text-decoration: none;
+          opacity: 0.8;
+          transition: opacity 0.2s ease;
+
+          &:hover {
+            opacity: 1;
+          }
+        }
+      }
+
+      .contact-info {
+        .contact-item {
+          opacity: 0.8;
+          margin-bottom: 0.5rem;
+        }
+      }
+    }
+  }
+
+  .footer-bottom {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    text-align: center;
+
+    .copyright {
+      opacity: 0.6;
+    }
+  }
+}

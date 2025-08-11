@@ -3,10 +3,17 @@ import { NextPage } from 'next';
 import { GetServerSideProps } from 'next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import withLayoutBasic from '../../libs/components/layout/LayoutBasic';
-import AgentList from '../../libs/components/agent/AgentList';
+import useDeviceDetect from '../../libs/hooks/useDeviceDetect';
+import AgentMobile from '../../libs/components/agent/AgentMobile';
+import AgentDesktop from '../../libs/components/agent/AgentDesktop';
 
 const AgentPage: NextPage = () => {
-  return <AgentList />;
+  const device = useDeviceDetect();
+
+  if (device === 'mobile') {
+    return <AgentMobile />;
+  }
+  return <AgentDesktop />;
 };
 
 export const getServerSideProps: GetServerSideProps = async ({ locale }) => {

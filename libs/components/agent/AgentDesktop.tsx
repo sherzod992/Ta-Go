@@ -1,0 +1,518 @@
+import React, { useState, useMemo } from 'react';
+import {
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  CardMedia,
+  Grid,
+  Chip,
+  Button,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Rating,
+  Avatar,
+  Paper,
+  Divider,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemAvatar,
+  Badge,
+  ToggleButton,
+  ToggleButtonGroup,
+  Container,
+  Stack,
+  Alert,
+  CircularProgress,
+  Slider,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+} from '@mui/material';
+import {
+  Search as SearchIcon,
+  FilterList as FilterIcon,
+  Phone as PhoneIcon,
+  Email as EmailIcon,
+  LocationOn as LocationIcon,
+  Star as StarIcon,
+  DirectionsBike as BikeIcon,
+  Person as PersonIcon,
+  Business as BusinessIcon,
+  Sort as SortIcon,
+  ViewList as ViewListIcon,
+  ViewModule as ViewModuleIcon,
+  Message as MessageIcon,
+  Verified as VerifiedIcon,
+  ExpandMore as ExpandMoreIcon,
+} from '@mui/icons-material';
+import { useTranslation } from 'next-i18next';
+import { useQuery } from '@apollo/client';
+import { GET_AGENTS } from '../../../apollo/user/query';
+import { PropertyLocation, PropertyType } from '../../enums/property.enum';
+import { MemberType } from '../../enums/member.enum';
+
+const AgentDesktop: React.FC = () => {
+  const { t } = useTranslation();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedLocation, setSelectedLocation] = useState<string>('');
+  const [selectedSpecialty, setSelectedSpecialty] = useState<string>('');
+  const [sortBy, setSortBy] = useState('rating');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [contactDialogOpen, setContactDialogOpen] = useState(false);
+  const [selectedAgent, setSelectedAgent] = useState<any>(null);
+  const [priceRange, setPriceRange] = useState<number[]>([0, 100000000]);
+
+  // GraphQL 쿼리
+  const { data, loading, error } = useQuery(GET_AGENTS, {
+    variables: {
+      input: {
+        page: 1,
+        limit: 50,
+        search: {
+          keyword: searchTerm,
+          location: selectedLocation || undefined,
+          memberType: MemberType.AGENT,
+        },
+      },
+    },
+    errorPolicy: 'all',
+  });
+
+  // 에이전트 데이터 처리
+  const agents = useMemo(() => {
+    if (!data?.getAgents?.list) return [];
+    
+    let filteredAgents = [...data.getAgents.list]; // 배열 복사본 생성
+
+    // 전문분야 필터링
+    if (selectedSpecialty) {
+      filteredAgents = filteredAgents.filter((agent: any) => {
+        return Array.isArray(agent.memberProperties) && agent.memberProperties.some((property: any) => 
+          property.propertyType === selectedSpecialty
+        );
+      });
+    }
+
+    // 정렬
+    switch (sortBy) {
+      case 'rating':
+        filteredAgents.sort((a: any, b: any) => (b.memberRank || 0) - (a.memberRank || 0));
+        break;
+      case 'property-count':
+        filteredAgents.sort((a: any, b: any) => (Array.isArray(b.memberProperties) ? b.memberProperties.length : 0) - (Array.isArray(a.memberProperties) ? a.memberProperties.length : 0));
+        break;
+      case 'follower-count':
+        filteredAgents.sort((a: any, b: any) => (Array.isArray(b.memberFollowers) ? b.memberFollowers.length : 0) - (Array.isArray(a.memberFollowers) ? a.memberFollowers.length : 0));
+        break;
+      case 'name':
+        filteredAgents.sort((a: any, b: any) => (a.memberFullName || '').localeCompare(b.memberFullName || ''));
+        break;
+      default:
+        filteredAgents.sort((a: any, b: any) => (b.memberRank || 0) - (a.memberRank || 0));
+    }
+
+    return filteredAgents;
+  }, [data, selectedSpecialty, sortBy]);
+
+  const handleContact = (agent: any) => {
+    setSelectedAgent(agent);
+    setContactDialogOpen(true);
+  };
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('ko-KR').format(price) + '원';
+  };
+
+  const getAgentScore = (agent: any) => {
+    const propertyCount = Array.isArray(agent.memberProperties) ? agent.memberProperties.length : 0;
+    const articleCount = Array.isArray(agent.memberArticles) ? agent.memberArticles.length : 0;
+    const followerCount = Array.isArray(agent.memberFollowers) ? agent.memberFollowers.length : 0;
+    const likeCount = agent.memberLikes || 0;
+    const viewCount = agent.memberViews || 0;
+    
+    return propertyCount * 10 + articleCount * 5 + followerCount * 2 + likeCount + viewCount * 0.1;
+  };
+
+  const getAgentSpecialties = (agent: any) => {
+    if (!agent.memberProperties || !Array.isArray(agent.memberProperties)) return [];
+    
+    const typeCounts: { [key: string]: number } = {};
+    agent.memberProperties.forEach((property: any) => {
+      const type = property.propertyType;
+      typeCounts[type] = (typeCounts[type] || 0) + 1;
+    });
+    
+    return Object.entries(typeCounts)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 3)
+      .map(([type]) => type);
+  };
+
+  const locations = Object.values(PropertyLocation);
+  const specialties = Object.values(PropertyType);
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Box sx={{ textAlign: 'center', py: 8 }}>
+          <Box sx={{ mb: 3 }}>
+            <Alert severity="error" sx={{ fontSize: 60, opacity: 0.5 }} />
+          </Box>
+          <Typography variant="h5" color="text.secondary" gutterBottom>
+            일시적인 오류가 발생했습니다
+          </Typography>
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+            에이전트 정보를 불러오는 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.
+          </Typography>
+          <Button 
+            variant="contained" 
+            color="primary"
+            onClick={() => window.location.reload()}
+          >
+            다시 시도
+          </Button>
+        </Box>
+      </Container>
+    );
+  }
+
+  return (
+    <Box className="agent-desktop">
+      <Container maxWidth="xl">
+        {/* 헤더 */}
+        <Box sx={{ py: 4, textAlign: 'center' }}>
+          <Typography variant="h3" component="h1" gutterBottom>
+            {t('Agents')}
+          </Typography>
+          <Typography variant="h6" color="text.secondary">
+            {t('Professional agents who have registered properties')} {agents.length}명을 찾았습니다
+          </Typography>
+        </Box>
+
+        <Grid container spacing={4}>
+          {/* 사이드바 필터 */}
+          <Grid item xs={12} md={3}>
+            <Paper sx={{ p: 3, position: 'sticky', top: 20 }}>
+              <Typography variant="h6" gutterBottom>
+                필터
+              </Typography>
+              
+              <Stack spacing={3}>
+                {/* 검색 */}
+                <TextField
+                  fullWidth
+                  placeholder={t('Search by agent name or company')}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  InputProps={{
+                    startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />,
+                  }}
+                />
+
+                {/* 지역 필터 */}
+                <FormControl fullWidth>
+                  <InputLabel>지역</InputLabel>
+                  <Select
+                    value={selectedLocation}
+                    onChange={(e) => setSelectedLocation(e.target.value)}
+                    label="지역"
+                  >
+                    <MenuItem value="">전체</MenuItem>
+                    {locations.map((location) => (
+                      <MenuItem key={location} value={location}>{location}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+
+                {/* 전문분야 필터 */}
+                <FormControl fullWidth>
+                  <InputLabel>전문분야</InputLabel>
+                  <Select
+                    value={selectedSpecialty}
+                    onChange={(e) => setSelectedSpecialty(e.target.value)}
+                    label="전문분야"
+                  >
+                    <MenuItem value="">전체</MenuItem>
+                    {specialties.map((specialty) => (
+                      <MenuItem key={specialty} value={specialty}>{specialty}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+
+                {/* 정렬 */}
+                <FormControl fullWidth>
+                  <InputLabel>정렬</InputLabel>
+                  <Select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    label="정렬"
+                  >
+                    <MenuItem value="rating">평점순</MenuItem>
+                    <MenuItem value="property-count">매물수순</MenuItem>
+                    <MenuItem value="follower-count">팔로워순</MenuItem>
+                    <MenuItem value="name">이름순</MenuItem>
+                  </Select>
+                </FormControl>
+
+                {/* 뷰 모드 */}
+                <Box>
+                  <Typography variant="subtitle2" gutterBottom>
+                    보기 모드
+                  </Typography>
+                  <ToggleButtonGroup
+                    value={viewMode}
+                    exclusive
+                    onChange={(e, newMode) => newMode && setViewMode(newMode)}
+                    fullWidth
+                  >
+                    <ToggleButton value="grid">
+                      <ViewModuleIcon />
+                    </ToggleButton>
+                    <ToggleButton value="list">
+                      <ViewListIcon />
+                    </ToggleButton>
+                  </ToggleButtonGroup>
+                </Box>
+              </Stack>
+            </Paper>
+          </Grid>
+
+          {/* 메인 콘텐츠 */}
+          <Grid item xs={12} md={9}>
+            {/* Agent 목록 */}
+            <Grid container spacing={3}>
+              {agents.map((agent: any) => (
+                <Grid item xs={12} lg={viewMode === 'grid' ? 6 : 12} key={agent._id}>
+                  <Card className="agent-card" sx={{ height: '100%' }}>
+                    <CardContent sx={{ p: 3 }}>
+                      <Box sx={{ display: 'flex', gap: 3, mb: 3 }}>
+                        <Avatar
+                          src={agent.memberImage}
+                          sx={{ width: 80, height: 80 }}
+                          className="agent-avatar"
+                        />
+                        <Box sx={{ flex: 1 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                            <Typography variant="h5" component="h2">
+                              {agent.memberFullName || agent.memberNick}
+                            </Typography>
+                            {agent.memberStatus === 'ACTIVE' && (
+                              <VerifiedIcon color="primary" sx={{ fontSize: '1.5rem' }} />
+                            )}
+                          </Box>
+                          <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
+                            {agent.memberAddress}
+                          </Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <Rating value={getAgentScore(agent) / 100} precision={0.1} readOnly />
+                            <Typography variant="body1">
+                              {getAgentScore(agent).toFixed(0)}점
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </Box>
+
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 4, mb: 3 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <LocationIcon />
+                          <Typography variant="body1">{agent.memberAddress}</Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <BikeIcon />
+                          <Typography variant="body1">매물 {Array.isArray(agent.memberProperties) ? agent.memberProperties.length : 0}개</Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <PersonIcon />
+                          <Typography variant="body1">팔로워 {Array.isArray(agent.memberFollowers) ? agent.memberFollowers.length : 0}명</Typography>
+                        </Box>
+                      </Box>
+
+                      {agent.memberDesc && (
+                        <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+                          {agent.memberDesc}
+                        </Typography>
+                      )}
+
+                      <Box sx={{ mb: 3 }}>
+                        {getAgentSpecialties(agent).map((specialty, index) => (
+                          <Chip key={index} label={specialty} sx={{ mr: 1, mb: 1 }} />
+                        ))}
+                      </Box>
+
+                      <Box sx={{ display: 'flex', gap: 2 }}>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          startIcon={<MessageIcon />}
+                          onClick={() => handleContact(agent)}
+                          sx={{ flex: 1 }}
+                          className="contact-btn"
+                        >
+                          연락하기
+                        </Button>
+                        <Button variant="outlined" sx={{ flex: 1 }} className="properties-btn">
+                          매물보기
+                        </Button>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+
+            {agents.length === 0 && (
+              <Box sx={{ textAlign: 'center', py: 8 }}>
+                <Box sx={{ mb: 3 }}>
+                  <PersonIcon sx={{ fontSize: 80, color: 'text.secondary', opacity: 0.5 }} />
+                </Box>
+                <Typography variant="h5" color="text.secondary" gutterBottom>
+                  아직 등록된 에이전트가 없습니다
+                </Typography>
+                <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+                  현재 등록된 에이전트가 없습니다. 곧 새로운 에이전트들이 등록될 예정입니다.
+                </Typography>
+                <Button 
+                  variant="outlined" 
+                  color="primary"
+                  onClick={() => window.location.reload()}
+                >
+                  새로고침
+                </Button>
+              </Box>
+            )}
+          </Grid>
+        </Grid>
+      </Container>
+
+      {/* 연락처 다이얼로그 */}
+      <Dialog open={contactDialogOpen} onClose={() => setContactDialogOpen(false)} maxWidth="md" fullWidth>
+        <DialogTitle>에이전트 연락처</DialogTitle>
+        <DialogContent>
+          {selectedAgent && (
+            <Box sx={{ mt: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 4 }}>
+                <Avatar src={selectedAgent.memberImage} sx={{ width: 80, height: 80 }} />
+                <Box>
+                  <Typography variant="h4">{selectedAgent.memberFullName || selectedAgent.memberNick}</Typography>
+                  <Typography variant="body1" color="text.secondary">{selectedAgent.memberAddress}</Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
+                    <Rating value={getAgentScore(selectedAgent) / 100} precision={0.1} readOnly />
+                    <Typography variant="body1">
+                      {getAgentScore(selectedAgent).toFixed(0)}점
+                    </Typography>
+                  </Box>
+                </Box>
+              </Box>
+              
+              <Grid container spacing={4}>
+                <Grid item xs={12} md={6}>
+                  <Typography variant="h6" gutterBottom>
+                    연락처 정보
+                  </Typography>
+                  <List>
+                    {selectedAgent.memberPhone && (
+                      <ListItem>
+                        <ListItemAvatar>
+                          <PhoneIcon />
+                        </ListItemAvatar>
+                        <ListItemText primary="전화번호" secondary={selectedAgent.memberPhone} />
+                      </ListItem>
+                    )}
+                    {selectedAgent.memberEmail && (
+                      <ListItem>
+                        <ListItemAvatar>
+                          <EmailIcon />
+                        </ListItemAvatar>
+                        <ListItemText primary="이메일" secondary={selectedAgent.memberEmail} />
+                      </ListItem>
+                    )}
+                    <ListItem>
+                      <ListItemAvatar>
+                        <LocationIcon />
+                      </ListItemAvatar>
+                      <ListItemText primary="위치" secondary={selectedAgent.memberAddress} />
+                    </ListItem>
+                  </List>
+                </Grid>
+                
+                <Grid item xs={12} md={6}>
+                  <Typography variant="h6" gutterBottom>
+                    활동 지표
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={6}>
+                      <Box sx={{ textAlign: 'center', p: 3, border: 1, borderColor: 'divider', borderRadius: 2 }}>
+                        <Typography variant="h4" color="primary">
+                          {Array.isArray(selectedAgent.memberProperties) ? selectedAgent.memberProperties.length : 0}
+                        </Typography>
+                        <Typography variant="body1">등록 매물</Typography>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Box sx={{ textAlign: 'center', p: 3, border: 1, borderColor: 'divider', borderRadius: 2 }}>
+                        <Typography variant="h4" color="primary">
+                          {Array.isArray(selectedAgent.memberFollowers) ? selectedAgent.memberFollowers.length : 0}
+                        </Typography>
+                        <Typography variant="body1">팔로워</Typography>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Box sx={{ textAlign: 'center', p: 3, border: 1, borderColor: 'divider', borderRadius: 2 }}>
+                        <Typography variant="h4" color="primary">
+                          {Array.isArray(selectedAgent.memberArticles) ? selectedAgent.memberArticles.length : 0}
+                        </Typography>
+                        <Typography variant="body1">게시글</Typography>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Box sx={{ textAlign: 'center', p: 3, border: 1, borderColor: 'divider', borderRadius: 2 }}>
+                        <Typography variant="h4" color="primary">
+                          {selectedAgent.memberViews || 0}
+                        </Typography>
+                        <Typography variant="body1">조회수</Typography>
+                      </Box>
+                    </Grid>
+                  </Grid>
+                </Grid>
+              </Grid>
+
+              {selectedAgent.memberDesc && (
+                <>
+                  <Divider sx={{ my: 3 }} />
+                  <Typography variant="h6" gutterBottom>
+                    소개
+                  </Typography>
+                  <Typography variant="body1">
+                    {selectedAgent.memberDesc}
+                  </Typography>
+                </>
+              )}
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setContactDialogOpen(false)}>닫기</Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
+  );
+};
+
+export default AgentDesktop;

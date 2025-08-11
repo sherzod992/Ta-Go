@@ -1,0 +1,221 @@
+/** MOBILE AGENT STYLES **/
+
+.agent-mobile {
+  background-color: #f8f9fa;
+  min-height: 100vh;
+
+  // 헤더 스타일
+  .MuiBox-root:first-child {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    
+    .MuiTypography-h5 {
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    
+    .MuiTypography-body2 {
+      opacity: 0.9;
+    }
+  }
+
+  // 검색 및 필터 바
+  .MuiPaper-root {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    
+    .MuiTextField-root {
+      .MuiOutlinedInput-root {
+        border-radius: 8px;
+        background-color: white;
+      }
+    }
+    
+    .MuiButton-root {
+      border-radius: 8px;
+      text-transform: none;
+      font-weight: 600;
+    }
+    
+    .MuiToggleButtonGroup-root {
+      .MuiToggleButton-root {
+        border-radius: 8px;
+        min-width: 48px;
+      }
+    }
+  }
+
+  // 에이전트 카드
+  .agent-card {
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    background: white;
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+    
+    .MuiCardContent-root {
+      padding: 1.5rem;
+    }
+    
+    .agent-avatar {
+      border: 3px solid #e3f2fd;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .MuiTypography-h6 {
+      font-weight: 700;
+      color: #2c3e50;
+    }
+    
+    .MuiRating-root {
+      .MuiRating-iconFilled {
+        color: #ff9800;
+      }
+    }
+    
+    .MuiChip-root {
+      background-color: #e3f2fd;
+      color: #1976d2;
+      font-weight: 500;
+      border-radius: 20px;
+    }
+    
+    .contact-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 8px;
+      text-transform: none;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+      
+      &:hover {
+        background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      }
+    }
+    
+    .properties-btn {
+      border-radius: 8px;
+      text-transform: none;
+      font-weight: 600;
+      border-color: #667eea;
+      color: #667eea;
+      
+      &:hover {
+        background-color: rgba(102, 126, 234, 0.1);
+        border-color: #5a6fd8;
+        color: #5a6fd8;
+      }
+    }
+  }
+
+  // 필터 드로어
+  .MuiDrawer-paper {
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    
+    .MuiBox-root {
+      padding: 2rem 1.5rem;
+    }
+    
+    .MuiFormControl-root {
+      .MuiOutlinedInput-root {
+        border-radius: 8px;
+      }
+    }
+    
+    .MuiButton-contained {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 8px;
+      text-transform: none;
+      font-weight: 600;
+      padding: 12px 24px;
+    }
+  }
+
+  // 연락처 다이얼로그
+  .MuiDialog-paper {
+    border-radius: 16px;
+    
+    .MuiDialogTitle-root {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      font-weight: 700;
+    }
+    
+    .MuiListItem-root {
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      
+      &:hover {
+        background-color: #f8f9fa;
+      }
+    }
+    
+    .MuiGrid-container {
+      .MuiBox-root {
+        border-radius: 12px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border: 1px solid #dee2e6;
+        
+        .MuiTypography-h6 {
+          color: #667eea;
+          font-weight: 700;
+        }
+      }
+    }
+  }
+
+  // 빈 상태
+  .MuiBox-root:last-child {
+    .MuiTypography-h6 {
+      color: #6c757d;
+      font-weight: 600;
+    }
+    
+    .MuiTypography-body2 {
+      color: #adb5bd;
+    }
+  }
+
+  // 로딩 상태
+  .MuiCircularProgress-root {
+    color: #667eea;
+  }
+
+  // 에러 상태
+  .MuiAlert-root {
+    border-radius: 12px;
+    border: none;
+    
+    .MuiAlert-icon {
+      color: #dc3545;
+    }
+  }
+
+  // 반응형 조정
+  @media (max-width: 480px) {
+    .agent-card {
+      .MuiCardContent-root {
+        padding: 1rem;
+      }
+      
+      .MuiBox-root {
+        gap: 1rem;
+      }
+      
+      .agent-avatar {
+        width: 50px !important;
+        height: 50px !important;
+      }
+    }
+    
+    .MuiContainer-root {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+  }
+}

@@ -195,5 +195,22 @@
   "of": "중",
   "properties": "매물",
   "Failed to load properties. Please try again later.": "매물을 불러오는데 실패했습니다. 나중에 다시 시도해주세요.",
-  "No properties found matching your criteria.": "검색 조건에 맞는 매물이 없습니다."
+  "No properties found matching your criteria.": "검색 조건에 맞는 매물이 없습니다.",
+  "Follower Count": "팔로워순",
+  "Property Count": "매물수순",
+  "View Mode": "보기 모드",
+  "Grid": "그리드",
+  "List": "리스트",
+  "Contact Information": "연락처 정보",
+  "Activity Metrics": "활동 지표",
+  "Registered Properties": "등록 매물",
+  "Followers": "팔로워",
+  "Posts": "게시글",
+  "Views": "조회수",
+  "Introduction": "소개",
+  "Apply": "적용",
+  "Agent Contact": "에이전트 연락처",
+  "Agent Score": "에이전트 점수",
+  "Specialties": "전문분야",
+  "Recent Activity": "최근 활동"
 } 

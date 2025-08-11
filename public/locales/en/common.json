@@ -196,5 +196,22 @@
   "of": "of",
   "properties": "properties",
   "Failed to load properties. Please try again later.": "Failed to load properties. Please try again later.",
-  "No properties found matching your criteria.": "No properties found matching your criteria."
+  "No properties found matching your criteria.": "No properties found matching your criteria.",
+  "Follower Count": "Follower Count",
+  "Property Count": "Property Count",
+  "View Mode": "View Mode",
+  "Grid": "Grid",
+  "List": "List",
+  "Contact Information": "Contact Information",
+  "Activity Metrics": "Activity Metrics",
+  "Registered Properties": "Registered Properties",
+  "Followers": "Followers",
+  "Posts": "Posts",
+  "Views": "Views",
+  "Introduction": "Introduction",
+  "Apply": "Apply",
+  "Agent Contact": "Agent Contact",
+  "Agent Score": "Agent Score",
+  "Specialties": "Specialties",
+  "Recent Activity": "Recent Activity"
 } 
