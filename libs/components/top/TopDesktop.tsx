@@ -7,7 +7,6 @@ import { useReactiveVar } from '@apollo/client';
 import { userVar } from '../../../apollo/store';
 import { logOut } from '../../auth';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-import '../../../scss/pc/top/top.scss';
 
 const TopDesktop: React.FC = () => {
   const { t } = useTranslation();

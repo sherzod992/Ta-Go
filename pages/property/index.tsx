@@ -27,7 +27,7 @@ const PropertyPage: NextPage = () => {
 
   // Buy 페이지인 경우 디바이스에 따라 컴포넌트 렌더링
   if (type === 'buy' || !type) {
-    if (device === 'mobile') {
+    if (device.isMobile) {
       return <BuyPageMobile />;
     }
     return <BuyPageDesktop />;

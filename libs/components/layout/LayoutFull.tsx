@@ -23,7 +23,7 @@ const withLayoutFull = (Component: any) => {
 
 		/** HANDLERS **/
 
-		if (device == 'mobile') {
+		if (device.isMobile) {
 			return (
 				<>
 					<Head>

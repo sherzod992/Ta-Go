@@ -10,7 +10,7 @@ import AgentDesktop from '../../libs/components/agent/AgentDesktop';
 const AgentPage: NextPage = () => {
   const device = useDeviceDetect();
 
-  if (device === 'mobile') {
+  if (device.isMobile) {
     return <AgentMobile />;
   }
   return <AgentDesktop />;

@@ -10,7 +10,7 @@ import SellPageDesktop from '../../libs/components/sell/SellPageDesktop';
 const SellPage: NextPage = () => {
   const device = useDeviceDetect();
 
-  if (device === 'mobile') {
+  if (device.isMobile) {
     return <SellPageMobile />;
   }
 

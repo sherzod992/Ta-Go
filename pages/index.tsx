@@ -19,7 +19,7 @@ const HomePage: NextPage = () => {
   const device = useDeviceDetect();
 
   // 모바일: 핵심 기능만 표시 (6개 섹션)
-  if (device === 'mobile') {
+  if (device.isMobile) {
     return (
       <Box>
         <Container maxWidth="xl" sx={{ padding: 0 }}>

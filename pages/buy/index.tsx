@@ -10,7 +10,7 @@ import BuyPageDesktop from '../../libs/components/buy/BuyPageDesktop';
 const BuyPage: NextPage = () => {
   const device = useDeviceDetect();
 
-  if (device === 'mobile') {
+  if (device.isMobile) {
     return <BuyPageMobile />;
   }
 
