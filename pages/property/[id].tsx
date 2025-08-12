@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import { GetStaticProps } from 'next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import withLayoutBasic from '../../libs/components/layout/LayoutBasic';
-import PropertyDetail from '../../libs/components/property/PropertyDetail';
+import { PropertyDetail } from '../../libs/components/property/PropertyDetail';
 
 const PropertyDetailPage: NextPage = () => {
   const router = useRouter();

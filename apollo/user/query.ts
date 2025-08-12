@@ -749,3 +749,117 @@ export const GET_MEMBER_FOLLOWINGS = gql`
 		}
 	}
 `;
+
+
+
+/**************************
+ *         CHAT           *
+ *************************/
+
+export const GET_CHAT_ROOMS = gql`
+	query GetChatRooms($input: ChatRoomQueryInput!) {
+		getChatRooms(input: $input) {
+			list {
+				_id
+				propertyId
+				userId
+				agentId
+				status
+				createdAt
+				updatedAt
+				unreadCount
+				lastMessage {
+					_id
+					content
+					timestamp
+					senderType
+				}
+				propertyData {
+					_id
+					propertyTitle
+					propertyPrice
+					propertyBrand
+					propertyModel
+					propertyImages
+				}
+				userData {
+					_id
+					memberNick
+					memberFullName
+					memberImage
+					memberEmail
+					memberPhone
+				}
+				agentData {
+					_id
+					memberNick
+					memberFullName
+					memberImage
+					memberEmail
+					memberPhone
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
+export const GET_CHAT_MESSAGES = gql`
+	query GetChatMessages($input: ChatMessagesQueryInput!) {
+		getChatMessages(input: $input) {
+			list {
+				_id
+				chatId
+				senderId
+				senderType
+				content
+				timestamp
+				isRead
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
+export const GET_CHAT_ROOM = gql`
+	query GetChatRoom($input: String!) {
+		getChatRoom(chatId: $input) {
+			_id
+			propertyId
+			userId
+			agentId
+			status
+			createdAt
+			updatedAt
+			unreadCount
+			propertyData {
+				_id
+				propertyTitle
+				propertyPrice
+				propertyBrand
+				propertyModel
+				propertyImages
+			}
+			userData {
+				_id
+				memberNick
+				memberFullName
+				memberImage
+				memberEmail
+				memberPhone
+			}
+			agentData {
+				_id
+				memberNick
+				memberFullName
+				memberImage
+				memberEmail
+				memberPhone
+			}
+		}
+	}
+`;

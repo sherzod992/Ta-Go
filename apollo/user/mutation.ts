@@ -389,3 +389,62 @@ export const UNSUBSCRIBE = gql`
 		}
 	}
 `;
+
+
+
+/**************************
+ *         CHAT           *
+ *************************/
+
+export const CREATE_CHAT_ROOM = gql`
+	mutation CreateChatRoom($input: CreateChatRoomInput!) {
+		createChatRoom(input: $input) {
+			_id
+			propertyId
+			userId
+			agentId
+			status
+			createdAt
+			updatedAt
+			propertyData {
+				_id
+				propertyTitle
+				propertyPrice
+				propertyBrand
+				propertyModel
+				propertyImages
+			}
+			userData {
+				_id
+				memberNick
+				memberFullName
+				memberImage
+			}
+		}
+	}
+`;
+
+export const SEND_MESSAGE = gql`
+	mutation SendMessage($input: SendMessageInput!) {
+		sendMessage(input: $input) {
+			_id
+			chatId
+			senderId
+			senderType
+			content
+			timestamp
+			isRead
+		}
+	}
+`;
+
+export const UPDATE_CHAT_STATUS = gql`
+	mutation UpdateChatStatus($input: UpdateChatStatusInput!) {
+		updateChatStatus(input: $input) {
+			_id
+			status
+			agentId
+			updatedAt
+		}
+	}
+`;
