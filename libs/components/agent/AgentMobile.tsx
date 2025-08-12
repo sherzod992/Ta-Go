@@ -89,6 +89,10 @@ const AgentMobile: React.FC = () => {
   const agents = useMemo(() => {
     if (!data?.getAgents?.list) return [];
     
+    // 디버깅을 위한 로그
+    console.log('Agents data:', data.getAgents.list);
+    console.log('First agent memberProperties:', data.getAgents.list[0]?.memberProperties);
+    
     let filteredAgents = [...data.getAgents.list]; // 배열 복사본 생성
 
     // 전문분야 필터링
@@ -107,10 +111,18 @@ const AgentMobile: React.FC = () => {
         filteredAgents.sort((a: any, b: any) => (b.memberRank || 0) - (a.memberRank || 0));
         break;
       case 'property-count':
-        filteredAgents.sort((a: any, b: any) => (b.memberProperties?.length || 0) - (a.memberProperties?.length || 0));
+        filteredAgents.sort((a: any, b: any) => {
+          const aCount = Array.isArray(a.memberProperties) ? a.memberProperties.length : 0;
+          const bCount = Array.isArray(b.memberProperties) ? b.memberProperties.length : 0;
+          return bCount - aCount;
+        });
         break;
       case 'follower-count':
-        filteredAgents.sort((a: any, b: any) => (b.memberFollowers?.length || 0) - (a.memberFollowers?.length || 0));
+        filteredAgents.sort((a: any, b: any) => {
+          const aCount = Array.isArray(a.memberFollowers) ? a.memberFollowers.length : 0;
+          const bCount = Array.isArray(b.memberFollowers) ? b.memberFollowers.length : 0;
+          return bCount - aCount;
+        });
         break;
       case 'name':
         filteredAgents.sort((a: any, b: any) => (a.memberFullName || '').localeCompare(b.memberFullName || ''));
@@ -132,9 +144,9 @@ const AgentMobile: React.FC = () => {
   };
 
   const getAgentScore = (agent: any) => {
-    const propertyCount = agent.memberProperties?.length || 0;
-    const articleCount = agent.memberArticles?.length || 0;
-    const followerCount = agent.memberFollowers?.length || 0;
+    const propertyCount = Array.isArray(agent.memberProperties) ? agent.memberProperties.length : 0;
+    const articleCount = Array.isArray(agent.memberArticles) ? agent.memberArticles.length : 0;
+    const followerCount = Array.isArray(agent.memberFollowers) ? agent.memberFollowers.length : 0;
     const likeCount = agent.memberLikes || 0;
     const viewCount = agent.memberViews || 0;
     
@@ -288,11 +300,15 @@ const AgentMobile: React.FC = () => {
                     </Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                       <BikeIcon sx={{ fontSize: 'small' }} />
-                                              <Typography variant="body2">매물 {agent.memberProperties?.length || 0}개</Typography>
+                      <Typography variant="body2">
+                        매물 {Array.isArray(agent.memberProperties) ? agent.memberProperties.length : 0}개
+                      </Typography>
                     </Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                       <PersonIcon sx={{ fontSize: 'small' }} />
-                                              <Typography variant="body2">팔로워 {agent.memberFollowers?.length || 0}명</Typography>
+                      <Typography variant="body2">
+                        팔로워 {Array.isArray(agent.memberFollowers) ? agent.memberFollowers.length : 0}명
+                      </Typography>
                     </Box>
                   </Box>
 

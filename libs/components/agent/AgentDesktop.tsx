@@ -117,7 +117,11 @@ const AgentDesktop: React.FC = () => {
         filteredAgents.sort((a: any, b: any) => (b.memberRank || 0) - (a.memberRank || 0));
         break;
       case 'property-count':
-        filteredAgents.sort((a: any, b: any) => (b.memberProperties?.length || 0) - (a.memberProperties?.length || 0));
+        filteredAgents.sort((a: any, b: any) => {
+          const aCount = Array.isArray(a.memberProperties) ? a.memberProperties.length : 0;
+          const bCount = Array.isArray(b.memberProperties) ? b.memberProperties.length : 0;
+          return bCount - aCount;
+        });
         break;
       case 'follower-count':
         filteredAgents.sort((a: any, b: any) => (b.memberFollowers?.length || 0) - (a.memberFollowers?.length || 0));
@@ -142,9 +146,9 @@ const AgentDesktop: React.FC = () => {
   };
 
   const getAgentScore = (agent: any) => {
-    const propertyCount = agent.memberProperties?.length || 0;
-    const articleCount = agent.memberArticles?.length || 0;
-    const followerCount = agent.memberFollowers?.length || 0;
+    const propertyCount = Array.isArray(agent.memberProperties) ? agent.memberProperties.length : 0;
+    const articleCount = Array.isArray(agent.memberArticles) ? agent.memberArticles.length : 0;
+    const followerCount = Array.isArray(agent.memberFollowers) ? agent.memberFollowers.length : 0;
     const likeCount = agent.memberLikes || 0;
     const viewCount = agent.memberViews || 0;
     
@@ -345,11 +349,15 @@ const AgentDesktop: React.FC = () => {
                         </Box>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <BikeIcon />
-                          <Typography variant="body1">매물 {agent.memberProperties?.length || 0}개</Typography>
+                          <Typography variant="body1">
+                    매물 {Array.isArray(agent.memberProperties) ? agent.memberProperties.length : 0}개
+                  </Typography>
                         </Box>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <PersonIcon />
-                          <Typography variant="body1">팔로워 {agent.memberFollowers?.length || 0}명</Typography>
+                          <Typography variant="body1">
+                    팔로워 {Array.isArray(agent.memberFollowers) ? agent.memberFollowers.length : 0}명
+                  </Typography>
                         </Box>
                       </Box>
 
