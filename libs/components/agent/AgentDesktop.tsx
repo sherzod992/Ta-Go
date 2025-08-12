@@ -61,7 +61,7 @@ import { PropertyLocation, PropertyType } from '../../enums/property.enum';
 import { MemberType } from '../../enums/member.enum';
 
 const AgentDesktop: React.FC = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('common');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedLocation, setSelectedLocation] = useState<string>('');
   const [selectedSpecialty, setSelectedSpecialty] = useState<string>('');

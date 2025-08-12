@@ -11,7 +11,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 
 const TopMobile: React.FC = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('common');
   const router = useRouter();
   const user = useReactiveVar(userVar);
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);

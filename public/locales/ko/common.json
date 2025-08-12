@@ -120,7 +120,7 @@
   "Chungnam": "충남",
   "Jeonnam": "전남",
   "Gyeongbuk": "경북",
-  "Gyeongnam": "경남"
+  "Gyeongnam": "경남",
   "Price": "가격",
   "Year": "연도",
   "Mileage": "주행거리",
@@ -212,5 +212,12 @@
   "Agent Contact": "에이전트 연락처",
   "Agent Score": "에이전트 점수",
   "Specialties": "전문분야",
-  "Recent Activity": "최근 활동"
+  "Recent Activity": "최근 활동",
+  "Brand": "브랜드",
+  "Other": "기타",
+  "Apply Filters": "필터 적용",
+  "New and used": "신차 및 중고",
+  "Any": "상관없음",
+  "Search by keyword": "키워드로 검색...",
+  "Keyword": "키워드"
 } 

@@ -9,7 +9,7 @@ import { logOut } from '../../auth';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 
 const TopDesktop: React.FC = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('common');
   const router = useRouter();
   const user = useReactiveVar(userVar);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);

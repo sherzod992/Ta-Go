@@ -223,7 +223,7 @@ const trendingKeywords = [
 ];
 
 const CommunityList: React.FC = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('common');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('latest');
