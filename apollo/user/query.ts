@@ -756,24 +756,19 @@ export const GET_MEMBER_FOLLOWINGS = gql`
  *         CHAT           *
  *************************/
 
-export const GET_CHAT_ROOMS = gql`
-	query GetChatRooms($input: ChatRoomQueryInput!) {
-		getChatRooms(input: $input) {
+ export const GET_MY_CHAT_ROOMS = gql`
+	query GetMyChatRooms($input: ChatRoomQueryInput!) {
+		getMyChatRooms(input: $input) {
 			list {
 				_id
 				propertyId
-				userId
 				agentId
 				status
-				createdAt
-				updatedAt
-				unreadCount
-				lastMessage {
-					_id
-					content
-					timestamp
-					senderType
+				unreadCount {
+					userId
+					agentId
 				}
+				lastMessage
 				propertyData {
 					_id
 					propertyTitle
@@ -782,16 +777,7 @@ export const GET_CHAT_ROOMS = gql`
 					propertyModel
 					propertyImages
 				}
-				userData {
-					_id
-					memberNick
-					memberFullName
-					memberImage
-					memberEmail
-					memberPhone
-				}
 				agentData {
-					_id
 					memberNick
 					memberFullName
 					memberImage
@@ -799,9 +785,7 @@ export const GET_CHAT_ROOMS = gql`
 					memberPhone
 				}
 			}
-			metaCounter {
-				total
-			}
+			totalUnreadCount
 		}
 	}
 `;
@@ -817,6 +801,7 @@ export const GET_CHAT_MESSAGES = gql`
 				content
 				timestamp
 				isRead
+				readAt
 			}
 			metaCounter {
 				total
@@ -833,9 +818,11 @@ export const GET_CHAT_ROOM = gql`
 			userId
 			agentId
 			status
-			createdAt
-			updatedAt
-			unreadCount
+			unreadCount {
+				userId
+				agentId
+			}
+			lastMessage
 			propertyData {
 				_id
 				propertyTitle
@@ -845,7 +832,6 @@ export const GET_CHAT_ROOM = gql`
 				propertyImages
 			}
 			userData {
-				_id
 				memberNick
 				memberFullName
 				memberImage
@@ -853,7 +839,6 @@ export const GET_CHAT_ROOM = gql`
 				memberPhone
 			}
 			agentData {
-				_id
 				memberNick
 				memberFullName
 				memberImage
@@ -861,5 +846,11 @@ export const GET_CHAT_ROOM = gql`
 				memberPhone
 			}
 		}
+	}
+`;
+
+export const GET_UNREAD_MESSAGE_COUNT = gql`
+	query GetUnreadMessageCount {
+		getUnreadMessageCount
 	}
 `;

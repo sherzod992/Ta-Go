@@ -72,8 +72,7 @@ export const WebChat: React.FC<WebChatProps> = ({
 					variables: {
 						input: {
 							propertyId,
-							userId,
-							initialMessage: '안녕하세요! 이 매물에 대해 궁금한 점이 있으시면 언제든 말씀해 주세요.'
+							userId
 						}
 					}
 				});

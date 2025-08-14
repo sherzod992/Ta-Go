@@ -8,6 +8,7 @@ const items = [
   { key: 'favorites', label: 'My Favorites' },
   { key: 'visited', label: 'Recently Visited' },
   { key: 'articles', label: 'My Articles' },
+  { key: 'chat', label: 'My Chats' },
   { key: 'add', label: 'Add New Property' },
 ];
 

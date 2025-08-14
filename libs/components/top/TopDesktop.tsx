@@ -7,6 +7,7 @@ import { useReactiveVar } from '@apollo/client';
 import { userVar } from '../../../apollo/store';
 import { logOut } from '../../auth';
 import NotificationsIcon from '@mui/icons-material/Notifications';
+import { NotificationIcon } from '../common/NotificationIcon';
 
 const TopDesktop: React.FC = () => {
   const { t } = useTranslation('common');
@@ -120,7 +121,12 @@ const TopDesktop: React.FC = () => {
           ))}
         </Menu>
 
-        {/* Notifications */}
+        {/* Chat Notifications */}
+        {user?._id && (
+          <NotificationIcon userId={user._id} />
+        )}
+
+        {/* General Notifications */}
         <IconButton className="notifications">
           <Badge badgeContent={0} color="error">
             <NotificationsIcon />

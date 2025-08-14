@@ -9,6 +9,7 @@ import { logOut } from '../../auth';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
+import { NotificationIcon } from '../common/NotificationIcon';
 
 const TopMobile: React.FC = () => {
   const { t } = useTranslation('common');
@@ -77,6 +78,11 @@ const TopMobile: React.FC = () => {
 
         {/* Right Section - Language & Menu Toggle */}
         <Box className="right-section">
+          {/* Chat Notifications */}
+          {user?._id && (
+            <NotificationIcon userId={user._id} />
+          )}
+
           {/* Language Selector */}
           <IconButton className="language-selector" onClick={handleLanguageMenu}>
             <span className="flag">{currentLanguage.flag}</span>

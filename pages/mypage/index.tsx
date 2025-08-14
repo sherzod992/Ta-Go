@@ -10,6 +10,7 @@ import MyFavorites from '../../libs/components/mypage/MyFavorites';
 import RecentlyVisited from '../../libs/components/mypage/RecentlyVisited';
 import MyArticles from '../../libs/components/mypage/MyArticles';
 import MyProfile from '../../libs/components/mypage/MyProfile';
+import ChatListPage from './chat';
 
 const MyPage: React.FC = () => {
   const router = useRouter();
@@ -42,6 +43,8 @@ const MyPage: React.FC = () => {
         return <RecentlyVisited />;
       case 'articles':
         return <MyArticles />;
+      case 'chat':
+        return <ChatListPage />;
       case 'profile':
       default:
         return <MyProfile />;

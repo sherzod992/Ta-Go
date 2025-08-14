@@ -404,8 +404,10 @@ export const CREATE_CHAT_ROOM = gql`
 			userId
 			agentId
 			status
-			createdAt
-			updatedAt
+			unreadCount {
+				userId
+				agentId
+			}
 			propertyData {
 				_id
 				propertyTitle
@@ -415,7 +417,6 @@ export const CREATE_CHAT_ROOM = gql`
 				propertyImages
 			}
 			userData {
-				_id
 				memberNick
 				memberFullName
 				memberImage
@@ -434,6 +435,16 @@ export const SEND_MESSAGE = gql`
 			content
 			timestamp
 			isRead
+			readAt
+		}
+	}
+`;
+
+export const MARK_MESSAGES_AS_READ = gql`
+	mutation MarkMessagesAsRead($input: MarkMessagesReadInput!) {
+		markMessagesAsRead(input: $input) {
+			success
+			updatedCount
 		}
 	}
 `;

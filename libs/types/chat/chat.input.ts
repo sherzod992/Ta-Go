@@ -1,7 +1,6 @@
 export interface CreateChatRoomInput {
 	propertyId: string;
-	userId: string;
-	initialMessage: string;
+	userId?: string;
 }
 
 export interface SendMessageInput {
@@ -12,7 +11,6 @@ export interface SendMessageInput {
 }
 
 export interface ChatRoomQueryInput {
-	userId?: string;
 	agentId?: string;
 	status?: 'ACTIVE' | 'CLOSED' | 'PENDING';
 	page?: number;
@@ -23,6 +21,11 @@ export interface ChatMessagesQueryInput {
 	chatId: string;
 	page?: number;
 	limit?: number;
+}
+
+export interface MarkMessagesReadInput {
+	chatId: string;
+	userId: string;
 }
 
 export interface UpdateChatStatusInput {

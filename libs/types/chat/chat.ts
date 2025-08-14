@@ -6,6 +6,7 @@ export interface ChatMessage {
 	content: string;
 	timestamp: string;
 	isRead: boolean;
+	readAt?: string;
 }
 
 export interface ChatRoom {
@@ -14,10 +15,11 @@ export interface ChatRoom {
 	userId: string;
 	agentId?: string;
 	status: 'ACTIVE' | 'CLOSED' | 'PENDING';
-	createdAt: string;
-	updatedAt: string;
-	lastMessage?: ChatMessage;
-	unreadCount: number;
+	unreadCount: {
+		userId: number;
+		agentId: number;
+	};
+	lastMessage?: string;
 	propertyData?: {
 		_id: string;
 		propertyTitle: string;
@@ -27,24 +29,24 @@ export interface ChatRoom {
 		propertyImages: string[];
 	};
 	userData?: {
-		_id: string;
 		memberNick: string;
 		memberFullName: string;
 		memberImage?: string;
+		memberEmail?: string;
+		memberPhone?: string;
 	};
 	agentData?: {
-		_id: string;
 		memberNick: string;
 		memberFullName: string;
 		memberImage?: string;
+		memberEmail?: string;
+		memberPhone?: string;
 	};
 }
 
 export interface ChatListResponse {
 	list: ChatRoom[];
-	metaCounter: {
-		total: number;
-	};
+	totalUnreadCount: number;
 }
 
 export interface ChatMessagesResponse {
@@ -52,4 +54,8 @@ export interface ChatMessagesResponse {
 	metaCounter: {
 		total: number;
 	};
+}
+
+export interface UnreadCountResponse {
+	totalUnreadCount: number;
 }
