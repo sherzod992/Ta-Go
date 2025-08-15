@@ -2,9 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useQuery, useMutation } from '@apollo/client';
 import { GET_CHAT_ROOM, GET_CHAT_MESSAGES } from '../../../apollo/user/query';
-import { SEND_MESSAGE, MARK_MESSAGES_AS_READ } from '../../../apollo/user/mutation';
+import { SEND_MESSAGE, MARK_AS_READ } from '../../../apollo/user/mutation';
 import { ChatMessage, ChatRoom } from '../../../libs/types/chat/chat';
-import { SendMessageInput, MarkMessagesReadInput } from '../../../libs/types/chat/chat.input';
+import { SendMessageInput } from '../../../libs/types/chat/chat.input';
 import { sweetErrorAlert } from '../../../libs/sweetAlert';
 import useDeviceDetect from '../../../libs/hooks/useDeviceDetect';
 import LayoutBasic from '../../../libs/components/layout/LayoutBasic';
@@ -54,20 +54,25 @@ const ChatRoomPage: React.FC = () => {
 	const userId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null;
 
 	// 채팅방 정보 조회
-	const { data: chatRoomData, loading: loadingChatRoom } = useQuery(GET_CHAT_ROOM, {
-		variables: { input: chatId },
+	const { data: chatRoomData, loading: loadingChatRoom, error: chatRoomError } = useQuery(GET_CHAT_ROOM, {
+		variables: { roomId: chatId },
 		skip: !chatId,
 		pollInterval: 5000,
 		onError: (error) => {
-			sweetErrorAlert('채팅방 정보를 불러오는데 실패했습니다.');
+			console.error('Chat room error:', error);
+			if (error.message.includes('채팅방을 찾을 수 없습니다') || error.message.includes('not found')) {
+				console.log('채팅방이 존재하지 않습니다.');
+			} else {
+				sweetErrorAlert('채팅방 정보를 불러오는데 실패했습니다.');
+			}
 		}
 	});
 
 	// 메시지 조회
-	const { data: messagesData, loading: loadingMessages } = useQuery(GET_CHAT_MESSAGES, {
+	const { data: messagesData, loading: loadingMessages, error: messagesError } = useQuery(GET_CHAT_MESSAGES, {
 		variables: { 
 			input: { 
-				chatId: chatId || '', 
+				roomId: chatId || '', 
 				page: 1, 
 				limit: 50 
 			} 
@@ -75,7 +80,12 @@ const ChatRoomPage: React.FC = () => {
 		skip: !chatId,
 		pollInterval: 3000,
 		onError: (error) => {
-			sweetErrorAlert('메시지를 불러오는데 실패했습니다.');
+			console.error('Messages error:', error);
+			if (error.message.includes('채팅방을 찾을 수 없습니다') || error.message.includes('not found')) {
+				console.log('채팅방이 존재하지 않습니다.');
+			} else {
+				sweetErrorAlert('메시지를 불러오는데 실패했습니다.');
+			}
 		}
 	});
 
@@ -88,7 +98,7 @@ const ChatRoomPage: React.FC = () => {
 	});
 
 	// 메시지 읽음 처리
-	const [markMessagesAsRead] = useMutation(MARK_MESSAGES_AS_READ, {
+	const [markAsRead] = useMutation(MARK_AS_READ, {
 		onError: (error) => {
 			console.error('Mark messages as read error:', error);
 		}
@@ -103,7 +113,13 @@ const ChatRoomPage: React.FC = () => {
 
 	// 자동 스크롤
 	const scrollToBottom = () => {
-		messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+		try {
+			if (messagesEndRef.current) {
+				messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+			}
+		} catch (error) {
+			console.error('Scroll to bottom error:', error);
+		}
 	};
 
 	useEffect(() => {
@@ -116,28 +132,43 @@ const ChatRoomPage: React.FC = () => {
 		if (!container) return;
 
 		const handleScroll = () => {
-			const { scrollTop, scrollHeight, clientHeight } = container;
-			const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
-			setShowScrollToBottom(!isNearBottom);
+			try {
+				if (!container || !container.scrollTop) return;
+				const { scrollTop, scrollHeight, clientHeight } = container;
+				const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+				setShowScrollToBottom(!isNearBottom);
+			} catch (error) {
+				console.error('Scroll handler error:', error);
+			}
 		};
 
-		container.addEventListener('scroll', handleScroll);
-		return () => container.removeEventListener('scroll', handleScroll);
+		// 약간의 지연을 두어 DOM이 완전히 렌더링된 후 이벤트 리스너 추가
+		const timeoutId = setTimeout(() => {
+			if (container) {
+				container.addEventListener('scroll', handleScroll);
+			}
+		}, 100);
+
+		return () => {
+			clearTimeout(timeoutId);
+			if (container) {
+				container.removeEventListener('scroll', handleScroll);
+			}
+		};
 	}, []);
 
 	// 채팅방 진입 시 메시지 읽음 처리
 	useEffect(() => {
-		if (chatId && userId && messages.length > 0) {
-			markMessagesAsRead({
+		if (chatId && messages.length > 0) {
+			markAsRead({
 				variables: {
 					input: {
-						chatId: chatId as string,
-						userId
-					} as MarkMessagesReadInput
+						roomId: chatId as string
+					}
 				}
 			});
 		}
-	}, [chatId, userId, messages, markMessagesAsRead]);
+	}, [chatId, messages, markAsRead]);
 
 	// 입력창 자동 높이 조절
 	const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -160,12 +191,20 @@ const ChatRoomPage: React.FC = () => {
 
 		const userMessage: ChatMessage = {
 			_id: `temp-${Date.now()}`,
-			chatId: chatId as string,
-			senderId: userId,
-			senderType: 'USER',
+			messageId: `temp-${Date.now()}`,
+			roomId: chatId as string,
 			content: inputMessage,
-			timestamp: new Date().toISOString(),
-			isRead: false
+			senderId: userId,
+			messageType: 'TEXT',
+			status: 'SENDING',
+			senderNickname: '나',
+			isAgent: false,
+			isEdited: false,
+			isDeleted: false,
+			isPinned: false,
+			isSystem: false,
+			createdAt: new Date().toISOString(),
+			updatedAt: new Date().toISOString()
 		};
 
 		// 즉시 UI에 메시지 추가
@@ -182,9 +221,7 @@ const ChatRoomPage: React.FC = () => {
 			await sendMessage({
 				variables: {
 					input: {
-						chatId: chatId as string,
-						senderId: userId,
-						senderType: 'USER',
+						roomId: chatId as string,
 						content: inputMessage
 					} as SendMessageInput
 				}
@@ -197,13 +234,35 @@ const ChatRoomPage: React.FC = () => {
 		}
 	};
 
-	const formatTime = (timestamp: string) => {
-		const date = new Date(timestamp);
+	const formatTime = (createdAt: string) => {
+		const date = new Date(createdAt);
 		return date.toLocaleTimeString('ko-KR', { 
 			hour: '2-digit', 
 			minute: '2-digit' 
 		});
 	};
+
+	// 채팅방이 존재하지 않는 경우 처리
+	if (chatRoomError && (chatRoomError.message.includes('채팅방을 찾을 수 없습니다') || chatRoomError.message.includes('not found'))) {
+		return (
+			<Box 
+				display="flex" 
+				justifyContent="center" 
+				alignItems="center" 
+				minHeight="400px"
+				flexDirection="column"
+				gap={2}
+			>
+				<CircularProgress size={60} thickness={4} />
+				<Typography variant="h6" color="text.secondary">
+					채팅방이 존재하지 않습니다.
+				</Typography>
+				<Typography variant="body2" color="text.secondary">
+					올바른 채팅방 ID를 확인해주세요.
+				</Typography>
+			</Box>
+		);
+	}
 
 	if (loadingChatRoom || loadingMessages) {
 		return (
@@ -317,11 +376,11 @@ const ChatRoomPage: React.FC = () => {
 					</Box>
 				) : (
 					<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-						{messages.map((message, index) => {
-							const isMyMessage = message.senderType === 'USER';
-							
-							return (
-								<Fade in={true} timeout={300 + index * 50} key={message._id}>
+						{					messages.map((message, index) => {
+						const isMyMessage = message.senderId === userId;
+						
+						return (
+							<Fade in={true} timeout={300 + index * 50} key={message._id}>
 									<Box sx={{ 
 										display: 'flex', 
 										justifyContent: isMyMessage ? 'flex-end' : 'flex-start',
@@ -355,11 +414,11 @@ const ChatRoomPage: React.FC = () => {
 													justifyContent: 'flex-end'
 												}}>
 													<Typography variant="caption" sx={{ opacity: 0.7 }}>
-														{formatTime(message.timestamp)}
+														{formatTime(message.createdAt)}
 													</Typography>
 													{isMyMessage && (
 														<Box sx={{ display: 'flex', alignItems: 'center' }}>
-															{message.isRead ? (
+															{message.status === 'READ' ? (
 																<Box sx={{ 
 																	width: 12, 
 																	height: 12, 

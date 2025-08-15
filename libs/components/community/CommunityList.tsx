@@ -237,7 +237,7 @@ const CommunityList: React.FC = () => {
 
   // 필터링된 게시글 목록
   const filteredArticles = useMemo(() => {
-    let filtered = mockArticles;
+    let filtered = [...mockArticles]; // 배열을 안전하게 복사
 
     // 카테고리 필터링
     if (selectedCategory !== 'ALL') {
@@ -254,25 +254,26 @@ const CommunityList: React.FC = () => {
       );
     }
 
-    // 정렬
+    // 정렬 (안전한 배열 복사 후 정렬)
+    const sortedFiltered = [...filtered];
     switch (sortBy) {
       case 'latest':
-        filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        sortedFiltered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         break;
       case 'popular':
-        filtered.sort((a, b) => b.likes - a.likes);
+        sortedFiltered.sort((a, b) => b.likes - a.likes);
         break;
       case 'views':
-        filtered.sort((a, b) => b.views - a.views);
+        sortedFiltered.sort((a, b) => b.views - a.views);
         break;
       case 'comments':
-        filtered.sort((a, b) => b.comments - a.comments);
+        sortedFiltered.sort((a, b) => b.comments - a.comments);
         break;
       default:
-        filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        sortedFiltered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     }
-
-    return filtered;
+    
+    return sortedFiltered;
   }, [selectedCategory, searchTerm, sortBy]);
 
   const handleWriteArticle = () => {

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery } from '@apollo/client';
 import { GET_PROPERTY } from '../../../apollo/user/query';
 import { WebChat } from '../chat/WebChat';
+import { RelatedProperties } from './RelatedProperties';
 import useDeviceDetect from '../../hooks/useDeviceDetect';
 import { sweetMixinSuccessAlert } from '../../sweetAlert';
 
@@ -160,6 +161,9 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) =>
 					onClose={handleWebChatClose}
 				/>
 			)}
+
+			{/* 다른 매물 둘러보기 */}
+			<RelatedProperties currentPropertyId={propertyId} />
 		</div>
 	);
 }; 

@@ -400,27 +400,22 @@ export const CREATE_CHAT_ROOM = gql`
 	mutation CreateChatRoom($input: CreateChatRoomInput!) {
 		createChatRoom(input: $input) {
 			_id
-			propertyId
+			roomId
+			roomType
 			userId
 			agentId
+			propertyId
 			status
-			unreadCount {
-				userId
-				agentId
-			}
-			propertyData {
-				_id
-				propertyTitle
-				propertyPrice
-				propertyBrand
-				propertyModel
-				propertyImages
-			}
-			userData {
-				memberNick
-				memberFullName
-				memberImage
-			}
+			lastMessageContent
+			lastMessageSenderId
+			lastMessageTime
+			unreadCountForUser
+			unreadCountForAgent
+			propertyTitle
+			userNickname
+			agentNickname
+			createdAt
+			updatedAt
 		}
 	}
 `;
@@ -429,23 +424,27 @@ export const SEND_MESSAGE = gql`
 	mutation SendMessage($input: SendMessageInput!) {
 		sendMessage(input: $input) {
 			_id
-			chatId
+			messageId
+			roomId
 			senderId
-			senderType
+			messageType
 			content
-			timestamp
-			isRead
-			readAt
+			status
+			senderAvatar
+			isAgent
+			isEdited
+			isDeleted
+			isPinned
+			isSystem
+			createdAt
+			updatedAt
 		}
 	}
 `;
 
-export const MARK_MESSAGES_AS_READ = gql`
-	mutation MarkMessagesAsRead($input: MarkMessagesReadInput!) {
-		markMessagesAsRead(input: $input) {
-			success
-			updatedCount
-		}
+export const MARK_AS_READ = gql`
+	mutation MarkAsRead($input: MarkAsReadInput!) {
+		markAsRead(input: $input)
 	}
 `;
 
@@ -453,6 +452,7 @@ export const UPDATE_CHAT_STATUS = gql`
 	mutation UpdateChatStatus($input: UpdateChatStatusInput!) {
 		updateChatStatus(input: $input) {
 			_id
+			roomId
 			status
 			agentId
 			updatedAt

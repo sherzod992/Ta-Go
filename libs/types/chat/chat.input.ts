@@ -1,12 +1,12 @@
 export interface CreateChatRoomInput {
+	roomType: string;
+	agentId?: string;
 	propertyId: string;
 	userId?: string;
 }
 
 export interface SendMessageInput {
-	chatId: string;
-	senderId: string;
-	senderType: 'USER' | 'AGENT';
+	roomId: string;
 	content: string;
 }
 
@@ -18,18 +18,40 @@ export interface ChatRoomQueryInput {
 }
 
 export interface ChatMessagesQueryInput {
-	chatId: string;
+	roomId: string;
 	page?: number;
 	limit?: number;
 }
 
 export interface MarkMessagesReadInput {
-	chatId: string;
+	roomId: string;
 	userId: string;
 }
 
+export interface MarkAsReadInput {
+	roomId: string;
+}
+
 export interface UpdateChatStatusInput {
-	chatId: string;
+	roomId: string;
 	status: 'ACTIVE' | 'CLOSED' | 'PENDING';
 	agentId?: string;
+}
+
+// 백엔드 개선 사항에 따라 추가된 새로운 입력 타입들
+export interface CheckChatRoomExistsInput {
+	roomId: string;
+}
+
+export interface GetAllUserChatRoomsInput {
+	userId: string;
+}
+
+// 메시지 조회 문제 진단을 위한 새로운 입력 타입들
+export interface GetChatRoomMessagesInput {
+	roomId: string;
+}
+
+export interface GetMessageDebugInfoInput {
+	roomId: string;
 }

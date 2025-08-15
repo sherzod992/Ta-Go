@@ -37,7 +37,7 @@ export const WebChat: React.FC<WebChatProps> = ({
 
 	// 채팅방 생성 또는 기존 채팅방 조회
 	const { data: chatRoomData, loading: loadingChatRoom } = useQuery(GET_CHAT_ROOM, {
-		variables: { input: chatId },
+		variables: { roomId: chatId },
 		skip: !chatId,
 		pollInterval: 5000 // 5초마다 새로고침
 	});
@@ -46,7 +46,7 @@ export const WebChat: React.FC<WebChatProps> = ({
 	const { data: messagesData, loading: loadingMessages } = useQuery(GET_CHAT_MESSAGES, {
 		variables: { 
 			input: { 
-				chatId: chatId || '', 
+				roomId: chatId || '', 
 				page: 1, 
 				limit: 50 
 			} 
@@ -57,7 +57,13 @@ export const WebChat: React.FC<WebChatProps> = ({
 
 	// 자동 스크롤
 	const scrollToBottom = () => {
-		messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+		try {
+			if (messagesEndRef.current) {
+				messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+			}
+		} catch (error) {
+			console.error('Scroll to bottom error:', error);
+		}
 	};
 
 	useEffect(() => {
@@ -68,9 +74,12 @@ export const WebChat: React.FC<WebChatProps> = ({
 	useEffect(() => {
 		const initializeChat = async () => {
 			try {
+				console.log('WebChat 채팅방 생성 시작:', { propertyId, userId });
+				
 				const result = await createChatRoom({
 					variables: {
 						input: {
+							roomType: 'PROPERTY_INQUIRY',
 							propertyId,
 							userId
 						}
@@ -78,21 +87,32 @@ export const WebChat: React.FC<WebChatProps> = ({
 				});
 
 				if (result.data?.createChatRoom) {
-					setChatId(result.data.createChatRoom._id);
+					const newRoomId = result.data.createChatRoom.roomId;
+					console.log('WebChat 채팅방 생성 성공:', newRoomId);
+					setChatId(newRoomId);
 					
 					// 초기 메시지 추가
 					const initialMessage: ChatMessage = {
 						_id: 'welcome',
-						chatId: result.data.createChatRoom._id,
-						senderId: 'system',
-						senderType: 'AGENT',
+						messageId: 'welcome',
+						roomId: newRoomId,
 						content: '안녕하세요! 이 매물에 대해 궁금한 점이 있으시면 언제든 말씀해 주세요.',
-						timestamp: new Date().toISOString(),
-						isRead: true
+						senderId: 'system',
+						messageType: 'SYSTEM',
+						status: 'SENT',
+						senderNickname: '시스템',
+						isAgent: false,
+						isEdited: false,
+						isDeleted: false,
+						isPinned: false,
+						isSystem: true,
+						createdAt: new Date().toISOString(),
+						updatedAt: new Date().toISOString()
 					};
-					setMessages([initialMessage]);
+					setMessages([{ ...initialMessage }]);
 				}
 			} catch (error) {
+				console.error('Chat initialization error:', error);
 				sweetErrorAlert('채팅방 생성에 실패했습니다.');
 			}
 		};
@@ -105,7 +125,11 @@ export const WebChat: React.FC<WebChatProps> = ({
 	// 메시지 업데이트
 	useEffect(() => {
 		if (messagesData?.getChatMessages?.list) {
-			setMessages(messagesData.getChatMessages.list);
+			// 배열을 안전하게 복사하여 읽기 전용 에러 방지
+			const messagesList = Array.isArray(messagesData.getChatMessages.list) 
+				? [...messagesData.getChatMessages.list]
+				: [];
+			setMessages(messagesList);
 		}
 	}, [messagesData]);
 
@@ -130,16 +154,27 @@ export const WebChat: React.FC<WebChatProps> = ({
 
 		const userMessage: ChatMessage = {
 			_id: `temp-${Date.now()}`,
-			chatId,
-			senderId: userId,
-			senderType: 'USER',
+			messageId: `temp-${Date.now()}`,
+			roomId: chatId,
 			content: inputMessage,
-			timestamp: new Date().toISOString(),
-			isRead: false
+			senderId: userId,
+			messageType: 'TEXT',
+			status: 'SENDING',
+			senderNickname: '나',
+			isAgent: false,
+			isEdited: false,
+			isDeleted: false,
+			isPinned: false,
+			isSystem: false,
+			createdAt: new Date().toISOString(),
+			updatedAt: new Date().toISOString()
 		};
 
-		// 즉시 UI에 메시지 추가
-		setMessages(prev => [...prev, userMessage]);
+		// 즉시 UI에 메시지 추가 (안전한 배열 복사)
+		setMessages(prev => {
+			const newMessages = Array.isArray(prev) ? [...prev] : [];
+			return [...newMessages, userMessage];
+		});
 		setInputMessage('');
 		setIsTyping(true);
 
@@ -150,9 +185,7 @@ export const WebChat: React.FC<WebChatProps> = ({
 
 		try {
 			const messageInput: SendMessageInput = {
-				chatId,
-				senderId: userId,
-				senderType: 'USER',
+				roomId: chatId,
 				content: inputMessage
 			};
 
@@ -164,15 +197,26 @@ export const WebChat: React.FC<WebChatProps> = ({
 			setTimeout(() => {
 				const agentMessage: ChatMessage = {
 					_id: `agent-${Date.now()}`,
-					chatId,
-					senderId: 'agent',
-					senderType: 'AGENT',
+					messageId: `agent-${Date.now()}`,
+					roomId: chatId,
 					content: '문의해 주셔서 감사합니다! 곧 담당자가 연락드리겠습니다.',
-					timestamp: new Date().toISOString(),
-					isRead: false
+					senderId: 'agent',
+					messageType: 'TEXT',
+					status: 'SENT',
+					senderNickname: '담당자',
+					isAgent: true,
+					isEdited: false,
+					isDeleted: false,
+					isPinned: false,
+					isSystem: false,
+					createdAt: new Date().toISOString(),
+					updatedAt: new Date().toISOString()
 				};
 
-				setMessages(prev => [...prev, agentMessage]);
+				setMessages(prev => {
+					const newMessages = Array.isArray(prev) ? [...prev] : [];
+					return [...newMessages, agentMessage];
+				});
 				setIsTyping(false);
 			}, 1500);
 
@@ -199,8 +243,8 @@ export const WebChat: React.FC<WebChatProps> = ({
 		}
 	};
 
-	const formatTime = (timestamp: string) => {
-		return new Date(timestamp).toLocaleTimeString('ko-KR', {
+	const formatTime = (createdAt: string) => {
+		return new Date(createdAt).toLocaleTimeString('ko-KR', {
 			hour: '2-digit',
 			minute: '2-digit'
 		});
@@ -243,10 +287,10 @@ export const WebChat: React.FC<WebChatProps> = ({
 					messages.map((message) => (
 						<div
 							key={message._id}
-							className={`message ${message.senderType === 'USER' ? 'user-message' : 'agent-message'}`}
+							className={`message ${message.senderId === userId ? 'user-message' : 'agent-message'}`}
 						>
 							<div className="message-content">{message.content}</div>
-							<div className="message-time">{formatTime(message.timestamp)}</div>
+							<div className="message-time">{formatTime(message.createdAt)}</div>
 						</div>
 					))
 				)}

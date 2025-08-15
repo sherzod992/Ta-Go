@@ -133,13 +133,14 @@ const AgentDesktop: React.FC = () => {
       });
     }
 
-    // 정렬
+    // 정렬 (안전한 배열 복사 후 정렬)
+    const sortedAgents = [...filteredAgents];
     switch (sortBy) {
       case 'rating':
-        filteredAgents.sort((a: any, b: any) => (b.memberRank || 0) - (a.memberRank || 0));
+        sortedAgents.sort((a: any, b: any) => (b.memberRank || 0) - (a.memberRank || 0));
         break;
       case 'property-count':
-        filteredAgents.sort((a: any, b: any) => {
+        sortedAgents.sort((a: any, b: any) => {
           const getPropertyCount = (agent: any) => {
             if (Array.isArray(agent.memberProperties)) {
               return agent.memberProperties.length;
@@ -157,16 +158,16 @@ const AgentDesktop: React.FC = () => {
         });
         break;
       case 'follower-count':
-        filteredAgents.sort((a: any, b: any) => (b.memberFollowers?.length || 0) - (a.memberFollowers?.length || 0));
+        sortedAgents.sort((a: any, b: any) => (b.memberFollowers?.length || 0) - (a.memberFollowers?.length || 0));
         break;
       case 'name':
-        filteredAgents.sort((a: any, b: any) => (a.memberFullName || '').localeCompare(b.memberFullName || ''));
+        sortedAgents.sort((a: any, b: any) => (a.memberFullName || '').localeCompare(b.memberFullName || ''));
         break;
       default:
-        filteredAgents.sort((a: any, b: any) => (b.memberRank || 0) - (a.memberRank || 0));
+        sortedAgents.sort((a: any, b: any) => (b.memberRank || 0) - (a.memberRank || 0));
     }
 
-    return filteredAgents;
+    return sortedAgents;
   }, [data, selectedSpecialty, sortBy]);
 
   const handleContact = (agent: any) => {

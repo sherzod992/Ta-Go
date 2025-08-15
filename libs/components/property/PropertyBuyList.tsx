@@ -224,7 +224,7 @@ const PropertyBuyList: React.FC = () => {
 
   // 필터링된 매물 목록
   const filteredProperties = useMemo(() => {
-    let filtered = mockProperties;
+    let filtered = Array.isArray(mockProperties) ? [...mockProperties] : []; // 배열을 안전하게 복사
 
     // 검색어 필터링
     if (searchTerm) {
@@ -260,31 +260,32 @@ const PropertyBuyList: React.FC = () => {
       property.year >= yearRange[0] && property.year <= yearRange[1]
     );
 
-    // 정렬
+    // 정렬 (안전한 배열 복사 후 정렬)
+    const sortedFiltered = [...filtered];
     switch (sortBy) {
       case 'price-low':
-        filtered.sort((a, b) => a.price - b.price);
+        sortedFiltered.sort((a, b) => a.price - b.price);
         break;
       case 'price-high':
-        filtered.sort((a, b) => b.price - a.price);
+        sortedFiltered.sort((a, b) => b.price - a.price);
         break;
       case 'year-new':
-        filtered.sort((a, b) => b.year - a.year);
+        sortedFiltered.sort((a, b) => b.year - a.year);
         break;
       case 'year-old':
-        filtered.sort((a, b) => a.year - b.year);
+        sortedFiltered.sort((a, b) => a.year - b.year);
         break;
       case 'mileage-low':
-        filtered.sort((a, b) => a.mileage - b.mileage);
+        sortedFiltered.sort((a, b) => a.mileage - b.mileage);
         break;
       case 'rating-high':
-        filtered.sort((a, b) => b.rating - a.rating);
+        sortedFiltered.sort((a, b) => b.rating - a.rating);
         break;
       default:
-        filtered.sort((a, b) => b.year - a.year);
+        sortedFiltered.sort((a, b) => b.year - a.year);
     }
-
-    return filtered;
+    
+    return sortedFiltered;
   }, [searchTerm, selectedType, selectedLocation, selectedBrand, priceRange, yearRange, sortBy]);
 
   const handleFavoriteToggle = (propertyId: number) => {

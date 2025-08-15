@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useQuery, useMutation } from '@apollo/client';
-import { GET_CHAT_ROOM, GET_CHAT_MESSAGES } from '../../../apollo/user/query';
-import { CREATE_CHAT_ROOM, SEND_MESSAGE, MARK_MESSAGES_AS_READ } from '../../../apollo/user/mutation';
+import { GET_CHAT_ROOM, GET_CHAT_MESSAGES, CHECK_CHAT_ROOM_EXISTS, GET_ALL_USER_CHAT_ROOMS } from '../../../apollo/user/query';
+import { CREATE_CHAT_ROOM, SEND_MESSAGE, MARK_AS_READ } from '../../../apollo/user/mutation';
 import { ChatMessage, ChatRoom } from '../../../libs/types/chat/chat';
-import { CreateChatRoomInput, SendMessageInput, MarkMessagesReadInput } from '../../../libs/types/chat/chat.input';
+import { CreateChatRoomInput, SendMessageInput } from '../../../libs/types/chat/chat.input';
 import { sweetErrorAlert, sweetMixinSuccessAlert } from '../../../libs/sweetAlert';
 import useDeviceDetect from '../../../libs/hooks/useDeviceDetect';
 import LayoutBasic from '../../../libs/components/layout/LayoutBasic';
@@ -43,6 +43,7 @@ const PropertyChatPage: React.FC = () => {
 	const [inputMessage, setInputMessage] = useState('');
 	const [isTyping, setIsTyping] = useState(false);
 	const [showPropertyDialog, setShowPropertyDialog] = useState(false);
+	const [isInitializing, setIsInitializing] = useState(true);
 	
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 	const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -53,25 +54,59 @@ const PropertyChatPage: React.FC = () => {
 	// 채팅방 생성
 	const [createChatRoom, { loading: creatingChat }] = useMutation(CREATE_CHAT_ROOM, {
 		onError: (error) => {
+			console.error('채팅방 생성 에러:', error);
 			sweetErrorAlert('채팅방 생성에 실패했습니다.');
 		}
 	});
 
+	// 사용자의 모든 채팅방 조회 (디버깅용)
+	const { data: userChatRoomsData } = useQuery(GET_ALL_USER_CHAT_ROOMS, {
+		variables: { userId: userId || '' },
+		skip: !userId,
+		onError: (error) => {
+			console.error('사용자 채팅방 조회 에러:', error);
+		}
+	});
+
+	// 채팅방 존재 여부 확인
+	const { data: chatRoomExistsData, refetch: refetchChatRoomExists } = useQuery(CHECK_CHAT_ROOM_EXISTS, {
+		variables: { roomId: chatId || '' },
+		skip: !chatId,
+		onError: (error) => {
+			console.error('채팅방 존재 확인 에러:', error);
+		}
+	});
+
 	// 채팅방 정보 조회
-	const { data: chatRoomData, loading: loadingChatRoom } = useQuery(GET_CHAT_ROOM, {
-		variables: { input: chatId },
+	const { data: chatRoomData, loading: loadingChatRoom, error: chatRoomError, refetch: refetchChatRoom } = useQuery(GET_CHAT_ROOM, {
+		variables: { roomId: chatId },
 		skip: !chatId,
 		pollInterval: 5000,
 		onError: (error) => {
-			sweetErrorAlert('채팅방 정보를 불러오는데 실패했습니다.');
+			console.error('채팅방 조회 에러:', error);
+			// 백엔드 개선 사항에 따라 더 구체적인 에러 처리
+			if (error.message.includes('채팅방을 찾을 수 없습니다') || 
+				error.message.includes('not found') ||
+				error.message.includes('Chat room not found')) {
+				console.log('채팅방이 존재하지 않습니다. 새로 생성합니다.');
+				handleCreateNewChatRoom();
+			} else if (error.message.includes('권한이 없습니다') || 
+					   error.message.includes('permission denied') ||
+					   error.message.includes('Unauthorized')) {
+				console.log('채팅방 접근 권한이 없습니다.');
+				sweetErrorAlert('이 채팅방에 접근할 권한이 없습니다.');
+			} else {
+				console.error('알 수 없는 채팅방 에러:', error);
+				sweetErrorAlert('채팅방 정보를 불러오는데 실패했습니다.');
+			}
 		}
 	});
 
 	// 메시지 조회
-	const { data: messagesData, loading: loadingMessages } = useQuery(GET_CHAT_MESSAGES, {
+	const { data: messagesData, loading: loadingMessages, error: messagesError, refetch: refetchMessages } = useQuery(GET_CHAT_MESSAGES, {
 		variables: { 
 			input: { 
-				chatId: chatId || '', 
+				roomId: chatId || '', 
 				page: 1, 
 				limit: 50 
 			} 
@@ -79,62 +114,135 @@ const PropertyChatPage: React.FC = () => {
 		skip: !chatId,
 		pollInterval: 3000,
 		onError: (error) => {
-			sweetErrorAlert('메시지를 불러오는데 실패했습니다.');
+			console.error('메시지 조회 에러:', error);
+			// 백엔드 개선 사항에 따라 더 구체적인 에러 처리
+			if (error.message.includes('채팅방을 찾을 수 없습니다') || 
+				error.message.includes('not found') ||
+				error.message.includes('Chat room not found')) {
+				console.log('메시지 조회 시 채팅방이 존재하지 않습니다.');
+				handleCreateNewChatRoom();
+			} else if (error.message.includes('권한이 없습니다') || 
+					   error.message.includes('permission denied') ||
+					   error.message.includes('Unauthorized')) {
+				console.log('메시지 조회 권한이 없습니다.');
+				sweetErrorAlert('메시지를 조회할 권한이 없습니다.');
+			} else {
+				console.error('알 수 없는 메시지 조회 에러:', error);
+				sweetErrorAlert('메시지를 불러오는데 실패했습니다.');
+			}
 		}
 	});
 
 	// 메시지 전송
 	const [sendMessage, { loading: sendingMessage }] = useMutation(SEND_MESSAGE, {
 		onError: (error) => {
+			console.error('메시지 전송 에러:', error);
 			sweetErrorAlert('메시지 전송에 실패했습니다.');
 			setIsTyping(false);
 		}
 	});
 
 	// 메시지 읽음 처리
-	const [markMessagesAsRead] = useMutation(MARK_MESSAGES_AS_READ, {
+	const [markAsRead] = useMutation(MARK_AS_READ, {
 		onError: (error) => {
-			console.error('Mark messages as read error:', error);
+			console.error('메시지 읽음 처리 에러:', error);
 		}
 	});
 
-	// 채팅방 초기화
+	// 새로운 채팅방 생성 처리
+	const handleCreateNewChatRoom = async () => {
+		if (!propertyId || !userId) {
+			console.error('매물 ID 또는 사용자 ID가 없습니다.');
+			return;
+		}
+
+		try {
+			console.log('새 채팅방 생성 시작:', { propertyId, userId });
+			
+			const result = await createChatRoom({
+				variables: {
+					input: {
+						roomType: 'PROPERTY_INQUIRY',
+						propertyId: propertyId as string,
+						userId: userId
+					} as CreateChatRoomInput
+				}
+			});
+
+			if (result.data?.createChatRoom) {
+				const newRoomId = result.data.createChatRoom.roomId;
+				console.log('채팅방 생성 성공:', newRoomId);
+				setChatId(newRoomId);
+				
+				// 초기 메시지 추가
+				const initialMessage: ChatMessage = {
+					_id: 'welcome',
+					messageId: 'welcome',
+					roomId: newRoomId,
+					content: '안녕하세요! 이 매물에 대해 궁금한 점이 있으시면 언제든 말씀해 주세요.',
+					senderId: 'system',
+					messageType: 'SYSTEM',
+					status: 'SENT',
+					senderNickname: '시스템',
+					isAgent: false,
+					isEdited: false,
+					isDeleted: false,
+					isPinned: false,
+					isSystem: true,
+					createdAt: new Date().toISOString(),
+					updatedAt: new Date().toISOString()
+				};
+				setMessages([initialMessage]);
+				
+				// 채팅방 존재 여부 확인 쿼리 새로고침
+				await refetchChatRoomExists();
+			}
+		} catch (error) {
+			console.error('채팅방 생성 중 에러:', error);
+			sweetErrorAlert('채팅방 생성에 실패했습니다.');
+		}
+	};
+
+	// 채팅방 초기화 (개선된 로직)
 	useEffect(() => {
 		const initializeChat = async () => {
-			if (!propertyId || !userId || chatId) return;
+			if (!propertyId || !userId) {
+				console.log('매물 ID 또는 사용자 ID가 없어 초기화를 건너뜁니다.');
+				setIsInitializing(false);
+				return;
+			}
 
 			try {
-				const result = await createChatRoom({
-					variables: {
-						input: {
-							propertyId: propertyId as string,
-							userId: userId || undefined
-						} as CreateChatRoomInput
-					}
-				});
-
-				if (result.data?.createChatRoom) {
-					setChatId(result.data.createChatRoom._id);
+				console.log('채팅 초기화 시작:', { propertyId, userId });
+				
+				// 사용자의 기존 채팅방 확인
+				if (userChatRoomsData?.getAllUserChatRooms) {
+					const existingRoom = userChatRoomsData.getAllUserChatRooms.find(
+						(room: any) => room.propertyId === propertyId && room.roomType === 'PROPERTY_INQUIRY'
+					);
 					
-					// 초기 메시지 추가
-					const initialMessage: ChatMessage = {
-						_id: 'welcome',
-						chatId: result.data.createChatRoom._id,
-						senderId: 'system',
-						senderType: 'AGENT',
-						content: '안녕하세요! 이 매물에 대해 궁금한 점이 있으시면 언제든 말씀해 주세요.',
-						timestamp: new Date().toISOString(),
-						isRead: true
-					};
-					setMessages([initialMessage]);
+					if (existingRoom) {
+						console.log('기존 채팅방 발견:', existingRoom.roomId);
+						setChatId(existingRoom.roomId);
+						setIsInitializing(false);
+						return;
+					}
 				}
+
+				// 기존 채팅방이 없으면 새로 생성
+				console.log('기존 채팅방이 없어 새로 생성합니다.');
+				await handleCreateNewChatRoom();
+				
 			} catch (error) {
-				console.error('Chat initialization error:', error);
+				console.error('채팅 초기화 에러:', error);
+				sweetErrorAlert('채팅 초기화에 실패했습니다.');
+			} finally {
+				setIsInitializing(false);
 			}
 		};
 
 		initializeChat();
-	}, [propertyId, userId, chatId, createChatRoom]);
+	}, [propertyId, userId, userChatRoomsData]);
 
 	// 메시지 업데이트
 	useEffect(() => {
@@ -145,7 +253,13 @@ const PropertyChatPage: React.FC = () => {
 
 	// 자동 스크롤
 	const scrollToBottom = () => {
-		messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+		try {
+			if (messagesEndRef.current) {
+				messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+			}
+		} catch (error) {
+			console.error('스크롤 에러:', error);
+		}
 	};
 
 	useEffect(() => {
@@ -154,17 +268,16 @@ const PropertyChatPage: React.FC = () => {
 
 	// 채팅방 진입 시 메시지 읽음 처리
 	useEffect(() => {
-		if (chatId && userId && messages.length > 0) {
-			markMessagesAsRead({
+		if (chatId && messages.length > 0) {
+			markAsRead({
 				variables: {
 					input: {
-						chatId,
-						userId
-					} as MarkMessagesReadInput
+						roomId: chatId
+					}
 				}
 			});
 		}
-	}, [chatId, userId, messages, markMessagesAsRead]);
+	}, [chatId, messages, markAsRead]);
 
 	// 입력창 자동 높이 조절
 	const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -187,12 +300,20 @@ const PropertyChatPage: React.FC = () => {
 
 		const userMessage: ChatMessage = {
 			_id: `temp-${Date.now()}`,
-			chatId,
-			senderId: userId,
-			senderType: 'USER',
+			messageId: `temp-${Date.now()}`,
+			roomId: chatId,
 			content: inputMessage,
-			timestamp: new Date().toISOString(),
-			isRead: false
+			senderId: userId,
+			messageType: 'TEXT',
+			status: 'SENDING',
+			senderNickname: '나',
+			isAgent: false,
+			isEdited: false,
+			isDeleted: false,
+			isPinned: false,
+			isSystem: false,
+			createdAt: new Date().toISOString(),
+			updatedAt: new Date().toISOString()
 		};
 
 		// 즉시 UI에 메시지 추가
@@ -207,9 +328,7 @@ const PropertyChatPage: React.FC = () => {
 
 		try {
 			const messageInput: SendMessageInput = {
-				chatId,
-				senderId: userId,
-				senderType: 'USER',
+				roomId: chatId,
 				content: inputMessage
 			};
 
@@ -225,15 +344,15 @@ const PropertyChatPage: React.FC = () => {
 		}
 	};
 
-	const formatTime = (timestamp: string) => {
-		return new Date(timestamp).toLocaleTimeString('ko-KR', {
+	const formatTime = (createdAt: string) => {
+		return new Date(createdAt).toLocaleTimeString('ko-KR', {
 			hour: '2-digit',
 			minute: '2-digit'
 		});
 	};
 
-	const formatDate = (timestamp: string) => {
-		return new Date(timestamp).toLocaleDateString('ko-KR', {
+	const formatDate = (createdAt: string) => {
+		return new Date(createdAt).toLocaleDateString('ko-KR', {
 			year: 'numeric',
 			month: 'long',
 			day: 'numeric'
@@ -260,17 +379,53 @@ const PropertyChatPage: React.FC = () => {
 		}
 	};
 
-	if (creatingChat || loadingChatRoom || loadingMessages) {
+	// 로딩 상태 처리
+	if (isInitializing || creatingChat || loadingChatRoom || loadingMessages) {
 		return (
-			<Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+			<Box display="flex" justifyContent="center" alignItems="center" minHeight="400px" flexDirection="column" gap={2}>
 				<CircularProgress />
+				<Typography variant="h6" color="text.secondary">
+					{isInitializing ? '채팅방을 초기화하는 중...' : '채팅 정보를 불러오는 중...'}
+				</Typography>
+			</Box>
+		);
+	}
+
+	// 채팅방이 존재하지 않는 경우 처리 (개선된 에러 처리)
+	if (chatRoomError && (
+		chatRoomError.message.includes('채팅방을 찾을 수 없습니다') || 
+		chatRoomError.message.includes('not found') ||
+		chatRoomError.message.includes('Chat room not found')
+	)) {
+		return (
+			<Box display="flex" justifyContent="center" alignItems="center" minHeight="400px" flexDirection="column" gap={2}>
+				<CircularProgress />
+				<Typography variant="h6" color="text.secondary">
+					채팅방을 생성하는 중...
+				</Typography>
+			</Box>
+		);
+	}
+
+	// 권한 에러 처리
+	if (chatRoomError && (
+		chatRoomError.message.includes('권한이 없습니다') || 
+		chatRoomError.message.includes('permission denied') ||
+		chatRoomError.message.includes('Unauthorized')
+	)) {
+		return (
+			<Box display="flex" justifyContent="center" alignItems="center" minHeight="400px" flexDirection="column" gap={2}>
+				<Typography variant="h6" color="error">
+					이 채팅방에 접근할 권한이 없습니다.
+				</Typography>
+				<Button variant="contained" onClick={() => router.back()}>
+					돌아가기
+				</Button>
 			</Box>
 		);
 	}
 
 	const chatRoom = chatRoomData?.getChatRoom;
-	const propertyData = chatRoom?.propertyData;
-	const agentData = chatRoom?.agentData;
 
 	return (
 		<Box sx={{ maxWidth: 800, margin: '0 auto', height: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -283,10 +438,10 @@ const PropertyChatPage: React.FC = () => {
 					
 					<Box flex={1} onClick={() => setShowPropertyDialog(true)} sx={{ cursor: 'pointer' }}>
 						<Typography variant="h6" fontWeight="bold">
-							{propertyData?.propertyTitle || '매물 정보 로딩 중...'}
+							{chatRoom?.propertyTitle || '매물 정보 로딩 중...'}
 						</Typography>
 						<Typography variant="body2" color="text.secondary">
-							{agentData?.memberFullName || '담당자 미배정'}
+							{chatRoom?.agentNickname || '담당자 미배정'}
 						</Typography>
 					</Box>
 
@@ -316,17 +471,17 @@ const PropertyChatPage: React.FC = () => {
 					</Box>
 				) : (
 					messages.map((message, index) => {
-						const isUser = message.senderType === 'USER';
+						const isUser = message.senderId === userId;
 						const showDate = index === 0 || 
-							new Date(message.timestamp).toDateString() !== 
-							new Date(messages[index - 1].timestamp).toDateString();
+							new Date(message.createdAt).toDateString() !== 
+							new Date(messages[index - 1].createdAt).toDateString();
 
 						return (
 							<React.Fragment key={message._id}>
 								{showDate && (
 									<Box textAlign="center" my={2}>
 										<Chip 
-											label={formatDate(message.timestamp)} 
+											label={formatDate(message.createdAt)} 
 											size="small" 
 											variant="outlined"
 										/>
@@ -360,8 +515,8 @@ const PropertyChatPage: React.FC = () => {
 												mt: 0.5
 											}}
 										>
-											{formatTime(message.timestamp)}
-											{message.isRead && isUser && ' ✓'}
+											{formatTime(message.createdAt)}
+											{message.status === 'READ' && isUser && ' ✓'}
 										</Typography>
 									</Box>
 								</Box>

@@ -10,7 +10,7 @@ import MyFavorites from '../../libs/components/mypage/MyFavorites';
 import RecentlyVisited from '../../libs/components/mypage/RecentlyVisited';
 import MyArticles from '../../libs/components/mypage/MyArticles';
 import MyProfile from '../../libs/components/mypage/MyProfile';
-import ChatListPage from './chat';
+import ChatListPage from './chat/index';
 
 const MyPage: React.FC = () => {
   const router = useRouter();

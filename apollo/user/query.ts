@@ -761,29 +761,22 @@ export const GET_MEMBER_FOLLOWINGS = gql`
 		getMyChatRooms(input: $input) {
 			list {
 				_id
-				propertyId
+				roomId
+				roomType
+				userId
 				agentId
+				propertyId
 				status
-				unreadCount {
-					userId
-					agentId
-				}
-				lastMessage
-				propertyData {
-					_id
-					propertyTitle
-					propertyPrice
-					propertyBrand
-					propertyModel
-					propertyImages
-				}
-				agentData {
-					memberNick
-					memberFullName
-					memberImage
-					memberEmail
-					memberPhone
-				}
+				lastMessageContent
+				lastMessageSenderId
+				lastMessageTime
+				unreadCountForUser
+				unreadCountForAgent
+				propertyTitle
+				userNickname
+				agentNickname
+				createdAt
+				updatedAt
 			}
 			totalUnreadCount
 		}
@@ -795,13 +788,20 @@ export const GET_CHAT_MESSAGES = gql`
 		getChatMessages(input: $input) {
 			list {
 				_id
-				chatId
+				messageId
+				roomId
 				senderId
-				senderType
+				messageType
 				content
-				timestamp
-				isRead
-				readAt
+				status
+				senderAvatar
+				isAgent
+				isEdited
+				isDeleted
+				isPinned
+				isSystem
+				createdAt
+				updatedAt
 			}
 			metaCounter {
 				total
@@ -811,40 +811,25 @@ export const GET_CHAT_MESSAGES = gql`
 `;
 
 export const GET_CHAT_ROOM = gql`
-	query GetChatRoom($input: String!) {
-		getChatRoom(chatId: $input) {
+	query GetChatRoom($roomId: String!) {
+		getChatRoom(roomId: $roomId) {
 			_id
-			propertyId
+			roomId
+			roomType
 			userId
 			agentId
+			propertyId
 			status
-			unreadCount {
-				userId
-				agentId
-			}
-			lastMessage
-			propertyData {
-				_id
-				propertyTitle
-				propertyPrice
-				propertyBrand
-				propertyModel
-				propertyImages
-			}
-			userData {
-				memberNick
-				memberFullName
-				memberImage
-				memberEmail
-				memberPhone
-			}
-			agentData {
-				memberNick
-				memberFullName
-				memberImage
-				memberEmail
-				memberPhone
-			}
+			lastMessageContent
+			lastMessageSenderId
+			lastMessageTime
+			unreadCountForUser
+			unreadCountForAgent
+			propertyTitle
+			userNickname
+			agentNickname
+			createdAt
+			updatedAt
 		}
 	}
 `;
@@ -852,5 +837,60 @@ export const GET_CHAT_ROOM = gql`
 export const GET_UNREAD_MESSAGE_COUNT = gql`
 	query GetUnreadMessageCount {
 		getUnreadMessageCount
+	}
+`;
+
+// 백엔드 개선 사항에 따라 추가된 새로운 쿼리들
+export const CHECK_CHAT_ROOM_EXISTS = gql`
+	query CheckChatRoomExists($roomId: String!) {
+		checkChatRoomExists(roomId: $roomId)
+	}
+`;
+
+export const GET_ALL_USER_CHAT_ROOMS = gql`
+	query GetAllUserChatRooms($userId: String!) {
+		getAllUserChatRooms(userId: $userId) {
+			roomId
+			roomType
+			propertyId
+			status
+			createdAt
+		}
+	}
+`;
+
+// 메시지 조회 문제 진단을 위한 새로운 쿼리들
+export const GET_CHAT_ROOM_MESSAGES = gql`
+	query GetChatRoomMessages($roomId: String!) {
+		getChatRoomMessages(roomId: $roomId) {
+			_id
+			messageId
+			roomId
+			senderId
+			messageType
+			content
+			status
+			senderNickname
+			isAgent
+			isEdited
+			isDeleted
+			isPinned
+			isSystem
+			createdAt
+			updatedAt
+		}
+	}
+`;
+
+export const GET_MESSAGE_DEBUG_INFO = gql`
+	query GetMessageDebugInfo($roomId: String!) {
+		getMessageDebugInfo(roomId: $roomId) {
+			totalMessages
+			messageCount
+			roomExists
+			lastMessage
+			firstMessage
+			debugInfo
+		}
 	}
 `;

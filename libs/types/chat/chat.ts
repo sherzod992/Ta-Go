@@ -1,47 +1,40 @@
 export interface ChatMessage {
 	_id: string;
-	chatId: string;
+	messageId: string;
+	roomId: string;
 	senderId: string;
-	senderType: 'USER' | 'AGENT';
+	messageType: string;
 	content: string;
-	timestamp: string;
-	isRead: boolean;
-	readAt?: string;
+	status: string;
+	senderNickname?: string;
+	senderAvatar?: string;
+	isAgent: boolean;
+	isEdited: boolean;
+	isDeleted: boolean;
+	isPinned: boolean;
+	isSystem: boolean;
+	createdAt: string;
+	updatedAt: string;
 }
 
 export interface ChatRoom {
 	_id: string;
-	propertyId: string;
+	roomId: string;
+	roomType: string;
 	userId: string;
 	agentId?: string;
+	propertyId: string;
 	status: 'ACTIVE' | 'CLOSED' | 'PENDING';
-	unreadCount: {
-		userId: number;
-		agentId: number;
-	};
-	lastMessage?: string;
-	propertyData?: {
-		_id: string;
-		propertyTitle: string;
-		propertyPrice: number;
-		propertyBrand: string;
-		propertyModel: string;
-		propertyImages: string[];
-	};
-	userData?: {
-		memberNick: string;
-		memberFullName: string;
-		memberImage?: string;
-		memberEmail?: string;
-		memberPhone?: string;
-	};
-	agentData?: {
-		memberNick: string;
-		memberFullName: string;
-		memberImage?: string;
-		memberEmail?: string;
-		memberPhone?: string;
-	};
+	lastMessageContent?: string;
+	lastMessageSenderId?: string;
+	lastMessageTime?: string;
+	unreadCountForUser: number;
+	unreadCountForAgent: number;
+	propertyTitle: string;
+	userNickname: string;
+	agentNickname?: string;
+	createdAt: string;
+	updatedAt: string;
 }
 
 export interface ChatListResponse {
