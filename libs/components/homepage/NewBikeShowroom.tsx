@@ -42,12 +42,10 @@ const NewBikeShowroom: React.FC = () => {
   if (loading) {
     return (
       <Box sx={{ py: 8, backgroundColor: 'white', textAlign: 'center' }}>
-        <Container maxWidth="lg">
-          <CircularProgress size={60} />
-          <Typography variant="h6" sx={{ mt: 2 }}>
-            {t('Loading new bikes...')}
-          </Typography>
-        </Container>
+        <CircularProgress size={60} />
+        <Typography variant="h6" sx={{ mt: 2 }}>
+          {t('Loading new bikes...')}
+        </Typography>
       </Box>
     );
   }
@@ -56,18 +54,15 @@ const NewBikeShowroom: React.FC = () => {
   if (error) {
     return (
       <Box sx={{ py: 8, backgroundColor: 'white' }}>
-        <Container maxWidth="lg">
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {t('Failed to load new bikes. Please try again later.')}
-          </Alert>
-        </Container>
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {t('Failed to load new bikes. Please try again later.')}
+        </Alert>
       </Box>
     );
   }
 
   return (
     <Box sx={{ py: 8, backgroundColor: 'white' }}>
-      <Container maxWidth="lg">
         <Typography
           variant="h2"
           sx={{
@@ -140,7 +135,6 @@ const NewBikeShowroom: React.FC = () => {
             ))}
           </Grid>
         )}
-      </Container>
     </Box>
   );
 };

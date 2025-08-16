@@ -175,7 +175,7 @@ const HeroSection: React.FC = () => {
       />
       
       {/* Hero Content */}
-      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1, height: '100%' }}>
+      <Container maxWidth={false} sx={{ position: 'relative', zIndex: 1, height: '100%', maxWidth: '1200px', mx: 'auto', px: 2 }}>
         <Box
           sx={{
             display: 'flex',
@@ -223,7 +223,7 @@ const HeroSection: React.FC = () => {
           pb: 4,
         }}
       >
-        <Container maxWidth="lg">
+        <Container maxWidth={false} sx={{ maxWidth: '1200px', mx: 'auto', px: 2 }}>
           <Card
             sx={{
               borderRadius: 3,

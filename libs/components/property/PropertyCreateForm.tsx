@@ -161,6 +161,9 @@ const PropertyCreateForm: React.FC = () => {
   console.log('Current user:', user);
   console.log('Current token:', token);
   console.log('User ID exists:', !!user?._id);
+  console.log('User memberType:', user?.memberType);
+  console.log('User memberStatus:', user?.memberStatus);
+  console.log('Can create property:', user?._id && user?.memberType !== MemberType.ADMIN && user?.memberStatus === 'ACTIVE');
 
   // 로그인 체크
   if (!user?._id) {
@@ -185,6 +188,52 @@ const PropertyCreateForm: React.FC = () => {
     console.log('No token found, redirecting to login');
     router.push('/login');
     return null;
+  }
+
+  // 권한 체크 - ADMIN은 매물 등록 불가
+  if (user?.memberType === MemberType.ADMIN) {
+    return (
+      <Box sx={{ textAlign: 'center', py: 4 }}>
+        <Alert severity="error">
+          <Typography variant="h6" gutterBottom>
+            관리자 계정으로는 매물을 등록할 수 없습니다.
+          </Typography>
+          <Typography variant="body2" paragraph>
+            매물 등록은 일반 사용자(USER) 또는 에이전트(AGENT) 계정으로만 가능합니다.
+          </Typography>
+          <Button 
+            variant="contained" 
+            onClick={() => router.push('/property')}
+            sx={{ mt: 2 }}
+          >
+            매물 목록으로 돌아가기
+          </Button>
+        </Alert>
+      </Box>
+    );
+  }
+
+  // 사용자 상태 체크
+  if (user?.memberStatus !== 'ACTIVE') {
+    return (
+      <Box sx={{ textAlign: 'center', py: 4 }}>
+        <Alert severity="error">
+          <Typography variant="h6" gutterBottom>
+            계정이 비활성화되어 있습니다.
+          </Typography>
+          <Typography variant="body2" paragraph>
+            매물을 등록하려면 활성화된 계정이 필요합니다.
+          </Typography>
+          <Button 
+            variant="contained" 
+            onClick={() => router.push('/mypage')}
+            sx={{ mt: 2 }}
+          >
+            내 정보 확인하기
+          </Button>
+        </Alert>
+      </Box>
+    );
   }
 
   // 이미지 압축 함수
@@ -401,9 +450,25 @@ const PropertyCreateForm: React.FC = () => {
           router.push('/property?type=buy');
         }, 2000);
       }
-    } catch (err) {
-      setError('매물 등록 중 오류가 발생했습니다.');
+    } catch (err: any) {
       console.error('Property creation error:', err);
+      
+      // GraphQL 에러 메시지 처리
+      if (err?.graphQLErrors && err.graphQLErrors.length > 0) {
+        const graphQLError = err.graphQLErrors[0];
+        if (graphQLError.message.includes('Allowed only for members with specific roles')) {
+          setError('매물 등록 권한이 없습니다. 일반 사용자 또는 에이전트 계정으로 로그인해주세요.');
+        } else if (graphQLError.message.includes('Unauthorized')) {
+          setError('로그인이 필요합니다. 다시 로그인해주세요.');
+          setTimeout(() => router.push('/login'), 2000);
+        } else {
+          setError(`매물 등록 실패: ${graphQLError.message}`);
+        }
+      } else if (err?.networkError) {
+        setError('네트워크 오류가 발생했습니다. 인터넷 연결을 확인해주세요.');
+      } else {
+        setError('매물 등록 중 오류가 발생했습니다. 다시 시도해주세요.');
+      }
     } finally {
       setIsUploading(false);
     }
@@ -418,6 +483,19 @@ const PropertyCreateForm: React.FC = () => {
       <Typography variant="h4" component="h1" gutterBottom>
         매물 등록
       </Typography>
+      
+      {/* 디버깅 정보 - 개발 환경에서만 표시 */}
+      {process.env.NODE_ENV === 'development' && user && (
+        <Alert severity="info" sx={{ mb: 2 }}>
+          <Typography variant="body2">
+            <strong>디버깅 정보:</strong><br />
+            사용자 ID: {user._id}<br />
+            사용자 타입: {user.memberType}<br />
+            계정 상태: {user.memberStatus}<br />
+            매물 등록 가능: {user._id && user.memberType !== MemberType.ADMIN && user.memberStatus === 'ACTIVE' ? '예' : '아니오'}
+          </Typography>
+        </Alert>
+      )}
 
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>

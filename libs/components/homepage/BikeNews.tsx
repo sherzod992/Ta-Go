@@ -42,12 +42,10 @@ const BikeNews: React.FC = () => {
   if (loading) {
     return (
       <Box sx={{ py: 8, backgroundColor: 'white', textAlign: 'center' }}>
-        <Container maxWidth="lg">
-          <CircularProgress size={60} />
-          <Typography variant="h6" sx={{ mt: 2 }}>
-            {t('Loading latest news...')}
-          </Typography>
-        </Container>
+        <CircularProgress size={60} />
+        <Typography variant="h6" sx={{ mt: 2 }}>
+          {t('Loading latest news...')}
+        </Typography>
       </Box>
     );
   }
@@ -56,18 +54,15 @@ const BikeNews: React.FC = () => {
   if (error) {
     return (
       <Box sx={{ py: 8, backgroundColor: 'white' }}>
-        <Container maxWidth="lg">
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {t('Failed to load latest news. Please try again later.')}
-          </Alert>
-        </Container>
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {t('Failed to load latest news. Please try again later.')}
+        </Alert>
       </Box>
     );
   }
 
   return (
     <Box sx={{ py: 8, backgroundColor: 'white' }}>
-      <Container maxWidth="lg">
         <Typography
           variant="h2"
           sx={{
@@ -153,7 +148,6 @@ const BikeNews: React.FC = () => {
             ))}
           </Grid>
         )}
-      </Container>
     </Box>
   );
 };

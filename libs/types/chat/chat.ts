@@ -8,11 +8,11 @@ export interface ChatMessage {
 	status: string;
 	senderNickname?: string;
 	senderAvatar?: string;
-	isAgent: boolean;
-	isEdited: boolean;
-	isDeleted: boolean;
-	isPinned: boolean;
-	isSystem: boolean;
+	isAgent: boolean; // non-nullable 필드
+	isEdited: boolean; // non-nullable 필드
+	isDeleted: boolean; // non-nullable 필드
+	isPinned: boolean; // non-nullable 필드
+	isSystem: boolean; // non-nullable 필드
 	createdAt: string;
 	updatedAt: string;
 }

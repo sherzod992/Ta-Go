@@ -36,77 +36,75 @@ const ExpertReviews: React.FC = () => {
 
   return (
     <Box sx={{ py: 8, backgroundColor: '#f8f9fa' }}>
-      <Container maxWidth="lg">
-        <Typography
-          variant="h2"
-          sx={{
-            textAlign: 'center',
-            marginBottom: 4,
-            fontWeight: 'bold',
-            color: '#333',
-          }}
-        >
-          {t('Expert Reviews')}
-        </Typography>
-        
-        <Grid container spacing={4}>
-          {expertReviews.map((review) => (
-            <Grid item xs={12} md={4} key={review.id}>
-              <Card
-                sx={{
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  transition: 'transform 0.2s',
-                  '&:hover': {
-                    transform: 'translateY(-4px)',
-                    boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
-                  },
-                }}
-              >
-                <CardContent sx={{ flexGrow: 1 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <Avatar
-                      src={review.expertImage}
-                      sx={{ width: 56, height: 56, mr: 2 }}
-                    />
-                    <Box>
-                      <Typography variant="h6" component="h3">
-                        {review.expertName}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {t('Expert')}
-                      </Typography>
-                    </Box>
-                  </Box>
-                  
-                  <Chip 
-                    label={review.category} 
-                    color="primary" 
-                    size="small" 
-                    sx={{ mb: 2 }}
+      <Typography
+        variant="h2"
+        sx={{
+          textAlign: 'center',
+          marginBottom: 4,
+          fontWeight: 'bold',
+          color: '#333',
+        }}
+      >
+        {t('Expert Reviews')}
+      </Typography>
+      
+      <Grid container spacing={4}>
+        {expertReviews.map((review) => (
+          <Grid item xs={12} md={4} key={review.id}>
+            <Card
+              sx={{
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                transition: 'transform 0.2s',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
+                },
+              }}
+            >
+              <CardContent sx={{ flexGrow: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <Avatar
+                    src={review.expertImage}
+                    sx={{ width: 56, height: 56, mr: 2 }}
                   />
-                  
-                  <Typography variant="h6" component="h4" gutterBottom>
-                    {review.bikeName}
-                  </Typography>
-                  
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <Rating value={review.rating} precision={0.1} readOnly />
-                    <Typography variant="body2" sx={{ ml: 1 }}>
-                      {review.rating}/5
+                  <Box>
+                    <Typography variant="h6" component="h3">
+                      {review.expertName}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {t('Expert')}
                     </Typography>
                   </Box>
-                  
-                  <Typography variant="body1" color="text.secondary">
-                    "{review.review}"
+                </Box>
+                
+                <Chip 
+                  label={review.category} 
+                  color="primary" 
+                  size="small" 
+                  sx={{ mb: 2 }}
+                />
+                
+                <Typography variant="h6" component="h4" gutterBottom>
+                  {review.bikeName}
+                </Typography>
+                
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <Rating value={review.rating} precision={0.1} readOnly />
+                  <Typography variant="body2" sx={{ ml: 1 }}>
+                    {review.rating}/5
                   </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-      </Container>
+                </Box>
+                
+                <Typography variant="body1" color="text.secondary">
+                  "{review.review}"
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
     </Box>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { useRouter } from 'next/router';
 import { GET_MY_CHAT_ROOMS, GET_CHAT_MESSAGES, CHECK_CHAT_ROOM_EXISTS, GET_ALL_USER_CHAT_ROOMS, GET_CHAT_ROOM_MESSAGES, GET_MESSAGE_DEBUG_INFO } from '../../../apollo/user/query';
@@ -7,6 +7,8 @@ import { ChatRoom } from '../../../libs/types/chat/chat';
 import { ChatRoomQueryInput } from '../../../libs/types/chat/chat.input';
 import { sweetErrorAlert } from '../../../libs/sweetAlert';
 import useDeviceDetect from '../../../libs/hooks/useDeviceDetect';
+import { useWebSocket } from '../../../libs/hooks/useWebSocket';
+import { useChatSubscriptions } from '../../../libs/hooks/useChatSubscriptions';
 import LayoutBasic from '../../../libs/components/layout/LayoutBasic';
 import { 
 	Box, 
@@ -66,9 +68,87 @@ const ChatListPage: React.FC = () => {
 	const [messageInput, setMessageInput] = useState('');
 	const [messages, setMessages] = useState<any[]>([]);
 	const [isLoadingMessages, setIsLoadingMessages] = useState(false);
+	const [typingUsers, setTypingUsers] = useState<string[]>([]);
+	const [isTyping, setIsTyping] = useState(false);
 
 	// 사용자 ID (실제로는 인증된 사용자에서 가져와야 함)
 	const userId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null;
+
+	// WebSocket 연결 및 실시간 기능
+	const {
+		isConnected: wsConnected,
+		joinRoom,
+		leaveRoom,
+		sendTypingStatus,
+		markAsRead: wsMarkAsRead,
+		typingUsers: wsTypingUsers,
+	} = useWebSocket({
+		onMessage: (message) => {
+			console.log('WebSocket 새 메시지 수신:', message);
+			if (message.roomId === selectedChatId) {
+				// isAgent 필드에 대한 기본값 처리
+				const processedMessage = {
+					...message,
+					isAgent: message.isAgent ?? false,
+					isEdited: message.isEdited ?? false,
+					isDeleted: message.isDeleted ?? false,
+					isPinned: message.isPinned ?? false,
+					isSystem: message.isSystem ?? false
+				};
+				setMessages(prev => [...prev, processedMessage]);
+			}
+		},
+		onTyping: (data) => {
+			console.log('WebSocket 타이핑 상태 수신:', data);
+			if (data.roomId === selectedChatId) {
+				setTypingUsers(prev => {
+					const newUsers = data.isTyping 
+						? [...prev.filter(id => id !== data.userId), data.userId]
+						: prev.filter(id => id !== data.userId);
+					return newUsers;
+				});
+			}
+		},
+		onNotification: (notification) => {
+			console.log('WebSocket 새 알림 수신:', notification);
+			// 알림 처리 로직
+		},
+	});
+
+	// GraphQL Subscription
+	const { messageSentData, typingIndicatorData, chatNotificationData } = useChatSubscriptions({
+		roomId: selectedChatId || undefined,
+		onMessageSent: (message) => {
+			console.log('GraphQL Subscription 새 메시지 수신:', message);
+			if (message.roomId === selectedChatId) {
+				// isAgent 필드에 대한 기본값 처리
+				const processedMessage = {
+					...message,
+					isAgent: message.isAgent ?? false,
+					isEdited: message.isEdited ?? false,
+					isDeleted: message.isDeleted ?? false,
+					isPinned: message.isPinned ?? false,
+					isSystem: message.isSystem ?? false
+				};
+				setMessages(prev => [...prev, processedMessage]);
+			}
+		},
+		onTypingIndicator: (data) => {
+			console.log('GraphQL Subscription 타이핑 상태 수신:', data);
+			if (data.roomId === selectedChatId) {
+				setTypingUsers(prev => {
+					const newUsers = data.isTyping 
+						? [...prev.filter(id => id !== data.userId), data.userId]
+						: prev.filter(id => id !== data.userId);
+					return newUsers;
+				});
+			}
+		},
+		onChatNotification: (notification) => {
+			console.log('GraphQL Subscription 채팅 알림 수신:', notification);
+			// 알림 처리 로직
+		},
+	});
 
 	// 컴포넌트 마운트 상태 관리
 	useEffect(() => {
@@ -96,12 +176,13 @@ const ChatListPage: React.FC = () => {
 		},
 		onCompleted: (data) => {
 			console.log('채팅방 메시지 디버깅 조회 완료:', data);
-			if (data?.getChatRoomMessages) {
-				console.log('실제 메시지 개수:', data.getChatRoomMessages.length);
-				console.log('첫 번째 메시지:', data.getChatRoomMessages[0]);
-				console.log('마지막 메시지:', data.getChatRoomMessages[data.getChatRoomMessages.length - 1]);
+			if (data?.getChatRoomMessages?.list) {
+				console.log('실제 메시지 개수:', data.getChatRoomMessages.list.length);
+				console.log('첫 번째 메시지:', data.getChatRoomMessages.list[0]);
+				console.log('마지막 메시지:', data.getChatRoomMessages.list[data.getChatRoomMessages.list.length - 1]);
 			}
-		}
+		},
+		errorPolicy: 'all'
 	});
 
 	const { data: messageDebugInfoData } = useQuery(GET_MESSAGE_DEBUG_INFO, {
@@ -115,7 +196,8 @@ const ChatListPage: React.FC = () => {
 			if (data?.getMessageDebugInfo) {
 				console.log('디버그 정보:', data.getMessageDebugInfo);
 			}
-		}
+		},
+		errorPolicy: 'all'
 	});
 
 	const { data, loading, error, refetch } = useQuery(GET_MY_CHAT_ROOMS, {
@@ -125,7 +207,7 @@ const ChatListPage: React.FC = () => {
 				limit: 50
 			} as ChatRoomQueryInput
 		},
-		pollInterval: 10000,
+		pollInterval: 15000, // 15초마다 폴링 (성능 최적화)
 		onError: (error) => {
 			console.error('채팅방 목록 조회 에러:', error);
 			// 백엔드 개선 사항에 따라 더 구체적인 에러 처리
@@ -161,9 +243,9 @@ const ChatListPage: React.FC = () => {
 			}
 		},
 		skip: !selectedChatId || !isMounted || selectedChatId === '',
-		pollInterval: 0, // 폴링 비활성화
+		pollInterval: 3000, // 3초마다 폴링 (성능 최적화)
 		errorPolicy: 'all', // 에러 정책을 all로 변경하여 에러가 있어도 데이터를 받을 수 있도록 함
-		notifyOnNetworkStatusChange: false,
+		notifyOnNetworkStatusChange: false, // 네트워크 상태 변경 알림 비활성화
 		fetchPolicy: 'cache-and-network',
 		onError: (error) => {
 			console.error('메시지 조회 에러:', error);
@@ -239,7 +321,29 @@ const ChatListPage: React.FC = () => {
 			console.log('4. 마지막 메시지:', data?.getChatMessages?.list?.[data?.getChatMessages?.list?.length - 1]);
 			
 			if (data?.getChatMessages?.list && Array.isArray(data.getChatMessages.list)) {
-				setMessages(data.getChatMessages.list);
+				// senderNickname이 null인 경우 기본값 제공 및 senderId 정규화, isAgent 기본값 제공
+				const processedMessages = data.getChatMessages.list.map((message: any) => ({
+					...message,
+					senderId: String(message.senderId), // senderId를 문자열로 정규화
+					senderNickname: message.senderNickname || '알 수 없음',
+					isAgent: message.isAgent ?? false, // isAgent가 null이면 false로 기본값 설정
+					isEdited: message.isEdited ?? false,
+					isDeleted: message.isDeleted ?? false,
+					isPinned: message.isPinned ?? false,
+					isSystem: message.isSystem ?? false
+				}));
+				setMessages(processedMessages);
+				
+				// 메시지 업데이트 후 스크롤을 맨 아래로
+				setTimeout(() => {
+					const messageContainer = document.querySelector('[data-message-container]') as HTMLElement;
+					if (messageContainer) {
+						// 스크롤을 맨 아래로 이동하여 최신 메시지가 오른쪽 아래에 표시되도록 함
+						messageContainer.scrollTop = messageContainer.scrollHeight;
+						// 추가로 스크롤을 오른쪽 끝으로 이동
+						messageContainer.scrollLeft = messageContainer.scrollWidth;
+					}
+				}, 100);
 			} else {
 				setMessages([]);
 			}
@@ -457,15 +561,46 @@ const ChatListPage: React.FC = () => {
 	useEffect(() => {
 		if (messages.length > 0) {
 			try {
-				const messageContainer = document.querySelector('[data-message-container]');
-				if (messageContainer && messageContainer.scrollHeight) {
+				const messageContainer = document.querySelector('[data-message-container]') as HTMLElement;
+				if (messageContainer) {
+					// 스크롤을 맨 아래로 이동하여 최신 메시지가 오른쪽 아래에 표시되도록 함
 					messageContainer.scrollTop = messageContainer.scrollHeight;
+					// 추가로 스크롤을 오른쪽 끝으로 이동
+					messageContainer.scrollLeft = messageContainer.scrollWidth;
 				}
 			} catch (error) {
 				console.error('Auto scroll error:', error);
 			}
 		}
 	}, [messages]);
+
+	// 메시지 전송 후 즉시 스크롤
+	useEffect(() => {
+		if (messages.length > 0) {
+			setTimeout(() => {
+				const messageContainer = document.querySelector('[data-message-container]') as HTMLElement;
+				if (messageContainer) {
+					// 스크롤을 맨 아래로 이동하여 최신 메시지가 오른쪽 아래에 표시되도록 함
+					messageContainer.scrollTop = messageContainer.scrollHeight;
+					// 추가로 스크롤을 오른쪽 끝으로 이동
+					messageContainer.scrollLeft = messageContainer.scrollWidth;
+				}
+			}, 100);
+		}
+	}, [messages.length]);
+
+	// 컴포넌트 마운트 시 스크롤
+	useEffect(() => {
+		setTimeout(() => {
+			const messageContainer = document.querySelector('[data-message-container]') as HTMLElement;
+			if (messageContainer) {
+				// 스크롤을 맨 아래로 이동하여 최신 메시지가 오른쪽 아래에 표시되도록 함
+				messageContainer.scrollTop = messageContainer.scrollHeight;
+				// 추가로 스크롤을 오른쪽 끝으로 이동
+				messageContainer.scrollLeft = messageContainer.scrollWidth;
+			}
+		}, 200);
+	}, []);
 
 	const handleChatRoomClick = async (chatId: string, propertyId: string) => {
 		console.log('채팅방 클릭:', { chatId, propertyId });
@@ -479,13 +614,22 @@ const ChatListPage: React.FC = () => {
 			return;
 		}
 		
+		// 이전 채팅방에서 나가기
+		if (selectedChatId) {
+			leaveRoom(selectedChatId);
+		}
+		
 		// 상태 초기화
 		setMessages([]);
 		setMessageInput('');
+		setTypingUsers([]);
 		
 		// 새로운 선택
 		setSelectedChatId(chatId);
 		setSelectedPropertyId(propertyId);
+		
+		// 새 채팅방 참가
+		joinRoom(chatId);
 		
 		// 채팅방 존재 여부를 먼저 확인
 		try {
@@ -540,7 +684,43 @@ const ChatListPage: React.FC = () => {
 			return;
 		}
 		
-		console.log('메시지 전송 시작:', { selectedChatId, content: messageInput.trim() });
+		const currentMessage = messageInput.trim();
+		setMessageInput('');
+		
+		// 임시 메시지 생성 (즉시 UI에 표시)
+		const tempMessage = {
+			_id: `temp-${Date.now()}`,
+			messageId: `temp-${Date.now()}`,
+			roomId: selectedChatId,
+			content: currentMessage,
+			senderId: String(userId), // 문자열로 확실히 변환
+			messageType: 'TEXT',
+			status: 'SENDING',
+			senderNickname: '나',
+			isAgent: false, // 명시적으로 false 설정
+			isEdited: false,
+			isDeleted: false,
+			isPinned: false,
+			isSystem: false,
+			createdAt: new Date().toISOString(),
+			updatedAt: new Date().toISOString()
+		};
+
+		// 즉시 UI에 임시 메시지 추가
+		setMessages(prev => [...prev, tempMessage]);
+		
+		// 메시지 추가 후 즉시 스크롤
+		setTimeout(() => {
+			const messageContainer = document.querySelector('[data-message-container]') as HTMLElement;
+			if (messageContainer) {
+				// 스크롤을 맨 아래로 이동하여 최신 메시지가 오른쪽 아래에 표시되도록 함
+				messageContainer.scrollTop = messageContainer.scrollHeight;
+				// 추가로 스크롤을 오른쪽 끝으로 이동
+				messageContainer.scrollLeft = messageContainer.scrollWidth;
+			}
+		}, 50);
+		
+		console.log('메시지 전송 시작:', { selectedChatId, content: currentMessage });
 		console.log('백엔드 이중 조회 로직이 roomId와 _id 모두로 채팅방을 찾을 것입니다.');
 		
 		try {
@@ -548,15 +728,30 @@ const ChatListPage: React.FC = () => {
 				variables: {
 					input: {
 						roomId: selectedChatId,
-						content: messageInput.trim(),
+						content: currentMessage,
 						messageType: 'TEXT'
 					}
 				}
 			});
 			
 			console.log('메시지 전송 성공 - 백엔드 이중 조회 로직이 정상 작동했습니다.');
+			
+			// 성공 시 임시 메시지를 실제 메시지로 업데이트
+			setMessages(prev => 
+				prev.map(msg => 
+					msg._id === tempMessage._id 
+						? { ...msg, status: 'SENT', _id: `sent-${Date.now()}` }
+						: msg
+				)
+			);
+
+			// 폴링으로 자동 업데이트되므로 수동 새로고침 제거
+			
 		} catch (error: any) {
 			console.error('메시지 전송 실패:', error);
+			
+			// 실패 시 임시 메시지 제거
+			setMessages(prev => prev.filter(msg => msg._id !== tempMessage._id));
 			
 			// 백엔드 이중 조회 로직 개선사항에 따른 에러 처리
 			if (error?.message?.includes('채팅방을 찾을 수 없습니다') || 
@@ -595,6 +790,35 @@ const ChatListPage: React.FC = () => {
 			handleSendMessage();
 		}
 	};
+
+	// 타이핑 상태 관리
+	const handleTyping = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+		const value = event.target.value;
+		setMessageInput(value);
+		
+		// 타이핑 상태 전송
+		if (selectedChatId && wsConnected) {
+			if (!isTyping && value.length > 0) {
+				setIsTyping(true);
+				sendTypingStatus(selectedChatId, true);
+			} else if (isTyping && value.length === 0) {
+				setIsTyping(false);
+				sendTypingStatus(selectedChatId, false);
+			}
+		}
+	}, [selectedChatId, wsConnected, isTyping, sendTypingStatus]);
+
+	// 타이핑 상태 정리
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			if (isTyping && selectedChatId && wsConnected) {
+				setIsTyping(false);
+				sendTypingStatus(selectedChatId, false);
+			}
+		}, 3000); // 3초 후 타이핑 상태 해제
+
+		return () => clearTimeout(timer);
+	}, [isTyping, selectedChatId, wsConnected, sendTypingStatus]);
 
 	const createChatRoomForProperty = async (propertyId: string) => {
 		console.log('채팅방 생성 시작:', { propertyId, userId });
@@ -1336,24 +1560,49 @@ const ChatListPage: React.FC = () => {
 									}}
 								>
 									<Box display="flex" alignItems="center" gap={2}>
-										<Avatar
-											src={undefined}
-											alt={filteredRooms.find(r => r._id === selectedChatId)?.propertyTitle || '매물'}
-											sx={{ 
-												width: 50, 
-												height: 50,
-												border: '2px solid rgba(255,255,255,0.3)',
-												bgcolor: 'rgba(255,255,255,0.2)'
-											}}
-										>
-											<Business sx={{ fontSize: 24 }} />
-										</Avatar>
-										<Box>
-											<Typography variant="h6" fontWeight="bold">
-												{filteredRooms.find(r => r._id === selectedChatId)?.propertyTitle || '알 수 없는 매물'}
-											</Typography>
-											<Typography variant="body2" sx={{ opacity: 0.9 }}>
-												{filteredRooms.find(r => r._id === selectedChatId)?.agentNickname || '담당자 미배정'}
+										<Box sx={{ flex: 1 }}>
+											<Box display="flex" alignItems="center" gap={2}>
+												<Avatar
+													src={undefined}
+													alt={filteredRooms.find(r => r._id === selectedChatId)?.propertyTitle || '매물'}
+													sx={{ 
+														width: 50, 
+														height: 50,
+														border: '2px solid rgba(255,255,255,0.3)',
+														bgcolor: 'rgba(255,255,255,0.2)'
+													}}
+												>
+													<Business sx={{ fontSize: 24 }} />
+												</Avatar>
+												<Box>
+													<Typography variant="h6" fontWeight="bold">
+														{filteredRooms.find(r => r._id === selectedChatId)?.propertyTitle || '알 수 없는 매물'}
+													</Typography>
+													<Typography variant="body2" sx={{ opacity: 0.9 }}>
+														{filteredRooms.find(r => r._id === selectedChatId)?.agentNickname || '담당자 미배정'}
+													</Typography>
+												</Box>
+											</Box>
+										</Box>
+										
+										{/* 연결 상태 표시 */}
+										<Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+											<Box
+												sx={{
+													width: 8,
+													height: 8,
+													borderRadius: '50%',
+													backgroundColor: wsConnected ? '#4caf50' : '#f44336',
+													animation: wsConnected ? 'pulse 2s infinite' : 'none',
+													'@keyframes pulse': {
+														'0%': { opacity: 1 },
+														'50%': { opacity: 0.5 },
+														'100%': { opacity: 1 },
+													},
+												}}
+											/>
+											<Typography variant="caption" sx={{ opacity: 0.8 }}>
+												{wsConnected ? '실시간 연결됨' : '연결 끊어짐'}
 											</Typography>
 										</Box>
 									</Box>
@@ -1368,9 +1617,14 @@ const ChatListPage: React.FC = () => {
 											flex: 1, 
 											p: 2, 
 											overflow: 'auto', 
+											overflowX: 'hidden',
 											maxHeight: '60vh',
 											display: 'flex',
-											flexDirection: 'column'
+											flexDirection: 'column',
+											justifyContent: 'flex-end', // 메시지를 아래쪽부터 표시
+											alignItems: 'flex-end', // 메시지를 오른쪽으로 정렬
+											gap: 1,
+											textAlign: 'right'
 										}}
 									>
 										{messagesLoading ? (
@@ -1420,40 +1674,70 @@ const ChatListPage: React.FC = () => {
 											</Box>
 										) : (
 											<Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-												{messages.map((message, index) => (
-													<Box
-														key={message._id || index}
-														sx={{
-															display: 'flex',
-															justifyContent: message.isAgent ? 'flex-start' : 'flex-end',
-															mb: 1
-														}}
-													>
+												{messages.map((message, index) => {
+													const isUser = String(message.senderId) === String(userId);
+													return (
 														<Box
+															key={message._id || index}
+															className={isUser ? 'user-message' : 'agent-message'}
 															sx={{
-																maxWidth: '70%',
-																p: 2,
-																borderRadius: 2,
-																backgroundColor: message.isAgent ? 'grey.100' : 'primary.main',
-																color: message.isAgent ? 'text.primary' : 'white',
-																wordBreak: 'break-word'
+																display: 'flex',
+																justifyContent: 'flex-end',
+																mb: 1,
+																alignItems: 'flex-end',
+																alignSelf: 'flex-end',
+																width: '100%'
 															}}
 														>
-															<Typography variant="body2" sx={{ mb: 0.5, fontWeight: 'bold' }}>
-																{message.isAgent ? '담당자' : '나'}
-															</Typography>
-															<Typography variant="body2">
-																{message.content}
-															</Typography>
-															<Typography variant="caption" sx={{ opacity: 0.7, mt: 0.5, display: 'block' }}>
-																{formatTime(message.createdAt)}
-															</Typography>
+															<Box
+																sx={{
+																	maxWidth: '65%',
+																	padding: '12px 16px',
+																	borderRadius: '18px 18px 4px 18px',
+																	background: isUser ? 'linear-gradient(135deg, #FF9500 0%, #FF6B00 100%)' : 'white',
+																	color: isUser ? 'white' : '#333',
+																	wordBreak: 'break-word',
+																	boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+																	alignSelf: 'flex-end',
+																	width: 'fit-content',
+																	minWidth: 'fit-content',
+																	marginLeft: 'auto',
+																	marginRight: '0'
+																}}
+															>
+																<Typography variant="body2" sx={{ 
+																	fontSize: '0.95rem', 
+																	lineHeight: 1.4,
+																	textAlign: 'right'
+																}}>
+																	{message.content}
+																</Typography>
+																<Typography variant="caption" sx={{ 
+																	opacity: 0.7, 
+																	mt: 0.5, 
+																	display: 'block',
+																	fontSize: '0.75rem',
+																	textAlign: 'right'
+																}}>
+																	{formatTime(message.createdAt)}
+																	{message.status === 'READ' && isUser && ' ✓'}
+																</Typography>
+															</Box>
 														</Box>
-													</Box>
-												))}
+													);
+												})}
 											</Box>
 										)}
 									</Box>
+
+									{/* 타이핑 상태 표시 */}
+									{typingUsers.length > 0 && (
+										<Box sx={{ p: 1, px: 2, borderTop: '1px solid rgba(0,0,0,0.1)' }}>
+											<Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+												{typingUsers.length === 1 ? '상대방이 입력 중...' : `${typingUsers.length}명이 입력 중...`}
+											</Typography>
+										</Box>
+									)}
 
 									{/* 메시지 입력 영역 */}
 									<Box sx={{ p: 2, borderTop: '1px solid rgba(0,0,0,0.1)' }}>
@@ -1491,7 +1775,7 @@ const ChatListPage: React.FC = () => {
 												multiline
 												maxRows={4}
 												value={messageInput}
-												onChange={(e) => setMessageInput(e.target.value)}
+												onChange={handleTyping}
 												onKeyPress={handleKeyPress}
 												placeholder={messagesError ? "채팅방을 불러올 수 없습니다" : "메시지를 입력하세요..."}
 												variant="outlined"
@@ -1507,10 +1791,15 @@ const ChatListPage: React.FC = () => {
 												onClick={handleSendMessage}
 												disabled={!messageInput.trim() || sendingMessage || !!messagesError}
 												sx={{
-													bgcolor: 'primary.main',
+													background: messageInput.trim() ? 'linear-gradient(135deg, #FF9500 0%, #FF6B00 100%)' : '#e0e0e0',
 													color: 'white',
-													'&:hover': { bgcolor: 'primary.dark' },
-													'&:disabled': { bgcolor: 'grey.300' }
+													'&:hover': {
+														background: messageInput.trim() ? 'linear-gradient(135deg, #FF6B00 0%, #FF4500 100%)' : '#e0e0e0',
+													},
+													'&:disabled': { 
+														background: '#e0e0e0',
+														color: '#999'
+													}
 												}}
 											>
 												{sendingMessage ? <CircularProgress size={20} color="inherit" /> : <Send />}

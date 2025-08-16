@@ -58,6 +58,13 @@ export const WebChat: React.FC<WebChatProps> = ({
 	// 자동 스크롤
 	const scrollToBottom = () => {
 		try {
+			const messagesContainer = document.querySelector('.chat-messages') as HTMLElement;
+			if (messagesContainer) {
+				// 스크롤을 맨 아래로 이동하여 최신 메시지가 오른쪽 아래에 표시되도록 함
+				messagesContainer.scrollTop = messagesContainer.scrollHeight;
+				// 추가로 스크롤을 오른쪽 끝으로 이동
+				messagesContainer.scrollLeft = messagesContainer.scrollWidth;
+			}
 			if (messagesEndRef.current) {
 				messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
 			}
@@ -66,9 +73,26 @@ export const WebChat: React.FC<WebChatProps> = ({
 		}
 	};
 
+	// 메시지가 업데이트될 때마다 자동 스크롤
 	useEffect(() => {
 		scrollToBottom();
 	}, [messages]);
+
+	// 메시지 전송 후 즉시 스크롤
+	useEffect(() => {
+		if (messages.length > 0) {
+			setTimeout(() => {
+				scrollToBottom();
+			}, 100);
+		}
+	}, [messages.length]);
+
+	// 컴포넌트 마운트 시 스크롤
+	useEffect(() => {
+		setTimeout(() => {
+			scrollToBottom();
+		}, 200);
+	}, []);
 
 	// 채팅방 생성
 	useEffect(() => {
@@ -125,9 +149,13 @@ export const WebChat: React.FC<WebChatProps> = ({
 	// 메시지 업데이트
 	useEffect(() => {
 		if (messagesData?.getChatMessages?.list) {
-			// 배열을 안전하게 복사하여 읽기 전용 에러 방지
+			// 배열을 안전하게 복사하여 읽기 전용 에러 방지 및 senderId 정규화
 			const messagesList = Array.isArray(messagesData.getChatMessages.list) 
-				? [...messagesData.getChatMessages.list]
+				? messagesData.getChatMessages.list.map((message: any) => ({
+					...message,
+					senderId: String(message.senderId), // senderId를 문자열로 정규화
+					senderNickname: message.senderNickname || '알 수 없음'
+				}))
 				: [];
 			setMessages(messagesList);
 		}
@@ -152,12 +180,22 @@ export const WebChat: React.FC<WebChatProps> = ({
 	const handleSendMessage = async () => {
 		if (!inputMessage.trim() || sendingMessage || !chatId) return;
 
-		const userMessage: ChatMessage = {
+		const currentMessage = inputMessage.trim();
+		setInputMessage('');
+		setIsTyping(true);
+
+		// 입력창 높이 초기화
+		if (inputRef.current) {
+			inputRef.current.style.height = 'auto';
+		}
+
+		// 임시 메시지 생성 (즉시 UI에 표시)
+		const tempMessage: ChatMessage = {
 			_id: `temp-${Date.now()}`,
 			messageId: `temp-${Date.now()}`,
 			roomId: chatId,
-			content: inputMessage,
-			senderId: userId,
+			content: currentMessage,
+			senderId: String(userId), // 문자열로 확실히 변환
 			messageType: 'TEXT',
 			status: 'SENDING',
 			senderNickname: '나',
@@ -170,27 +208,35 @@ export const WebChat: React.FC<WebChatProps> = ({
 			updatedAt: new Date().toISOString()
 		};
 
-		// 즉시 UI에 메시지 추가 (안전한 배열 복사)
+		// 즉시 UI에 임시 메시지 추가 (안전한 배열 복사)
 		setMessages(prev => {
 			const newMessages = Array.isArray(prev) ? [...prev] : [];
-			return [...newMessages, userMessage];
+			return [...newMessages, tempMessage];
 		});
-		setInputMessage('');
-		setIsTyping(true);
 
-		// 입력창 높이 초기화
-		if (inputRef.current) {
-			inputRef.current.style.height = 'auto';
-		}
+		// 메시지 추가 후 즉시 스크롤
+		setTimeout(() => {
+			scrollToBottom();
+		}, 50);
 
 		try {
 			const messageInput: SendMessageInput = {
 				roomId: chatId,
-				content: inputMessage
+				content: currentMessage
 			};
 
 			await sendMessage({
 				variables: { input: messageInput }
+			});
+
+			// 성공 시 임시 메시지를 실제 메시지로 업데이트
+			setMessages(prev => {
+				const newMessages = Array.isArray(prev) ? [...prev] : [];
+				return newMessages.map(msg => 
+					msg._id === tempMessage._id 
+						? { ...msg, status: 'SENT', _id: `sent-${Date.now()}` }
+						: msg
+				);
 			});
 
 			// 에이전트 응답 시뮬레이션 (실제로는 서버에서 처리)
@@ -220,10 +266,15 @@ export const WebChat: React.FC<WebChatProps> = ({
 				setIsTyping(false);
 			}, 1500);
 
-			sweetMixinSuccessAlert('메시지가 전송되었습니다!');
-
 		} catch (error) {
+			console.error('메시지 전송 실패:', error);
+			// 실패 시 임시 메시지 제거
+			setMessages(prev => {
+				const newMessages = Array.isArray(prev) ? [...prev] : [];
+				return newMessages.filter(msg => msg._id !== tempMessage._id);
+			});
 			sweetErrorAlert('메시지 전송에 실패했습니다.');
+		} finally {
 			setIsTyping(false);
 		}
 	};
@@ -365,7 +416,8 @@ export const WebChat: React.FC<WebChatProps> = ({
 					align-items: center;
 					padding: 1rem;
 					border-bottom: 1px solid #f1f3f4;
-					background: #f8f9fa;
+					background: linear-gradient(135deg, #FF9500 0%, #FF6B00 100%);
+					color: white;
 				}
 
 				.property-info {
@@ -411,9 +463,15 @@ export const WebChat: React.FC<WebChatProps> = ({
 				.chat-messages {
 					flex: 1;
 					overflow-y: auto;
+					overflow-x: hidden;
 					padding: 1rem;
 					background: #f8f9fa;
 					max-height: 300px;
+					display: flex;
+					flex-direction: column;
+					justify-content: flex-end;
+					align-items: flex-end;
+					text-align: right;
 				}
 
 				.loading-messages {
@@ -429,32 +487,47 @@ export const WebChat: React.FC<WebChatProps> = ({
 					max-width: 85%;
 					word-wrap: break-word;
 					font-size: 0.9rem;
+					margin-left: auto;
+					margin-right: 0;
+					width: fit-content;
+					align-self: flex-end;
+					text-align: right;
 				}
 
 				.user-message {
-					background: #007bff;
+					background: linear-gradient(135deg, #FF9500 0%, #FF6B00 100%);
 					color: white;
-					margin-left: auto;
-					border-bottom-right-radius: 4px;
+					margin-left: auto !important;
+					margin-right: 0 !important;
+					border-radius: 18px 18px 4px 18px;
+					box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+					align-self: flex-end;
 				}
 
 				.agent-message {
 					background: white;
 					color: #333;
-					border: 1px solid #e1e5e9;
-					border-bottom-left-radius: 4px;
+					border: none;
+					border-radius: 18px 18px 18px 4px;
+					box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+					margin-left: auto !important;
+					margin-right: 0 !important;
+					align-self: flex-end;
 				}
 
 				.message-time {
 					font-size: 0.7rem;
 					opacity: 0.7;
 					margin-top: 0.25rem;
+					text-align: right;
 				}
 
 				.typing-indicator {
 					display: flex;
 					gap: 4px;
 					align-items: center;
+					justify-content: flex-end;
+					align-self: flex-end;
 				}
 
 				.typing-indicator span {
@@ -505,13 +578,13 @@ export const WebChat: React.FC<WebChatProps> = ({
 
 				.message-input:focus {
 					outline: none;
-					border-color: #007bff;
+					border-color: #FF9500;
 				}
 
 				.send-btn {
 					width: 40px;
 					height: 40px;
-					background: #007bff;
+					background: linear-gradient(135deg, #FF9500 0%, #FF6B00 100%);
 					color: white;
 					border: none;
 					border-radius: 50%;
@@ -524,7 +597,7 @@ export const WebChat: React.FC<WebChatProps> = ({
 				}
 
 				.send-btn:hover:not(:disabled) {
-					background: #0056b3;
+					background: linear-gradient(135deg, #FF6B00 0%, #FF4500 100%);
 					transform: scale(1.1);
 				}
 
@@ -558,9 +631,9 @@ export const WebChat: React.FC<WebChatProps> = ({
 				}
 
 				.quick-btn:hover:not(:disabled) {
-					background: #e9ecef;
-					border-color: #007bff;
-					color: #007bff;
+					background: rgba(255,149,0,0.1);
+					border-color: #FF9500;
+					color: #FF9500;
 				}
 
 				.quick-btn:disabled {

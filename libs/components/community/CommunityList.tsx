@@ -299,7 +299,7 @@ const CommunityList: React.FC = () => {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ maxWidth: 1200, mx: 'auto', px: 2, py: 4 }}>
       {/* 헤더 */}
       <Box sx={{ mb: 3 }}>
         <Typography variant="h4" component="h1" gutterBottom>

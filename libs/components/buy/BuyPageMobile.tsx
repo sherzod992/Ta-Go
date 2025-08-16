@@ -245,7 +245,7 @@ const BuyPageMobile: React.FC = () => {
 
   return (
     <Box className="buy-page-mobile" sx={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
-      <Container maxWidth="sm" sx={{ py: 2 }}>
+      <Container maxWidth={false} sx={{ py: 2, maxWidth: '1200px', mx: 'auto', px: 2 }}>
         {/* 헤더 */}
         <Paper className="header-section" sx={{ p: 3, mb: 2, textAlign: 'center' }}>
           <Typography variant="h5" component="h1" gutterBottom>

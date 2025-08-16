@@ -281,7 +281,7 @@ const BuyPageDesktop: React.FC = () => {
 
   return (
     <Box className="buy-page-desktop" sx={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
-      <Container maxWidth="xl" sx={{ py: 4 }}>
+      <Container maxWidth={false} sx={{ py: 4, maxWidth: '1200px', mx: 'auto', px: 2 }}>
         {/* 헤더 */}
         <Paper className="header-section" sx={{ p: 4, mb: 4, textAlign: 'center' }}>
           <Typography variant="h3" component="h1" gutterBottom>

@@ -49,6 +49,88 @@ hr {
 	margin: auto;
 }
 
+// 채팅 컴포넌트 공통 스타일
+.chat-container {
+	.chat-messages {
+		&::-webkit-scrollbar {
+			width: 6px;
+		}
+		&::-webkit-scrollbar-thumb {
+			background: #c1c1c1;
+			border-radius: 3px;
+		}
+		&::-webkit-scrollbar-track {
+			background: #f1f1f1;
+		}
+	}
+
+	.message {
+		transition: all 0.3s ease;
+		
+		&:hover {
+			transform: translateY(-1px);
+		}
+	}
+
+	.user-message {
+		animation: slideInRight 0.3s ease;
+	}
+
+	.agent-message {
+		animation: slideInLeft 0.3s ease;
+	}
+}
+
+// 메시지 정렬 강화
+[data-message-container] {
+	.user-message {
+		align-self: flex-end !important;
+		margin-left: auto !important;
+		margin-right: 0 !important;
+	}
+	
+	.agent-message {
+		align-self: flex-start !important;
+		margin-left: 0 !important;
+		margin-right: auto !important;
+	}
+}
+
+// 모든 채팅 메시지 정렬 강화
+.user-message {
+	align-self: flex-end !important;
+	margin-left: auto !important;
+	margin-right: 0 !important;
+}
+
+.agent-message {
+	align-self: flex-start !important;
+	margin-left: 0 !important;
+	margin-right: auto !important;
+}
+
+@keyframes slideInRight {
+	from {
+		opacity: 0;
+		transform: translateX(20px);
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+@keyframes slideInLeft {
+	from {
+		opacity: 0;
+		transform: translateX(-20px);
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
 /** VERSION: PC **/
 #pc-wrap {
 	width: 100%;

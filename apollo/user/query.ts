@@ -794,6 +794,7 @@ export const GET_CHAT_MESSAGES = gql`
 				messageType
 				content
 				status
+				senderNickname
 				senderAvatar
 				isAgent
 				isEdited
@@ -863,34 +864,31 @@ export const GET_ALL_USER_CHAT_ROOMS = gql`
 export const GET_CHAT_ROOM_MESSAGES = gql`
 	query GetChatRoomMessages($roomId: String!) {
 		getChatRoomMessages(roomId: $roomId) {
-			_id
-			messageId
-			roomId
-			senderId
-			messageType
-			content
-			status
-			senderNickname
-			isAgent
-			isEdited
-			isDeleted
-			isPinned
-			isSystem
-			createdAt
-			updatedAt
+			list {
+				_id
+				messageId
+				roomId
+				senderId
+				messageType
+				content
+				status
+				isAgent
+				isEdited
+				isDeleted
+				isPinned
+				isSystem
+				createdAt
+				updatedAt
+			}
+			metaCounter {
+				total
+			}
 		}
 	}
 `;
 
 export const GET_MESSAGE_DEBUG_INFO = gql`
 	query GetMessageDebugInfo($roomId: String!) {
-		getMessageDebugInfo(roomId: $roomId) {
-			totalMessages
-			messageCount
-			roomExists
-			lastMessage
-			firstMessage
-			debugInfo
-		}
+		getMessageDebugInfo(roomId: $roomId)
 	}
 `;

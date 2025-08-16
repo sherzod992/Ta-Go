@@ -107,13 +107,22 @@ const ChatRoomPage: React.FC = () => {
 	// 메시지 업데이트
 	useEffect(() => {
 		if (messagesData?.getChatMessages?.list) {
-			setMessages(messagesData.getChatMessages.list);
+			// senderNickname이 null인 경우 기본값 제공
+			const processedMessages = messagesData.getChatMessages.list.map((message: any) => ({
+				...message,
+				senderNickname: message.senderNickname || '알 수 없음'
+			}));
+			setMessages(processedMessages);
 		}
 	}, [messagesData]);
 
 	// 자동 스크롤
 	const scrollToBottom = () => {
 		try {
+			const messagesContainer = messagesContainerRef.current;
+			if (messagesContainer) {
+				messagesContainer.scrollTop = messagesContainer.scrollHeight;
+			}
 			if (messagesEndRef.current) {
 				messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
 			}
@@ -122,9 +131,26 @@ const ChatRoomPage: React.FC = () => {
 		}
 	};
 
+	// 메시지가 업데이트될 때마다 자동 스크롤
 	useEffect(() => {
 		scrollToBottom();
 	}, [messages]);
+
+	// 메시지 전송 후 즉시 스크롤
+	useEffect(() => {
+		if (messages.length > 0) {
+			setTimeout(() => {
+				scrollToBottom();
+			}, 100);
+		}
+	}, [messages.length]);
+
+	// 컴포넌트 마운트 시 스크롤
+	useEffect(() => {
+		setTimeout(() => {
+			scrollToBottom();
+		}, 200);
+	}, []);
 
 	// 스크롤 위치 감지
 	useEffect(() => {
@@ -211,6 +237,11 @@ const ChatRoomPage: React.FC = () => {
 		setMessages(prev => [...prev, userMessage]);
 		setInputMessage('');
 		setIsTyping(true);
+
+		// 메시지 추가 후 즉시 스크롤
+		setTimeout(() => {
+			scrollToBottom();
+		}, 50);
 
 		// 입력창 높이 초기화
 		if (inputRef.current) {
@@ -354,7 +385,10 @@ const ChatRoomPage: React.FC = () => {
 					overflowY: 'auto',
 					p: 2,
 					background: 'rgba(255, 255, 255, 0.95)',
-					backdropFilter: 'blur(10px)'
+					backdropFilter: 'blur(10px)',
+					display: 'flex',
+					flexDirection: 'column',
+					justifyContent: 'flex-end'
 				}}
 			>
 				{messages.length === 0 ? (
@@ -375,33 +409,62 @@ const ChatRoomPage: React.FC = () => {
 						</Typography>
 					</Box>
 				) : (
-					<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-						{					messages.map((message, index) => {
-						const isMyMessage = message.senderId === userId;
-						
-						return (
-							<Fade in={true} timeout={300 + index * 50} key={message._id}>
-									<Box sx={{ 
+														<Box sx={{ 
 										display: 'flex', 
-										justifyContent: isMyMessage ? 'flex-end' : 'flex-start',
-										mb: 1
+										flexDirection: 'column', 
+										gap: 2,
+										width: '100%'
 									}}>
-										<Box sx={{ maxWidth: '70%' }}>
-											<Paper
-												elevation={2}
-												sx={{
-													p: 2,
-													borderRadius: 3,
-													background: isMyMessage 
-														? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-														: '#f8f9fa',
-													color: isMyMessage ? 'white' : 'text.primary',
-													border: isMyMessage ? 'none' : '1px solid #e9ecef',
-													'&:hover': {
-														boxShadow: 4
-													}
+										{messages.map((message, index) => {
+											const isMyMessage = String(message.senderId) === String(userId);
+											
+											return (
+												<Fade in={true} timeout={300 + index * 50} key={message._id}>
+													<Box 
+														className={isMyMessage ? 'user-message' : 'agent-message'}
+														sx={{ 
+															display: 'flex', 
+															justifyContent: isMyMessage ? 'flex-end' : 'flex-start',
+															mb: 1,
+															alignItems: 'flex-end',
+															gap: 1
+														}}
+													>
+										{!isMyMessage && (
+											<Avatar 
+												sx={{ 
+													width: 32, 
+													height: 32, 
+													bgcolor: '#FF9500',
+													fontSize: '0.8rem'
 												}}
 											>
+												{message.senderNickname?.charAt(0) || '담'}
+											</Avatar>
+										)}
+										
+																			<Box sx={{ 
+										maxWidth: '70%',
+										alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
+										width: 'fit-content'
+									}}>
+										<Paper
+											elevation={2}
+											sx={{
+												p: 2,
+												borderRadius: isMyMessage ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
+												background: isMyMessage 
+													? 'linear-gradient(135deg, #FF9500 0%, #FF6B00 100%)'
+													: '#f8f9fa',
+												color: isMyMessage ? 'white' : 'text.primary',
+												border: isMyMessage ? 'none' : '1px solid #e9ecef',
+												'&:hover': {
+													boxShadow: 4
+												},
+												width: 'fit-content',
+												minWidth: 'fit-content'
+											}}
+										>
 												<Typography variant="body1" sx={{ wordBreak: 'break-word' }}>
 													{message.content}
 												</Typography>

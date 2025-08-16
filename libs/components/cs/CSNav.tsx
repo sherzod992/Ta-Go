@@ -1,15 +1,18 @@
 import React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { useTranslation } from 'next-i18next';
 import { Box, Button, Stack } from '@mui/material';
 
 const CSNav: React.FC = () => {
   const router = useRouter();
+  const { t } = useTranslation('common');
+  
   const items = [
-    { href: '/cs/faq', label: 'FAQ' },
-    { href: '/cs/inquiry', label: '1:1 문의' },
-    { href: '/contact', label: '연락처' },
-    { href: '/cs/terms', label: '약관' },
+    { href: '/cs/faq', label: t('FAQ') },
+    { href: '/cs/inquiry', label: t('1:1 Inquiry') },
+    { href: '/contact', label: t('Contact') },
+    { href: '/cs/terms', label: t('Terms') },
   ];
 
   return (

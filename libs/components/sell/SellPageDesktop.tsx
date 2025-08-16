@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'next-i18next';
+import { useRouter } from 'next/router';
 import { Box, Container, Typography, Paper, Grid, Card, CardContent, Alert, Button } from '@mui/material';
 import { useReactiveVar } from '@apollo/client';
 import { userVar } from '../../../apollo/store';
@@ -8,10 +9,13 @@ import { MemberType } from '../../enums/member.enum';
 
 const SellPageDesktop: React.FC = () => {
   const { t } = useTranslation('common');
+  const router = useRouter();
   const user = useReactiveVar(userVar);
 
-  // Admin 권한 확인
+  // 권한 확인
   const isAdmin = user?.memberType === MemberType.ADMIN;
+  const isActiveUser = user?.memberStatus === 'ACTIVE';
+  const canCreateProperty = user?._id && !isAdmin && isActiveUser;
 
   return (
     <Box className="sell-page-desktop" sx={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
@@ -26,14 +30,32 @@ const SellPageDesktop: React.FC = () => {
           </Typography>
         </Paper>
 
-        {/* Admin 권한 제한 알림 */}
-        {isAdmin && (
+        {/* 권한 제한 알림 */}
+        {!user?._id && (
           <Alert severity="warning" sx={{ mb: 4 }}>
+            <Typography variant="body1" gutterBottom>
+              <strong>로그인이 필요합니다.</strong>
+            </Typography>
+            <Typography variant="body2" sx={{ mb: 2 }}>
+              매물을 등록하려면 로그인이 필요합니다.
+            </Typography>
+            <Button 
+              variant="outlined" 
+              color="primary"
+              onClick={() => router.push('/login')}
+            >
+              로그인하기
+            </Button>
+          </Alert>
+        )}
+
+        {isAdmin && (
+          <Alert severity="error" sx={{ mb: 4 }}>
             <Typography variant="body1" gutterBottom>
               <strong>관리자 계정으로는 매물을 등록할 수 없습니다.</strong>
             </Typography>
             <Typography variant="body2" sx={{ mb: 2 }}>
-              매물 등록은 일반 사용자 계정으로만 가능합니다. 관리자 계정은 매물 관리 및 시스템 관리 기능만 사용할 수 있습니다.
+              매물 등록은 일반 사용자(USER) 또는 에이전트(AGENT) 계정으로만 가능합니다. 관리자 계정은 매물 관리 및 시스템 관리 기능만 사용할 수 있습니다.
             </Typography>
             <Button 
               variant="outlined" 
@@ -45,6 +67,24 @@ const SellPageDesktop: React.FC = () => {
           </Alert>
         )}
 
+        {user?._id && !isActiveUser && (
+          <Alert severity="error" sx={{ mb: 4 }}>
+            <Typography variant="body1" gutterBottom>
+              <strong>계정이 비활성화되어 있습니다.</strong>
+            </Typography>
+            <Typography variant="body2" sx={{ mb: 2 }}>
+              매물을 등록하려면 활성화된 계정이 필요합니다.
+            </Typography>
+            <Button 
+              variant="outlined" 
+              color="primary"
+              onClick={() => router.push('/mypage')}
+            >
+              내 정보 확인하기
+            </Button>
+          </Alert>
+        )}
+
         <Grid container spacing={4}>
           {/* 매물 등록 폼 */}
           <Grid item xs={12} md={8}>
@@ -52,12 +92,12 @@ const SellPageDesktop: React.FC = () => {
               className="form-section" 
               sx={{ 
                 p: 4,
-                opacity: isAdmin ? 0.5 : 1,
-                pointerEvents: isAdmin ? 'none' : 'auto',
+                opacity: canCreateProperty ? 1 : 0.5,
+                pointerEvents: canCreateProperty ? 'auto' : 'none',
                 position: 'relative'
               }}
             >
-              {isAdmin && (
+              {!canCreateProperty && (
                 <Box
                   sx={{
                     position: 'absolute',
@@ -74,7 +114,10 @@ const SellPageDesktop: React.FC = () => {
                   }}
                 >
                   <Typography variant="h6" color="text.secondary">
-                    관리자는 매물을 등록할 수 없습니다
+                    {!user?._id ? '로그인이 필요합니다' : 
+                     isAdmin ? '관리자는 매물을 등록할 수 없습니다' : 
+                     !isActiveUser ? '계정이 비활성화되어 있습니다' : 
+                     '매물을 등록할 수 없습니다'}
                   </Typography>
                 </Box>
               )}
