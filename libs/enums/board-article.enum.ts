@@ -12,10 +12,16 @@ if (typeof window === 'undefined') {
 }
 
 export enum BoardArticleCategory {
-	FREE = 'FREE',
-	RECOMMEND = 'RECOMMEND',
-	NEWS = 'NEWS',
-	HUMOR = 'HUMOR',
+	FREE = 'FREE',           // 자유게시판
+	REVIEW = 'REVIEW',       // 리뷰게시판
+	MAINTENANCE = 'MAINTENANCE', // 정비게시판
+	TOURING = 'TOURING',     // 투어링게시판
+	TRADE = 'TRADE',         // 중고거래게시판
+	MEETING = 'MEETING',     // 모임게시판
+	QNA = 'QNA',             // 질문게시판
+	RECOMMEND = 'RECOMMEND', // 추천게시판
+	NEWS = 'NEWS',           // 뉴스게시판
+	HUMOR = 'HUMOR',         // 유머게시판
 }
 
 if (registerEnumType) {

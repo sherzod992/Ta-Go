@@ -1,0 +1,165 @@
+/** RESPONSIVE MIXINS **/
+
+// 미디어 쿼리 믹스인
+@mixin respond-to($breakpoint) {
+  @if map-has-key($breakpoints, $breakpoint) {
+    @media (min-width: map-get($breakpoints, $breakpoint)) {
+      @content;
+    }
+  } @else {
+    @warn "Unknown breakpoint: #{$breakpoint}";
+  }
+}
+
+// 최대 너비 미디어 쿼리
+@mixin respond-to-max($breakpoint) {
+  @if map-has-key($breakpoints, $breakpoint) {
+    @media (max-width: map-get($breakpoints, $breakpoint) - 1px) {
+      @content;
+    }
+  } @else {
+    @warn "Unknown breakpoint: #{$breakpoint}";
+  }
+}
+
+// 컨테이너 믹스인
+@mixin container {
+  width: 100%;
+  margin-right: auto;
+  margin-left: auto;
+  padding-right: $grid-gutter-width * 0.5;
+  padding-left: $grid-gutter-width * 0.5;
+  
+  @each $breakpoint, $max-width in $container-max-widths {
+    @include respond-to($breakpoint) {
+      max-width: $max-width;
+    }
+  }
+}
+
+// 그리드 시스템 믹스인
+@mixin make-col($size, $columns: $grid-columns) {
+  flex: 0 0 percentage($size / $columns);
+  max-width: percentage($size / $columns);
+}
+
+@mixin make-col-offset($size, $columns: $grid-columns) {
+  margin-left: percentage($size / $columns);
+}
+
+// 반응형 그리드 클래스 생성
+@mixin make-grid-columns($columns: $grid-columns, $gutter: $grid-gutter-width, $breakpoints: $breakpoints) {
+  @each $breakpoint in map-keys($breakpoints) {
+    $infix: if($breakpoint == "xs", "", "-#{$breakpoint}");
+    
+    @include respond-to($breakpoint) {
+      @for $i from 1 through $columns {
+        .col#{$infix}-#{$i} {
+          @include make-col($i, $columns);
+        }
+      }
+      
+      .col#{$infix}-auto {
+        flex: 0 0 auto;
+        width: auto;
+        max-width: 100%;
+      }
+    }
+  }
+}
+
+// 유틸리티 믹스인
+@mixin sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@mixin clearfix {
+  &::after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+}
+
+// 플렉스 유틸리티
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+// 반응형 텍스트
+@mixin responsive-text($min-size, $max-size, $min-width: 320px, $max-width: 1200px) {
+  font-size: clamp(#{$min-size}, #{$min-size} + (#{$max-size} - #{$min-size}) * ((100vw - #{$min-width}) / (#{$max-width} - #{$min-width})), #{$max-size});
+}
+
+// 반응형 이미지
+@mixin responsive-image {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+// 반응형 비디오
+@mixin responsive-video {
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-bottom: 56.25%; // 16:9 비율
+  
+  iframe,
+  video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+// 접근성 믹스인
+@mixin focus-visible {
+  &:focus-visible {
+    outline: 2px solid map-get($colors, primary);
+    outline-offset: 2px;
+  }
+}
+
+@mixin reduced-motion {
+  @media (prefers-reduced-motion: reduce) {
+    @content;
+  }
+}
+
+// 다크 모드 지원
+@mixin dark-mode {
+  @media (prefers-color-scheme: dark) {
+    @content;
+  }
+}
+
+// 고대비 모드 지원
+@mixin high-contrast {
+  @media (prefers-contrast: high) {
+    @content;
+  }
+}

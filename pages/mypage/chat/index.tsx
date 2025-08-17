@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { useRouter } from 'next/router';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { GetServerSideProps } from 'next';
 import { GET_MY_CHAT_ROOMS, GET_CHAT_MESSAGES, CHECK_CHAT_ROOM_EXISTS, GET_ALL_USER_CHAT_ROOMS, GET_CHAT_ROOM_MESSAGES, GET_MESSAGE_DEBUG_INFO } from '../../../apollo/user/query';
 import { SEND_MESSAGE, MARK_AS_READ, CREATE_CHAT_ROOM } from '../../../apollo/user/mutation';
 import { ChatRoom } from '../../../libs/types/chat/chat';
@@ -50,6 +53,7 @@ import {
 } from '@mui/icons-material';
 
 const ChatListPage: React.FC = () => {
+	const { t } = useTranslation('common');
 	const router = useRouter();
 	const { isMobile } = useDeviceDetect();
 	const theme = useTheme();
@@ -153,10 +157,31 @@ const ChatListPage: React.FC = () => {
 	// 컴포넌트 마운트 상태 관리
 	useEffect(() => {
 		setIsMounted(true);
+		
+		// 라우터 이벤트 리스너 추가
+		const handleRouteChangeStart = () => {
+			console.log('페이지 전환 시작');
+		};
+		
+		const handleRouteChangeComplete = () => {
+			console.log('페이지 전환 완료');
+		};
+		
+		const handleRouteChangeError = (err: any) => {
+			console.error('페이지 전환 오류:', err);
+		};
+		
+		router.events.on('routeChangeStart', handleRouteChangeStart);
+		router.events.on('routeChangeComplete', handleRouteChangeComplete);
+		router.events.on('routeChangeError', handleRouteChangeError);
+		
 		return () => {
 			setIsMounted(false);
+			router.events.off('routeChangeStart', handleRouteChangeStart);
+			router.events.off('routeChangeComplete', handleRouteChangeComplete);
+			router.events.off('routeChangeError', handleRouteChangeError);
 		};
-	}, []);
+	}, [router]);
 
 	// 사용자의 모든 채팅방 조회 (디버깅용)
 	const { data: userChatRoomsData } = useQuery(GET_ALL_USER_CHAT_ROOMS, {
@@ -674,7 +699,8 @@ const ChatListPage: React.FC = () => {
 		}
 		
 		if (isMobile) {
-			router.push(`/mypage/chat/${chatId}`);
+			// 라우팅 개선: replace를 사용하여 브라우저 히스토리 문제 해결
+			router.replace(`/mypage/chat/${chatId}`, undefined, { shallow: false });
 		}
 	};
 
@@ -1642,10 +1668,10 @@ const ChatListPage: React.FC = () => {
 											>
 												<ChatBubble sx={{ fontSize: 40, color: 'error.main', opacity: 0.5 }} />
 												<Typography variant="body1" color="error.main" textAlign="center">
-													채팅방을 불러올 수 없습니다.
+													{t('Failed to load chat room')}
 												</Typography>
 												<Typography variant="body2" color="text.secondary" textAlign="center">
-													채팅방을 생성하거나 다른 채팅방을 선택해주세요.
+													{t('Start a new conversation')}
 												</Typography>
 												{selectedPropertyId && (
 													<Button
@@ -1653,7 +1679,7 @@ const ChatListPage: React.FC = () => {
 														onClick={() => createChatRoomForProperty(selectedPropertyId)}
 														sx={{ mt: 1 }}
 													>
-														채팅방 생성
+														{t('New Chat')}
 													</Button>
 												)}
 											</Box>
@@ -1668,8 +1694,8 @@ const ChatListPage: React.FC = () => {
 											>
 												<ChatBubble sx={{ fontSize: 40, color: 'text.secondary', opacity: 0.5 }} />
 												<Typography variant="body1" color="text.secondary" textAlign="center">
-													아직 메시지가 없습니다.<br />
-													첫 번째 메시지를 보내보세요!
+													{t('No messages')}<br />
+													{t('Send Message')}
 												</Typography>
 											</Box>
 										) : (
@@ -1734,7 +1760,7 @@ const ChatListPage: React.FC = () => {
 									{typingUsers.length > 0 && (
 										<Box sx={{ p: 1, px: 2, borderTop: '1px solid rgba(0,0,0,0.1)' }}>
 											<Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
-												{typingUsers.length === 1 ? '상대방이 입력 중...' : `${typingUsers.length}명이 입력 중...`}
+												{typingUsers.length === 1 ? t('Typing') : `${typingUsers.length} ${t('Typing')}`}
 											</Typography>
 										</Box>
 									)}
@@ -1777,7 +1803,7 @@ const ChatListPage: React.FC = () => {
 												value={messageInput}
 												onChange={handleTyping}
 												onKeyPress={handleKeyPress}
-												placeholder={messagesError ? "채팅방을 불러올 수 없습니다" : "메시지를 입력하세요..."}
+												placeholder={messagesError ? t('Failed to load chat room') : t('Type a message')}
 												variant="outlined"
 												size="small"
 												disabled={!!messagesError}
@@ -1819,10 +1845,10 @@ const ChatListPage: React.FC = () => {
 							>
 								<ChatBubble sx={{ fontSize: 80, color: 'text.secondary', opacity: 0.5 }} />
 								<Typography variant="h5" color="text.secondary" fontWeight="bold">
-									채팅방을 선택해주세요
+									{t('Select a chat room')}
 								</Typography>
 								<Typography variant="body1" color="text.secondary">
-									왼쪽에서 채팅방을 선택하여 대화를 시작하세요
+									{t('Select a chat room to start conversation')}
 								</Typography>
 							</Box>
 						)}
@@ -1834,3 +1860,11 @@ const ChatListPage: React.FC = () => {
 };
 
 export default LayoutBasic(ChatListPage);
+
+export const getServerSideProps: GetServerSideProps = async ({ locale }) => {
+	return {
+		props: {
+			...(await serverSideTranslations(locale || 'ko', ['common'])),
+		},
+	};
+};

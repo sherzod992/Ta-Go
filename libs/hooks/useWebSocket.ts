@@ -167,6 +167,14 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
     }
   }, [isConnected]);
 
+  // 재연결
+  const reconnect = useCallback(() => {
+    disconnect();
+    setTimeout(() => {
+      connect();
+    }, 1000);
+  }, [disconnect, connect]);
+
   // 컴포넌트 마운트 시 연결
   useEffect(() => {
     connect();
@@ -194,6 +202,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
     leaveRoom,
     sendTypingStatus,
     markAsRead,
+    reconnect,
     socket: socketRef.current,
   };
 };

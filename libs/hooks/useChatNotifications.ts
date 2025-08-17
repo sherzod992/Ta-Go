@@ -5,9 +5,10 @@ import { GET_UNREAD_MESSAGE_COUNT } from '../../apollo/user/query';
 interface UseChatNotificationsProps {
 	userId: string;
 	enabled?: boolean;
+	onNotification?: (notification: any) => void;
 }
 
-export const useChatNotifications = ({ userId, enabled = true }: UseChatNotificationsProps) => {
+export const useChatNotifications = ({ userId, enabled = true, onNotification }: UseChatNotificationsProps) => {
 	const [unreadCount, setUnreadCount] = useState(0);
 	const [lastNotification, setLastNotification] = useState<Date | null>(null);
 
@@ -50,6 +51,15 @@ export const useChatNotifications = ({ userId, enabled = true }: UseChatNotifica
 	// 브라우저 알림 표시
 	const showNotification = (count: number) => {
 		if (!('Notification' in window)) return;
+
+		const notificationData = {
+			title: '새 메시지',
+			body: `${count}개의 새 메시지가 도착했습니다.`,
+			count: count
+		};
+
+		// 콜백 함수 호출
+		onNotification?.(notificationData);
 
 		if (Notification.permission === 'granted') {
 			new Notification('새 메시지', {

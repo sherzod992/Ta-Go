@@ -459,3 +459,35 @@ export const UPDATE_CHAT_STATUS = gql`
 		}
 	}
 `;
+
+/**************************
+ *         COMMENT        *
+ *************************/
+
+export const DELETE_COMMENT = gql`
+	mutation DeleteComment($input: String!) {
+		deleteComment(input: $input) {
+			_id
+			commentStatus
+			commentGroup
+			commentContent
+			commentRefId
+			memberId
+			createdAt
+			updatedAt
+		}
+	}
+`;
+
+export const LIKE_COMMENT = gql`
+	mutation LikeComment($input: String!) {
+		likeComment(input: $input) {
+			_id
+			likeTarget
+			likeRefId
+			memberId
+			createdAt
+			updatedAt
+		}
+	}
+`;

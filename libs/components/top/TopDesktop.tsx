@@ -6,7 +6,9 @@ import { useRouter } from 'next/router';
 import { useReactiveVar } from '@apollo/client';
 import { userVar } from '../../../apollo/store';
 import { logOut } from '../../auth';
+import { MemberType } from '../../enums/member.enum';
 import NotificationsIcon from '@mui/icons-material/Notifications';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import { NotificationIcon } from '../common/NotificationIcon';
 
 const TopDesktop: React.FC = () => {
@@ -15,6 +17,7 @@ const TopDesktop: React.FC = () => {
   const user = useReactiveVar(userVar);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [languageAnchorEl, setLanguageAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [adminAnchorEl, setAdminAnchorEl] = React.useState<null | HTMLElement>(null);
 
   // 언어 옵션
   const languages = [
@@ -53,6 +56,14 @@ const TopDesktop: React.FC = () => {
     handleLanguageClose();
   };
 
+  const handleAdminMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAdminAnchorEl(event.currentTarget);
+  };
+
+  const handleAdminClose = () => {
+    setAdminAnchorEl(null);
+  };
+
   return (
     <Box component="nav" className="top-pc">
       {/* Logo */}
@@ -84,6 +95,23 @@ const TopDesktop: React.FC = () => {
         <Link href="/cs" className="nav-item">
           {t('CS')}
         </Link>
+        {user?.memberType === MemberType.ADMIN && (
+          <Button
+            className="nav-item admin-nav"
+            onClick={handleAdminMenu}
+            startIcon={<AdminPanelSettingsIcon />}
+            sx={{
+              color: 'primary.main',
+              fontWeight: 'bold',
+              '&:hover': {
+                backgroundColor: 'primary.light',
+                color: 'white',
+              }
+            }}
+          >
+            {t('Admin')}
+          </Button>
+        )}
       </Box>
 
       {/* Right Section - Notifications, Language & Login/User */}
@@ -166,8 +194,36 @@ const TopDesktop: React.FC = () => {
               <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}>
                 {t('Logout')}
               </MenuItem>
-            </Menu>
-          </Box>
+                    </Menu>
+
+        {/* Admin Menu */}
+        {user?.memberType === MemberType.ADMIN && (
+          <Menu
+            anchorEl={adminAnchorEl}
+            open={Boolean(adminAnchorEl)}
+            onClose={handleAdminClose}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'right',
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+            className="menu"
+          >
+            <MenuItem onClick={() => { router.push('/_admin/properties'); handleAdminClose(); }}>
+              <Typography variant="body2">{t('Properties Management')}</Typography>
+            </MenuItem>
+            <MenuItem onClick={() => { router.push('/_admin/community'); handleAdminClose(); }}>
+              <Typography variant="body2">{t('Community Management')}</Typography>
+            </MenuItem>
+            <MenuItem onClick={() => { router.push('/_admin/cs'); handleAdminClose(); }}>
+              <Typography variant="body2">{t('CS Management')}</Typography>
+            </MenuItem>
+          </Menu>
+        )}
+      </Box>
         ) : (
           <Link href="/login" className="login-button">
             <Button variant="contained" color="primary">

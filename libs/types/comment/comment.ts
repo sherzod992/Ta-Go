@@ -20,3 +20,12 @@ export interface Comments {
 	list: Comment[];
 	metaCounter: TotalCounter[];
 }
+
+export enum CommentSortBy {
+	CREATED_AT = 'createdAt',
+	UPDATED_AT = 'updatedAt',
+	LIKES = 'likes',
+	REPLIES = 'replies',
+	NEWEST = 'newest',
+	POPULAR = 'popular'
+}

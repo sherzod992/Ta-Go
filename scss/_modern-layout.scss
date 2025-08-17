@@ -1,0 +1,226 @@
+/** MODERN RESPONSIVE LAYOUT SYSTEM **/
+
+// 유동적 그리드 시스템
+.fluid-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  width: 100%;
+  padding: 0 5vw;
+  
+  @media (min-width: 768px) {
+    padding: 0 8vw;
+    gap: 3rem;
+  }
+  
+  @media (min-width: 1200px) {
+    padding: 0 10vw;
+    gap: 4rem;
+  }
+}
+
+// 전체 화면 레이아웃
+.full-viewport {
+  min-height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  
+  .content {
+    flex: 1;
+    width: 100%;
+    padding: 0 5vw;
+    
+    @media (min-width: 768px) {
+      padding: 0 8vw;
+    }
+    
+    @media (min-width: 1200px) {
+      padding: 0 10vw;
+    }
+  }
+}
+
+// 카드 그리드 시스템
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+  width: 100%;
+  
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 2.5rem;
+  }
+  
+  @media (min-width: 1200px) {
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 3rem;
+  }
+}
+
+// 반응형 컨테이너
+.responsive-container {
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 5vw;
+  
+  @media (min-width: 576px) {
+    padding: 0 6vw;
+  }
+  
+  @media (min-width: 768px) {
+    padding: 0 8vw;
+  }
+  
+  @media (min-width: 992px) {
+    padding: 0 10vw;
+  }
+  
+  @media (min-width: 1200px) {
+    padding: 0 12vw;
+  }
+  
+  @media (min-width: 1400px) {
+    padding: 0 15vw;
+  }
+}
+
+// 유동적 이미지
+.fluid-image {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  aspect-ratio: 16/9;
+}
+
+// 반응형 텍스트
+.fluid-text {
+  font-size: clamp(1rem, 4vw, 2rem);
+  line-height: 1.4;
+}
+
+.fluid-heading {
+  font-size: clamp(1.5rem, 6vw, 3rem);
+  line-height: 1.2;
+}
+
+// 스크롤 스냅 레이아웃
+.snap-container {
+  scroll-snap-type: x mandatory;
+  display: flex;
+  overflow-x: auto;
+  gap: 1rem;
+  padding: 0 5vw;
+  
+  .snap-item {
+    scroll-snap-align: start;
+    flex-shrink: 0;
+    width: 280px;
+    
+    @media (min-width: 768px) {
+      width: 350px;
+    }
+  }
+}
+
+// 그라데이션 배경
+.gradient-bg {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  width: 100vw;
+}
+
+// 유동적 스페이싱
+.fluid-spacing {
+  padding: clamp(2rem, 8vw, 6rem) 0;
+  margin: clamp(1rem, 4vw, 3rem) 0;
+}
+
+// 반응형 네비게이션
+.fluid-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 1rem 5vw;
+  
+  @media (min-width: 768px) {
+    padding: 1.5rem 8vw;
+  }
+  
+  @media (min-width: 1200px) {
+    padding: 2rem 10vw;
+  }
+}
+
+// 유동적 버튼
+.fluid-button {
+  padding: clamp(0.75rem, 2vw, 1.5rem) clamp(1.5rem, 4vw, 3rem);
+  font-size: clamp(0.875rem, 2.5vw, 1.125rem);
+  border-radius: clamp(0.5rem, 1.5vw, 1rem);
+}
+
+// 반응형 히어로 섹션
+.fluid-hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5vw;
+  text-align: center;
+  
+  @media (min-width: 768px) {
+    padding: 0 8vw;
+  }
+  
+  @media (min-width: 1200px) {
+    padding: 0 10vw;
+  }
+  
+  .hero-content {
+    max-width: 800px;
+    width: 100%;
+  }
+}
+
+// 유동적 사이드바
+.fluid-sidebar {
+  width: 100%;
+  
+  @media (min-width: 768px) {
+    width: 300px;
+    flex-shrink: 0;
+  }
+  
+  @media (min-width: 1200px) {
+    width: 350px;
+  }
+}
+
+.fluid-main {
+  flex: 1;
+  min-width: 0; // 플렉스 아이템 오버플로우 방지
+}
+
+// 반응형 레이아웃 래퍼
+.fluid-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  
+  @media (min-width: 768px) {
+    flex-direction: row;
+  }
+  
+  .sidebar {
+    @extend .fluid-sidebar;
+  }
+  
+  .main {
+    @extend .fluid-main;
+  }
+}

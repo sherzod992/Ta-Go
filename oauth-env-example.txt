@@ -1,0 +1,26 @@
+# OAuth 설정 예시 파일
+# 이 파일을 .env.local로 복사하고 실제 값으로 변경하세요
+
+# Google OAuth
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_google_client_id_here
+GOOGLE_CLIENT_SECRET=your_google_client_secret_here
+
+# Kakao OAuth
+NEXT_PUBLIC_KAKAO_CLIENT_ID=your_kakao_client_id_here
+KAKAO_CLIENT_SECRET=your_kakao_client_secret_here
+
+# Facebook OAuth
+NEXT_PUBLIC_FACEBOOK_APP_ID=your_facebook_app_id_here
+FACEBOOK_APP_SECRET=your_facebook_app_secret_here
+
+# GitHub OAuth
+NEXT_PUBLIC_GITHUB_CLIENT_ID=your_github_client_id_here
+GITHUB_CLIENT_SECRET=your_github_client_secret_here
+
+# Telegram Bot
+NEXT_PUBLIC_TELEGRAM_BOT_ID=your_telegram_bot_id_here
+TELEGRAM_BOT_TOKEN=your_telegram_bot_token_here
+
+# 애플리케이션 설정
+NEXT_PUBLIC_BASE_URL=http://localhost:3000
+BACKEND_URL=http://localhost:4000
