@@ -2,8 +2,8 @@ module.exports = {
     apps: [
         {
             name: 'ta-go',
-            script: 'npm',
-            args: 'start',
+            script: 'npx',
+            args: 'serve out -p 3011',
             cwd: '/var/www/ta-go',
             instances: 1,
             autorestart: true,
