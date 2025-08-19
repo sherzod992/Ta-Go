@@ -29,12 +29,12 @@ const createWebSocketWithLogging = (url: string) => {
 // 환경 변수에서 API URL 가져오기
 const getApiUrl = () => {
   // REACT_PUBLIC_API_GRAPHQL_URL 환경 변수도 확인 (기존 설정과의 호환성)
-  return process.env.NEXT_PUBLIC_API_GRAPHQL_URL || process.env.REACT_PUBLIC_API_GRAPHQL_URL || 'http://72.60.40.57:3012/graphql';
+  return process.env.NEXT_PUBLIC_API_GRAPHQL_URL || process.env.REACT_PUBLIC_API_GRAPHQL_URL || 'http://72.60.40.57:3000/graphql';
 };
 
 const getWsUrl = () => {
   // REACT_APP_API_WS 환경 변수도 확인 (기존 설정과의 호환성)
-  const baseWsUrl = process.env.NEXT_PUBLIC_API_WS || process.env.REACT_APP_API_WS || 'ws://72.60.40.57:3012';
+  const baseWsUrl = process.env.NEXT_PUBLIC_API_WS || process.env.REACT_APP_API_WS || 'ws://72.60.40.57:3000';
   // WebSocket URL에 /graphql 경로가 없으면 추가
   return baseWsUrl.endsWith('/graphql') ? baseWsUrl : `${baseWsUrl}/graphql`;
 };
