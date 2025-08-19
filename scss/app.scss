@@ -96,6 +96,76 @@ hr {
 	}
 }
 
+// PhoneInput 스타일 커스터마이징
+.PhoneInput {
+  display: flex;
+  align-items: center;
+  border: 1px solid rgba(0, 0, 0, 0.23);
+  border-radius: 4px;
+  padding: 0;
+  font-family: inherit;
+  transition: border-color 0.2s ease;
+  
+  &:focus-within {
+    border-color: #1976d2;
+    border-width: 2px;
+  }
+  
+  &.Mui-disabled {
+    background-color: rgba(0, 0, 0, 0.12);
+    color: rgba(0, 0, 0, 0.38);
+  }
+}
+
+.PhoneInputCountry {
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  border-right: 1px solid rgba(0, 0, 0, 0.23);
+  background-color: #f5f5f5;
+  min-width: 80px;
+}
+
+.PhoneInputCountrySelect {
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  cursor: pointer;
+  padding: 8px 4px;
+  width: 100%;
+  
+  &:focus {
+    outline: none;
+  }
+}
+
+.PhoneInputCountryIcon {
+  width: 20px;
+  height: 15px;
+  margin-right: 8px;
+}
+
+.PhoneInputInput {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 16.5px 14px;
+  font-size: 16px;
+  font-family: inherit;
+  background: transparent;
+  
+  &::placeholder {
+    color: rgba(0, 0, 0, 0.54);
+  }
+  
+  &:disabled {
+    background-color: rgba(0, 0, 0, 0.12);
+    color: rgba(0, 0, 0, 0.38);
+  }
+}
+
 // 모든 채팅 메시지 정렬 강화
 .user-message {
 	align-self: flex-end !important;

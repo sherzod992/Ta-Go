@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  ta-go:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+      - NEXT_PUBLIC_API_GRAPHQL_URL=${NEXT_PUBLIC_API_GRAPHQL_URL}
+      - NEXT_PUBLIC_API_WS=${NEXT_PUBLIC_API_WS}
+    restart: unless-stopped
+    volumes:
+      - ./public:/app/public:ro

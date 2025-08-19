@@ -6,7 +6,9 @@
 	"scripts": {
 		"dev": "next dev -p 3011",
 		"build": "next build",
+		"build:static": "cp next.config.static.js next.config.js && next build",
 		"start": "next start -p 3011",
+		"serve": "npx serve@latest out -p 3011",
 		"lint": "next lint",
 		"changelog": "standard-version --skip.tag"
 	},
@@ -58,6 +60,7 @@
 		"react-i18next": "^11.15.4",
 		"react-icons": "^4.4.0",
 		"react-moment": "^1.1.2",
+		"react-phone-number-input": "^3.4.12",
 		"react-scripts": "4.0.3",
 		"react-scrollable-feed": "^1.3.2",
 		"react-slick": "^0.28.1",

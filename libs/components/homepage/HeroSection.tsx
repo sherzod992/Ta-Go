@@ -144,306 +144,287 @@ const HeroSection: React.FC = () => {
   };
 
   return (
-    <Box
-      sx={{
-        minHeight: '800px',
-        position: 'relative',
-        overflow: 'hidden',
-      }}
-    >
-      {/* Background Image - Full Size */}
+    <Box sx={{ 
+      position: 'relative',
+      minHeight: '600px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      overflow: 'hidden',
+      padding: '2rem 0',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+    }}>
+      {/* Background Image */}
       <Box
+        className="background-image"
         sx={{
           position: 'absolute',
           top: 0,
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundImage: 'url(/img/home/home1.jpg)',
+          backgroundImage: 'url(/img/home/home2.jpg)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%)',
-          }
+          opacity: 0.3,
         }}
       />
-      
-      {/* Hero Content */}
-      <Container maxWidth={false} sx={{ position: 'relative', zIndex: 1, height: '100%', maxWidth: '1200px', mx: 'auto', px: 2 }}>
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '100%',
-            textAlign: 'center',
-            color: 'white',
-            pt: 8,
-          }}
-        >
-          <Typography
-            variant="h1"
-            sx={{
-              fontWeight: 'bold',
-              fontSize: { xs: '3rem', md: '5rem' },
-              textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
-              marginBottom: 2,
-            }}
-          >
-            {t('Find your next bike')}
-          </Typography>
-          <Typography
-            variant="h4"
-            sx={{
-              opacity: 0.9,
-              textShadow: '1px 1px 2px rgba(0,0,0,0.5)',
-              marginBottom: 4,
-            }}
-          >
-            {t('Discover the perfect ride for your adventure')}
-          </Typography>
-        </Box>
-      </Container>
 
-      {/* Search Filter Card - Positioned at Bottom */}
+      {/* Content Container */}
       <Box
+        className="content-container"
         sx={{
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          zIndex: 2,
-          pb: 4,
+          position: 'relative',
+          zIndex: 1,
+          width: '100%',
+          maxWidth: '1400px',
+          margin: '0 auto',
+          padding: '0 2rem',
         }}
       >
-        <Container maxWidth={false} sx={{ maxWidth: '1200px', mx: 'auto', px: 2 }}>
-          <Card
+        {/* Hero Title */}
+        <Box sx={{ textAlign: 'center', mb: 4 }}>
+          <Typography
+            variant="h2"
             sx={{
-              borderRadius: 3,
-              boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
-              marginBottom: 2,
+              color: 'white',
+              fontWeight: 900,
+              fontSize: { xs: '2.5rem', md: '4rem' },
+              textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
+              mb: 2,
             }}
           >
-            <CardContent sx={{ padding: 3 }}>
-              <Typography
-                variant="h3"
-                sx={{
-                  textAlign: 'center',
-                  marginBottom: 3,
-                  fontWeight: 'bold',
-                  color: '#333',
-                }}
-              >
-                {t('Search Filters')}
-              </Typography>
-              
-              {/* Top Row Filters */}
-              <Grid container spacing={2} sx={{ marginBottom: 2 }}>
-                <Grid item xs={12} sm={6} md={3}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>{t('Brand')}</InputLabel>
-                    <Select
-                      value={brand}
-                      label={t('Brand')}
-                      onChange={(e) => setBrand(e.target.value)}
-                    >
-                      <MenuItem value="all">{t('All brands')}</MenuItem>
-                      <MenuItem value="Honda">Honda</MenuItem>
-                      <MenuItem value="Yamaha">Yamaha</MenuItem>
-                      <MenuItem value="Suzuki">Suzuki</MenuItem>
-                      <MenuItem value="Kawasaki">Kawasaki</MenuItem>
-                      <MenuItem value="BMW">BMW</MenuItem>
-                      <MenuItem value="Ducati">Ducati</MenuItem>
-                      <MenuItem value="KTM">KTM</MenuItem>
-                      <MenuItem value="Harley-Davidson">Harley-Davidson</MenuItem>
-                      <MenuItem value="Triumph">Triumph</MenuItem>
-                      <MenuItem value="Aprilia">Aprilia</MenuItem>
-                      <MenuItem value="Moto Guzzi">Moto Guzzi</MenuItem>
-                      <MenuItem value="MV Agusta">MV Agusta</MenuItem>
-                      <MenuItem value="Royal Enfield">Royal Enfield</MenuItem>
-                      <MenuItem value="Zero">Zero</MenuItem>
-                      <MenuItem value="Hero">Hero</MenuItem>
-                      <MenuItem value="TVS">TVS</MenuItem>
-                      <MenuItem value="Bajaj">Bajaj</MenuItem>
-                      <MenuItem value="other">{t('Other')}</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} sm={6} md={3}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label={t('Keyword')}
-                    placeholder={t('Search by keyword')}
-                    value={keyword}
-                    onChange={(e) => setKeyword(e.target.value)}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6} md={3}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>{t('Location')}</InputLabel>
-                    <Select
-                      value={location}
-                      label={t('Location')}
-                      onChange={(e) => setLocation(e.target.value)}
-                    >
-                      <MenuItem value="all">{t('All locations')}</MenuItem>
-                      <MenuItem value="seoul">Seoul</MenuItem>
-                      <MenuItem value="busan">Busan</MenuItem>
-                      <MenuItem value="daegu">Daegu</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} sm={6} md={3}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>{t('New and used')}</InputLabel>
-                    <Select
-                      value={condition}
-                      label={t('New and used')}
-                      onChange={(e) => setCondition(e.target.value)}
-                    >
-                      <MenuItem value="all">{t('Any')}</MenuItem>
-                      <MenuItem value="new">New</MenuItem>
-                      <MenuItem value="used">Used</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-              </Grid>
+            {t('Find Your Perfect Motorcycle')}
+          </Typography>
+          <Typography
+            variant="h5"
+            sx={{
+              color: 'white',
+              opacity: 0.9,
+              fontSize: { xs: '1.2rem', md: '1.5rem' },
+              textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
+            }}
+          >
+            {t('Discover thousands of motorcycles from trusted sellers')}
+          </Typography>
+        </Box>
 
-              {/* Motorcycle Types Row */}
-              <Grid container spacing={1} sx={{ marginBottom: 2 }}>
-                {bikeCategories.map((categoryItem) => (
-                  <Grid item xs={6} sm={4} md={1.5} key={categoryItem.name}>
-                    <Box
-                      onClick={() => {
-                        // 카테고리 선택 시 검색 필터에 추가
-                        setSelectedCategory(selectedCategory === categoryItem.name ? 'all' : categoryItem.name);
-                      }}
-                      sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        cursor: 'pointer',
-                        padding: 1,
-                        borderRadius: 2,
-                        transition: 'all 0.2s',
-                        backgroundColor: selectedCategory === categoryItem.name ? 'rgba(25, 118, 210, 0.1)' : 'transparent',
-                        border: selectedCategory === categoryItem.name ? '2px solid #1976d2' : '2px solid transparent',
-                        '&:hover': {
-                          backgroundColor: 'rgba(0, 0, 0, 0.05)',
-                          transform: 'translateY(-2px)',
-                        },
-                      }}
-                    >
+        {/* Search Filter Card */}
+        <Card
+          className="search-filter-card"
+          sx={{
+            background: 'white',
+            borderRadius: '24px',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+            marginBottom: '2rem',
+            overflow: 'hidden',
+          }}
+        >
+          <CardContent sx={{ padding: '2rem' }}>
+            <Typography
+              className="filter-title"
+              variant="h4"
+              sx={{
+                textAlign: 'center',
+                fontWeight: 700,
+                color: '#333',
+                marginBottom: '2rem',
+              }}
+            >
+              {t('Search Your Dream Bike')}
+            </Typography>
+
+            {/* Filter Rows */}
+            <Grid container spacing={2} sx={{ marginBottom: 2 }}>
+              <Grid item xs={12} sm={6} md={3}>
+                <FormControl fullWidth>
+                  <InputLabel>{t('Brand')}</InputLabel>
+                  <Select
+                    value={brand}
+                    onChange={(e) => setBrand(e.target.value)}
+                    label={t('Brand')}
+                  >
+                    <MenuItem value="all">{t('All Brands')}</MenuItem>
+                    <MenuItem value="honda">Honda</MenuItem>
+                    <MenuItem value="yamaha">Yamaha</MenuItem>
+                    <MenuItem value="suzuki">Suzuki</MenuItem>
+                    <MenuItem value="kawasaki">Kawasaki</MenuItem>
+                    <MenuItem value="bmw">BMW</MenuItem>
+                    <MenuItem value="ducati">Ducati</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <TextField
+                  fullWidth
+                  label={t('Keyword')}
+                  placeholder={t('Search by model, year...')}
+                  value={keyword}
+                  onChange={(e) => setKeyword(e.target.value)}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <FormControl fullWidth>
+                  <InputLabel>{t('Location')}</InputLabel>
+                  <Select
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    label={t('Location')}
+                  >
+                    <MenuItem value="all">{t('All Locations')}</MenuItem>
+                    <MenuItem value="seoul">Seoul</MenuItem>
+                    <MenuItem value="busan">Busan</MenuItem>
+                    <MenuItem value="daegu">Daegu</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <FormControl fullWidth>
+                  <InputLabel>{t('Condition')}</InputLabel>
+                  <Select
+                    value={condition}
+                    onChange={(e) => setCondition(e.target.value)}
+                    label={t('Condition')}
+                  >
+                    <MenuItem value="all">{t('All Conditions')}</MenuItem>
+                    <MenuItem value="new">{t('New')}</MenuItem>
+                    <MenuItem value="used">{t('Used')}</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+            </Grid>
+
+            {/* Bike Categories */}
+            <Grid container spacing={2} sx={{ marginBottom: 2 }}>
+              <Grid item xs={12}>
+                <Typography variant="body2" gutterBottom>
+                  {t('Bike Categories')}:
+                </Typography>
+                <Grid container spacing={1}>
+                  {bikeCategories.map((categoryItem) => (
+                    <Grid item xs={3} sm={1.5} key={categoryItem.value}>
                       <Box
-                        component="img"
-                        src={categoryItem.image}
-                        alt={categoryItem.name}
+                        onClick={() => setSelectedCategory(categoryItem.name)}
                         sx={{
-                          width: 40,
-                          height: 40,
-                          objectFit: 'contain',
-                          marginBottom: 0.5,
-                        }}
-                      />
-                      <Typography
-                        variant="caption"
-                        sx={{
-                          textAlign: 'center',
-                          fontWeight: 500,
-                          color: selectedCategory === categoryItem.name ? '#1976d2' : '#333',
-                          fontSize: '0.7rem',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          padding: 1,
+                          border: selectedCategory === categoryItem.name ? '2px solid #1976d2' : '2px solid transparent',
+                          borderRadius: 2,
+                          cursor: 'pointer',
+                          transition: 'all 0.3s ease',
+                          backgroundColor: selectedCategory === categoryItem.name ? 'rgba(25, 118, 210, 0.1)' : 'transparent',
+                          '&:hover': {
+                            backgroundColor: 'rgba(25, 118, 210, 0.05)',
+                            borderColor: '#1976d2',
+                          },
                         }}
                       >
-                        {categoryItem.name}
-                      </Typography>
-                    </Box>
-                  </Grid>
-                ))}
-              </Grid>
-
-              {/* Action Buttons Row */}
-              <Grid container spacing={2} sx={{ marginBottom: 2 }}>
-                <Grid item xs={12} sm={6} md={6}>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    size="large"
-                    fullWidth
-                    disabled={searchResultCount === 0}
-                    onClick={handleShowBikes}
-                    sx={{
-                      height: '40px',
-                      backgroundColor: searchResultCount === 0 ? 'rgba(0, 0, 0, 0.12)' : '#d32f2f',
-                      color: searchResultCount === 0 ? 'rgba(0, 0, 0, 0.26)' : 'white',
-                      '&:hover': { 
-                        backgroundColor: searchResultCount === 0 ? 'rgba(0, 0, 0, 0.12)' : '#b71c1c' 
-                      },
-                      '&:disabled': {
-                        backgroundColor: 'rgba(0, 0, 0, 0.12)',
-                        color: 'rgba(0, 0, 0, 0.26)'
-                      }
-                    }}
-                  >
-                    {loading ? (
-                      <CircularProgress size={20} color="inherit" />
-                    ) : (
-                      `${t('Show bikes')} (${searchResultCount})`
-                    )}
-                  </Button>
-                </Grid>
-                <Grid item xs={12} sm={6} md={6}>
-                  <Button
-                    variant="text"
-                    color="error"
-                    onClick={handleClearAll}
-                    sx={{ textTransform: 'none', height: '40px' }}
-                  >
-                    {t('Clear all')}
-                  </Button>
+                        <Box
+                          component="img"
+                          src={categoryItem.image}
+                          alt={categoryItem.name}
+                          sx={{
+                            width: '100%',
+                            height: '120px',
+                            objectFit: 'cover',
+                            borderRadius: 1,
+                            marginBottom: 0.5,
+                            aspectRatio: '1/1',
+                          }}
+                        />
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            textAlign: 'center',
+                            fontWeight: 500,
+                            color: selectedCategory === categoryItem.name ? '#1976d2' : '#333',
+                            fontSize: '0.7rem',
+                            lineHeight: 1.2,
+                          }}
+                        >
+                          {categoryItem.name}
+                        </Typography>
+                      </Box>
+                    </Grid>
+                  ))}
                 </Grid>
               </Grid>
+            </Grid>
 
-              {/* 검색 결과 안내 */}
-              {!loading && searchResultCount === 0 && (
-                <Box sx={{ mb: 2, p: 2, backgroundColor: 'rgba(255, 193, 7, 0.1)', borderRadius: 1, border: '1px solid #ffc107' }}>
-                  <Typography variant="body2" color="warning.main">
-                    {t('No bikes found')} - {t('Try adjusting your search criteria')}
+            {/* Action Buttons Row */}
+            <Grid container spacing={2} sx={{ marginBottom: 2 }}>
+              <Grid item xs={12} sm={6} md={6}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="large"
+                  fullWidth
+                  disabled={searchResultCount === 0}
+                  onClick={handleShowBikes}
+                  sx={{
+                    height: '40px',
+                    backgroundColor: searchResultCount === 0 ? 'rgba(0, 0, 0, 0.12)' : '#d32f2f',
+                    color: searchResultCount === 0 ? 'rgba(0, 0, 0, 0.26)' : 'white',
+                    '&:hover': { 
+                      backgroundColor: searchResultCount === 0 ? 'rgba(0, 0, 0, 0.12)' : '#b71c1c' 
+                    },
+                    '&:disabled': {
+                      backgroundColor: 'rgba(0, 0, 0, 0.12)',
+                      color: 'rgba(0, 0, 0, 0.26)'
+                    }
+                  }}
+                >
+                  {loading ? (
+                    <CircularProgress size={20} color="inherit" />
+                  ) : (
+                    `${t('Show bikes')} (${searchResultCount})`
+                  )}
+                </Button>
+              </Grid>
+              <Grid item xs={12} sm={6} md={6}>
+                <Button
+                  variant="text"
+                  color="error"
+                  onClick={handleClearAll}
+                  sx={{ textTransform: 'none', height: '40px' }}
+                >
+                  {t('Clear all')}
+                </Button>
+              </Grid>
+            </Grid>
+
+            {/* 검색 결과 안내 */}
+            {!loading && searchResultCount === 0 && (
+              <Box sx={{ mb: 2, p: 2, backgroundColor: 'rgba(255, 193, 7, 0.1)', borderRadius: 1, border: '1px solid #ffc107' }}>
+                <Typography variant="body2" color="warning.main">
+                  {t('No bikes found')} - {t('Try adjusting your search criteria')}
+                </Typography>
+              </Box>
+            )}
+
+            {/* Price Range Filter */}
+            <Grid container spacing={2} sx={{ marginBottom: 2 }}>
+              <Grid item xs={12}>
+                <Box>
+                  <Typography variant="body2" gutterBottom>
+                    {t('Price Range')}: {formatPrice(priceRange[0])} - {formatPrice(priceRange[1])}
                   </Typography>
+                  <Slider
+                    value={priceRange}
+                    onChange={(_, value) => setPriceRange(value as [number, number])}
+                    valueLabelDisplay="auto"
+                    min={0}
+                    max={50000000}
+                    step={1000000}
+                    valueLabelFormat={(value) => formatPrice(value)}
+                  />
                 </Box>
-              )}
-
-              {/* Price Range Filter */}
-              <Grid container spacing={2} sx={{ marginBottom: 2 }}>
-                <Grid item xs={12}>
-                  <Box>
-                    <Typography variant="body2" gutterBottom>
-                      {t('Price Range')}: {formatPrice(priceRange[0])} - {formatPrice(priceRange[1])}
-                    </Typography>
-                    <Slider
-                      value={priceRange}
-                      onChange={(_, value) => setPriceRange(value as [number, number])}
-                      valueLabelDisplay="auto"
-                      min={0}
-                      max={50000000}
-                      step={1000000}
-                      valueLabelFormat={(value) => formatPrice(value)}
-                    />
-                  </Box>
-                </Grid>
               </Grid>
-            </CardContent>
-          </Card>
-
-
-        </Container>
+            </Grid>
+          </CardContent>
+        </Card>
       </Box>
     </Box>
   );

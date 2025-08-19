@@ -2,7 +2,7 @@ import type { AppProps } from 'next/app';
 import { ApolloProvider } from '@apollo/client';
 import { initializeApollo } from '../apollo/client';
 import { initializeReactiveVars } from '../apollo/store';
-import { appWithTranslation } from 'next-i18next';
+import { LanguageProvider } from '../libs/contexts/LanguageContext';
 import '../scss/app.scss';
 import { useEffect } from 'react';
 
@@ -15,10 +15,12 @@ function App({ Component, pageProps }: AppProps) {
   }, []);
   
   return (
-    <ApolloProvider client={client}>
-      <Component {...pageProps} />
-    </ApolloProvider>
+    <LanguageProvider>
+      <ApolloProvider client={client}>
+        <Component {...pageProps} />
+      </ApolloProvider>
+    </LanguageProvider>
   );
 }
 
-export default appWithTranslation(App); 
+export default App; 

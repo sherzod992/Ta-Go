@@ -5,7 +5,6 @@ import { useRouter } from 'next/router';
 import { 
   Box, 
   Typography, 
-  Container, 
   Grid, 
   Card, 
   CardMedia, 
@@ -63,6 +62,7 @@ const BikeNews: React.FC = () => {
 
   return (
     <Box sx={{ py: 8, backgroundColor: 'white' }}>
+      <Box sx={{ maxWidth: '1400px', mx: 'auto', px: 3 }}>
         <Typography
           variant="h2"
           sx={{
@@ -130,17 +130,17 @@ const BikeNews: React.FC = () => {
                       <Typography variant="caption" color="text.secondary">
                         {new Date(article.createdAt).toLocaleDateString()}
                       </Typography>
-                                          <Button
-                      variant="text"
-                      color="primary"
-                      size="small"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        router.push(`/community/${article._id}`);
-                      }}
-                    >
-                      {t('Read more')}
-                    </Button>
+                      <Button
+                        variant="text"
+                        color="primary"
+                        size="small"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          router.push(`/community/${article._id}`);
+                        }}
+                      >
+                        {t('Read more')}
+                      </Button>
                     </Box>
                   </CardContent>
                 </Card>
@@ -148,6 +148,7 @@ const BikeNews: React.FC = () => {
             ))}
           </Grid>
         )}
+      </Box>
     </Box>
   );
 };

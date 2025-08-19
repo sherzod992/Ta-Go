@@ -5,7 +5,6 @@ import { useRouter } from 'next/router';
 import { 
   Box, 
   Typography, 
-  Container, 
   Grid, 
   Card, 
   CardMedia, 
@@ -63,6 +62,7 @@ const NewBikeShowroom: React.FC = () => {
 
   return (
     <Box sx={{ py: 8, backgroundColor: 'white' }}>
+      <Box sx={{ maxWidth: '1400px', mx: 'auto', px: 3 }}>
         <Typography
           variant="h2"
           sx={{
@@ -102,39 +102,47 @@ const NewBikeShowroom: React.FC = () => {
                   <CardMedia
                     component="img"
                     height="250"
-                    image={bike.propertyImages?.[0] || '/img/typeImages/type5.png'}
+                    image={bike.propertyImages?.[0] || '/img/logo/Honda_Logo.svg'}
                     alt={bike.propertyTitle}
                     sx={{ objectFit: 'cover' }}
                   />
-                  <CardContent sx={{ flexGrow: 1, textAlign: 'center' }}>
+                  <CardContent sx={{ flexGrow: 1 }}>
                     <Typography variant="h5" component="h3" gutterBottom>
                       {bike.propertyTitle}
                     </Typography>
-                    <Typography variant="body1" color="text.secondary" paragraph>
-                      {bike.propertyBrand} {bike.propertyModel} ({bike.propertyYear})
+                    
+                    <Typography variant="h4" color="primary" gutterBottom>
+                      {new Intl.NumberFormat('ko-KR').format(bike.propertyPrice)}원
                     </Typography>
-                    <Typography variant="h4" color="primary" fontWeight="bold" gutterBottom>
-                      ${bike.propertyPrice?.toLocaleString()}
-                    </Typography>
-                                      <Button
-                    variant="outlined"
-                    color="primary"
-                    size="large"
-                    sx={{ mt: 2 }}
-                    fullWidth
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      router.push(`/property/${bike._id}`);
-                    }}
-                  >
-                    {t('View Details')}
-                  </Button>
+                    
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                      <Typography variant="body1" color="text.secondary">
+                        {bike.propertyLocation}
+                      </Typography>
+                      <Typography variant="body1" color="text.secondary">
+                        {bike.propertyYear}년
+                      </Typography>
+                    </Box>
+                    
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      size="large"
+                      fullWidth
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        router.push(`/property/${bike._id}`);
+                      }}
+                    >
+                      {t('View Details')}
+                    </Button>
                   </CardContent>
                 </Card>
               </Grid>
             ))}
           </Grid>
         )}
+      </Box>
     </Box>
   );
 };

@@ -1,15 +1,15 @@
-import { GetServerSideProps } from 'next';
+import { useEffect } from 'react';
+import { useRouter } from 'next/router';
 
-export const getServerSideProps: GetServerSideProps = async () => {
-  return {
-    redirect: {
-      destination: '/cs/faq',
-      permanent: true,
-    },
-  };
-};
+export default function RedirectFAQ() {
+  const router = useRouter();
 
-export default function RedirectFAQ() { return null; }
+  useEffect(() => {
+    router.replace('/cs/faq');
+  }, [router]);
+
+  return null;
+}
 
 
 

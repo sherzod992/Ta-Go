@@ -52,7 +52,15 @@ const TopDesktop: React.FC = () => {
 
   const handleLanguageChange = (languageCode: string) => {
     const { pathname, asPath, query } = router;
-    router.push({ pathname, query }, asPath, { locale: languageCode });
+    // 현재 경로를 유지하면서 언어만 변경
+    router.push(
+      { pathname, query },
+      asPath,
+      { 
+        locale: languageCode,
+        shallow: false 
+      }
+    );
     handleLanguageClose();
   };
 

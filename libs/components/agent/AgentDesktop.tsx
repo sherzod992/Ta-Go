@@ -289,13 +289,13 @@ const AgentDesktop: React.FC = () => {
 
   return (
     <Box className="agent-desktop">
-      <Container maxWidth="xl">
+      <Box sx={{ p: 3 }}>
         {/* 헤더 */}
-        <Box sx={{ py: 4, textAlign: 'center' }}>
-          <Typography variant="h3" component="h1" gutterBottom>
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="h4" component="h1" gutterBottom>
             {t('Agents')}
           </Typography>
-          <Typography variant="h6" color="text.secondary">
+          <Typography variant="body1" color="text.secondary">
             {t('Professional agents who have registered properties')} {agents.length}명을 찾았습니다
           </Typography>
         </Box>
@@ -393,7 +393,7 @@ const AgentDesktop: React.FC = () => {
             {/* Agent 목록 */}
             <Grid container spacing={3}>
               {agents.map((agent: any) => (
-                <Grid item xs={12} lg={viewMode === 'grid' ? 6 : 12} key={agent._id}>
+                <Grid item xs={12} lg={viewMode === 'grid' ? 4 : 12} key={agent._id}>
                   <Card className="agent-card" sx={{ height: '100%' }}>
                     <CardContent sx={{ p: 3 }}>
                       <Box sx={{ display: 'flex', gap: 3, mb: 3 }}>
@@ -431,54 +431,44 @@ const AgentDesktop: React.FC = () => {
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <BikeIcon />
                           <Typography variant="body1">
-                    매물 {(() => {
-                      // memberProperties가 배열인 경우
-                      if (Array.isArray(agent.memberProperties)) {
-                        return agent.memberProperties.length;
-                      }
-                      // memberProperties가 문자열인 경우 (JSON 문자열일 수 있음)
-                      else if (typeof agent.memberProperties === 'string') {
-                        try {
-                          const parsed = JSON.parse(agent.memberProperties);
-                          return Array.isArray(parsed) ? parsed.length : 0;
-                        } catch (e) {
-                          // JSON 파싱 실패 시 문자열 길이로 판단 (쉼표로 구분된 ID들일 수 있음)
-                          if (agent.memberProperties.includes(',')) {
-                            return agent.memberProperties.split(',').length;
-                          }
-                          return agent.memberProperties ? 1 : 0;
-                        }
-                      }
-                      // memberProperties가 null, undefined, 또는 다른 타입인 경우
-                      return 0;
-                    })()}개
-                  </Typography>
+                            매물 {(() => {
+                              if (Array.isArray(agent.memberProperties)) {
+                                return agent.memberProperties.length;
+                              } else if (typeof agent.memberProperties === 'string') {
+                                try {
+                                  const parsed = JSON.parse(agent.memberProperties);
+                                  return Array.isArray(parsed) ? parsed.length : 0;
+                                } catch (e) {
+                                  if (agent.memberProperties.includes(',')) {
+                                    return agent.memberProperties.split(',').length;
+                                  }
+                                  return agent.memberProperties ? 1 : 0;
+                                }
+                              }
+                              return 0;
+                            })()}개
+                          </Typography>
                         </Box>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <PersonIcon />
                           <Typography variant="body1">
-                    팔로워 {(() => {
-                      // memberFollowers가 배열인 경우
-                      if (Array.isArray(agent.memberFollowers)) {
-                        return agent.memberFollowers.length;
-                      }
-                      // memberFollowers가 문자열인 경우 (JSON 문자열일 수 있음)
-                      else if (typeof agent.memberFollowers === 'string') {
-                        try {
-                          const parsed = JSON.parse(agent.memberFollowers);
-                          return Array.isArray(parsed) ? parsed.length : 0;
-                        } catch (e) {
-                          // JSON 파싱 실패 시 문자열 길이로 판단 (쉼표로 구분된 ID들일 수 있음)
-                          if (agent.memberFollowers.includes(',')) {
-                            return agent.memberFollowers.split(',').length;
-                          }
-                          return agent.memberFollowers ? 1 : 0;
-                        }
-                      }
-                      // memberFollowers가 null, undefined, 또는 다른 타입인 경우
-                      return 0;
-                    })()}명
-                  </Typography>
+                            팔로워 {(() => {
+                              if (Array.isArray(agent.memberFollowers)) {
+                                return agent.memberFollowers.length;
+                              } else if (typeof agent.memberFollowers === 'string') {
+                                try {
+                                  const parsed = JSON.parse(agent.memberFollowers);
+                                  return Array.isArray(parsed) ? parsed.length : 0;
+                                } catch (e) {
+                                  if (agent.memberFollowers.includes(',')) {
+                                    return agent.memberFollowers.split(',').length;
+                                  }
+                                  return agent.memberFollowers ? 1 : 0;
+                                }
+                              }
+                              return 0;
+                            })()}명
+                          </Typography>
                         </Box>
                       </Box>
 
@@ -542,7 +532,7 @@ const AgentDesktop: React.FC = () => {
             )}
           </Grid>
         </Grid>
-      </Container>
+      </Box>
 
       {/* 연락처 다이얼로그 */}
       <Dialog open={contactDialogOpen} onClose={() => setContactDialogOpen(false)} maxWidth="md" fullWidth>
@@ -603,7 +593,22 @@ const AgentDesktop: React.FC = () => {
                     <Grid item xs={6}>
                       <Box sx={{ textAlign: 'center', p: 3, border: 1, borderColor: 'divider', borderRadius: 2 }}>
                         <Typography variant="h4" color="primary">
-                          {selectedAgent.memberProperties?.length || 0}
+                          {(() => {
+                            if (Array.isArray(selectedAgent.memberProperties)) {
+                              return selectedAgent.memberProperties.length;
+                            } else if (typeof selectedAgent.memberProperties === 'string') {
+                              try {
+                                const parsed = JSON.parse(selectedAgent.memberProperties);
+                                return Array.isArray(parsed) ? parsed.length : 0;
+                              } catch (e) {
+                                if (selectedAgent.memberProperties.includes(',')) {
+                                  return selectedAgent.memberProperties.split(',').length;
+                                }
+                                return selectedAgent.memberProperties ? 1 : 0;
+                              }
+                            }
+                            return 0;
+                          })()}
                         </Typography>
                         <Typography variant="body1">등록 매물</Typography>
                       </Box>
@@ -671,12 +676,6 @@ const AgentDesktop: React.FC = () => {
               </Typography>
               <Typography variant="body1" color="text.secondary">
                 총 {(() => {
-                  console.log('Agent properties data:', agentProperties);
-                  console.log('Agent property stats:', agentPropertyStats);
-                  console.log('Meta counter:', agentProperties?.getMemberProperties?.metaCounter);
-                  console.log('List length:', agentProperties?.getMemberProperties?.list?.length);
-                  
-                  // 통계 데이터가 있으면 우선 사용, 없으면 매물 목록의 메타 카운터 또는 리스트 길이 사용
                   return agentPropertyStats?.getMemberPropertyStats?.totalProperties || 
                          agentProperties?.getMemberProperties?.metaCounter?.total || 
                          agentProperties?.getMemberProperties?.list?.length || 0;
@@ -695,18 +694,18 @@ const AgentDesktop: React.FC = () => {
               {agentProperties.getMemberProperties.list.map((property: any) => (
                 <Grid item xs={12} sm={6} md={4} key={property._id}>
                   <Card 
-                        onClick={() => {
-                          window.open(`/property/${property._id}`, '_blank');
-                        }}
-                        sx={{
-                          height: '100%',
-                          cursor: 'pointer',
-                          transition: 'transform 0.2s',
-                          '&:hover': {
-                            transform: 'translateY(-4px)',
-                            boxShadow: 4
-                          }
-                        }}>
+                    onClick={() => {
+                      window.open(`/property/${property._id}`, '_blank');
+                    }}
+                    sx={{
+                      height: '100%',
+                      cursor: 'pointer',
+                      transition: 'transform 0.2s',
+                      '&:hover': {
+                        transform: 'translateY(-4px)',
+                        boxShadow: 4
+                      }
+                    }}>
                     <CardMedia
                       component="img"
                       height="180"

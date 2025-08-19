@@ -8,7 +8,7 @@ const CSPage: NextPage = () => {
   return <CSHome />;
 };
 
-export async function getStaticProps({ locale }: { locale: string }) {
+export async function getStaticProps({ locale = 'ko' }: { locale?: string }) {
   return {
     props: {
       ...(await serverSideTranslations(locale, ['common'])),

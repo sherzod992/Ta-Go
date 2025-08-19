@@ -1,110 +1,114 @@
 import React from 'react';
 import { useTranslation } from 'next-i18next';
-import { Box, Typography, Container, Grid, Card, CardContent, Avatar, Rating, Chip } from '@mui/material';
+import { 
+  Box, 
+  Typography, 
+  Grid, 
+  Card, 
+  CardContent, 
+  Avatar, 
+  Rating,
+  Chip
+} from '@mui/material';
 
 const ExpertReviews: React.FC = () => {
   const { t } = useTranslation('common');
-  const expertReviews = [
+
+  // 모의 리뷰 데이터
+  const reviews = [
     {
       id: 1,
-      bikeName: 'Mountain Pro X1',
-      expertName: 'Alex Johnson',
-      expertImage: '/img/typeImages/standart-naket.avif',
-      rating: 4.8,
-      review: 'Exceptional performance on rough terrain. The suspension system is outstanding.',
-      category: 'Mountain'
+      name: '김바이커',
+      avatar: '/img/logo/Honda_Logo.svg',
+      rating: 5,
+      title: 'Honda CB650R - 완벽한 도시 라이딩',
+      content: '도시에서의 일상적인 라이딩에 완벽한 바이크입니다. 연비도 좋고 관리도 쉽습니다.',
+      category: 'Sport'
     },
     {
       id: 2,
-      bikeName: 'Road Elite S2',
-      expertName: 'Sarah Chen',
-      expertImage: '/img/typeImages/standart-naket.avif',
-      rating: 4.9,
-      review: 'Incredible speed and precision. Perfect for competitive racing.',
-      category: 'Road'
+      name: '박투어러',
+      avatar: '/img/logo/BMWMotorrad.jpg',
+      rating: 5,
+      title: 'BMW R1250GS - 장거리 투어링의 정석',
+      content: '장거리 투어링에 최적화된 바이크입니다. 편안한 라이딩 포지션과 뛰어난 안정성을 제공합니다.',
+      category: 'Adventure'
     },
     {
       id: 3,
-      bikeName: 'City Cruiser Plus',
-      expertName: 'Mike Rodriguez',
-      expertImage: '/img/typeImages/standart-naket.avif',
-      rating: 4.7,
-      review: 'Comfortable and reliable for daily commuting. Great value for money.',
-      category: 'City'
+      name: '이크루저',
+      avatar: '/img/logo/PWcsAzP2m-HarleyDavidson.svg',
+      rating: 4,
+      title: 'Harley-Davidson Street Glide - 클래식의 매력',
+      content: '클래식한 디자인과 강력한 엔진 사운드가 매력적입니다. 장거리 라이딩에도 적합합니다.',
+      category: 'Cruiser'
     }
   ];
 
   return (
     <Box sx={{ py: 8, backgroundColor: '#f8f9fa' }}>
-      <Typography
-        variant="h2"
-        sx={{
-          textAlign: 'center',
-          marginBottom: 4,
-          fontWeight: 'bold',
-          color: '#333',
-        }}
-      >
-        {t('Expert Reviews')}
-      </Typography>
-      
-      <Grid container spacing={4}>
-        {expertReviews.map((review) => (
-          <Grid item xs={12} md={4} key={review.id}>
-            <Card
-              sx={{
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                transition: 'transform 0.2s',
-                '&:hover': {
-                  transform: 'translateY(-4px)',
-                  boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
-                },
-              }}
-            >
-              <CardContent sx={{ flexGrow: 1 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <Avatar
-                    src={review.expertImage}
-                    sx={{ width: 56, height: 56, mr: 2 }}
-                  />
-                  <Box>
-                    <Typography variant="h6" component="h3">
-                      {review.expertName}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {t('Expert')}
-                    </Typography>
+      <Box sx={{ maxWidth: '1400px', mx: 'auto', px: 3 }}>
+        <Typography
+          variant="h2"
+          sx={{
+            textAlign: 'center',
+            marginBottom: 4,
+            fontWeight: 'bold',
+            color: '#333',
+          }}
+        >
+          {t('Expert Reviews')}
+        </Typography>
+        
+        <Grid container spacing={4}>
+          {reviews.map((review) => (
+            <Grid item xs={12} md={4} key={review.id}>
+              <Card
+                sx={{
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  transition: 'transform 0.2s',
+                  '&:hover': {
+                    transform: 'translateY(-4px)',
+                    boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
+                  },
+                }}
+              >
+                <CardContent sx={{ flexGrow: 1, p: 3 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <Avatar
+                      src={review.avatar}
+                      sx={{ width: 50, height: 50, mr: 2 }}
+                    />
+                    <Box>
+                      <Typography variant="h6" component="h3">
+                        {review.name}
+                      </Typography>
+                      <Rating value={review.rating} readOnly size="small" />
+                    </Box>
                   </Box>
-                </Box>
-                
-                <Chip 
-                  label={review.category} 
-                  color="primary" 
-                  size="small" 
-                  sx={{ mb: 2 }}
-                />
-                
-                <Typography variant="h6" component="h4" gutterBottom>
-                  {review.bikeName}
-                </Typography>
-                
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <Rating value={review.rating} precision={0.1} readOnly />
-                  <Typography variant="body2" sx={{ ml: 1 }}>
-                    {review.rating}/5
+                  
+                  <Chip 
+                    label={review.category} 
+                    color="primary" 
+                    size="small"
+                    sx={{ mb: 2 }}
+                  />
+                  
+                  <Typography variant="h6" component="h4" gutterBottom>
+                    {review.title}
                   </Typography>
-                </Box>
-                
-                <Typography variant="body1" color="text.secondary">
-                  "{review.review}"
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
+                  
+                  <Typography variant="body2" color="text.secondary" paragraph>
+                    {review.content}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
     </Box>
   );
 };

@@ -1,177 +1,169 @@
-# TA-GO - 오토바이 거래 플랫폼
+# TA-GO 프로젝트
 
-## 🚀 Inquiry 시스템 구현 완료
+## 🚀 빠른 시작
 
-### 📋 구현된 기능
+### 🌐 배포된 사이트
+- **프론트엔드**: [http://72.60.40.57](http://72.60.40.57)
+- **백엔드 API**: [http://72.60.40.57:3000](http://72.60.40.57:3000)
+- **GraphQL**: [http://72.60.40.57:3000/graphql](http://72.60.40.57:3000/graphql)
 
-#### 1. 백엔드 API 연동
-- **문의 생성**: `CREATE_INQUIRY` mutation
-- **문의 조회**: `GET_INQUIRIES`, `GET_MY_INQUIRIES`, `GET_AGENT_INQUIRIES` query
-- **문의 수정**: `UPDATE_INQUIRY` mutation
-- **문의 삭제**: `DELETE_INQUIRY` mutation
+### 📋 배포 가이드
+- [📖 전체 스택 배포 가이드](FULL_STACK_DEPLOY_GUIDE.md)
+- [🔧 GitHub Secrets 설정 가이드](GITHUB_SECRETS_SETUP.md)
+- [🌐 호스팅어 VPS 배포 가이드](HOSTINGER_VPS_DEPLOY_GUIDE.md)
 
-#### 2. 프론트엔드 컴포넌트
-- **WebChat**: 완전한 웹 채팅 시스템
-- **PropertyDetail**: 개선된 매물 상세정보 페이지 (웹 채팅 통합)
-- **AgentDashboard**: 에이전트용 웹 채팅 관리 대시보드
-
-#### 3. 타입 시스템
-- **ChatMessage**: 채팅 메시지 데이터 구조
-- **ChatRoom**: 채팅방 데이터 구조
-- **CreateChatRoomInput**: 채팅방 생성 입력 데이터
-- **SendMessageInput**: 메시지 전송 입력 데이터
-
-#### 4. GraphQL 시스템
-- **CREATE_CHAT_ROOM**: 채팅방 생성 뮤테이션
-- **SEND_MESSAGE**: 메시지 전송 뮤테이션
-- **GET_CHAT_ROOMS**: 채팅방 목록 조회
-- **GET_CHAT_MESSAGES**: 채팅 메시지 조회
-
-### 🎯 사용 방법
-
-#### 매물 상세 페이지에서 웹 채팅하기
-```tsx
-import { WebChat } from '../libs/components/chat/WebChat';
-
-// 완전한 웹 채팅 시스템
-<WebChat
-  propertyId="매물ID"
-  propertyTitle="매물제목"
-  propertyImage="매물이미지URL"
-  propertyPrice={매물가격}
-  userId="사용자ID"
-  onClose={() => setShowChat(false)}
-/>
-```
-
-
-
-#### 에이전트 대시보드
-```tsx
-import { AgentDashboard } from '../libs/components/agent/AgentDashboard';
-
-<AgentDashboard />
-```
-
-### 🎨 UI/UX 특징
-
-#### 반응형 디자인
-- **PC**: 그리드 레이아웃, 사이드바 활용
-- **모바일**: 카드 레이아웃, 터치 최적화
-
-#### 상태 관리
-- 실시간 알림 시스템
-- 상태별 색상 구분
-- 페이지네이션 지원
-
-#### 사용자 경험
-- **완전한 웹 내 채팅**: 외부 앱 없이 웹에서만 모든 문의 처리
-- **실시간 대화**: 3초마다 자동 새로고침으로 실시간 메시지
-- **매물 정보 표시**: 채팅방 헤더에 매물 제목, 가격, 썸네일 표시
-- **빠른 답변**: 자주 묻는 질문 버튼으로 편리한 문의
-- **타이핑 인디케이터**: 생동감 있는 UX
-- **자동 스크롤**: 새 메시지 자동 스크롤
-- **반응형 디자인**: PC와 모바일 모두 최적화
-
-### 🔧 기술 스택
-
-- **Frontend**: React, TypeScript, Apollo Client
-- **Styling**: SCSS, 반응형 CSS
-- **State Management**: Apollo Client Cache
-- **Real-time**: Polling (30초 간격)
-
-### 📁 파일 구조
+## 🏗️ 프로젝트 구조
 
 ```
-libs/
-├── components/
-│   ├── chat/
-│   │   └── WebChat.tsx          # 완전한 웹 채팅 시스템
-│   ├── agent/
-│   │   └── AgentDashboard.tsx   # 에이전트 웹 채팅 관리 대시보드
-│   └── property/
-│       └── PropertyDetail.tsx   # 매물 상세정보 (웹 채팅 통합)
-├── types/
-│   └── chat/
-│       ├── chat.input.ts        # 채팅 입력 타입
-│       └── chat.ts              # 채팅 메인 타입
-└── apollo/
-    └── user/
-        ├── mutation.ts          # Chat mutations
-        └── query.ts             # Chat queries
-
-scss/
-├── pc/
-│   └── property/property-detail.scss # PC 매물 상세 스타일
-└── mobile/
-    └── property/property-detail.scss # 모바일 매물 상세 스타일
+ta-go/
+├── .github/workflows/          # GitHub Actions 워크플로우
+│   ├── deploy.yml             # VPS 배포 워크플로우
+│   └── deploy-vps.yml         # 프론트엔드 전용 배포
+├── libs/                      # 공통 라이브러리
+├── pages/                     # Next.js 페이지
+├── public/                    # 정적 파일
+├── scss/                      # 스타일 파일
+├── hostinger-*.sh            # 배포 스크립트들
+└── README.md                 # 프로젝트 문서
 ```
 
-### 🚀 확장 가능한 기능
+## 🚀 배포 정보
 
-#### 1단계 (현재 완료)
-- ✅ 완전한 웹 채팅 시스템
-- ✅ 외부 연락 수단 완전 제거 (카카오톡, 네이버톡, 이메일, 전화번호)
-- ✅ 실시간 메시지 송수신 (3초 폴링)
-- ✅ 매물 정보가 포함된 채팅방 헤더
-- ✅ 기존 문의 시스템 완전 제거 및 정리
-- ✅ 개선된 매물 상세정보 시각화
+### VPS 정보
+- **IP 주소**: `72.60.40.57`
+- **서버 호스트명**: `srv963199.hstgr.cloud`
+- **운영체제**: Ubuntu
+- **상태**: Running
 
-#### 2단계 (향후 구현)
-- 🔄 실시간 채팅 기능
-- 🔄 AI 자동 답변
-- 🔄 템플릿 답변
+### 배포 구성
+- **백엔드**: `/var/www/ta-ja` (포트 3000)
+- **프론트엔드**: `/var/www/ta-go` (포트 3011)
+- **Nginx**: 리버스 프록시 (포트 80/443)
 
-#### 3단계 (고급 기능)
-- 🔄 예약 시스템 연동
-- 🔄 결제 시스템 연동
-- 🔄 리뷰 시스템 연동
+## 🔧 개발 환경 설정
 
-### 💡 비즈니스 효과
+### 필수 요구사항
+- Node.js 18+
+- npm 또는 yarn
+- Git
 
-#### 사용자 측면
-- ✅ 완전한 웹 내 채팅: 외부 앱 없이 웹에서만 모든 문의 처리
-- ✅ 실시간 대화: 3초마다 자동 새로고침으로 실시간 메시지
-- ✅ 매물 정보 표시: 채팅방 헤더에 매물 제목, 가격, 썸네일 표시
+### 로컬 개발 서버 실행
+```bash
+# 의존성 설치
+npm install
 
-#### 에이전트 측면
-- ✅ 웹 채팅 관리: 웹 내에서 모든 채팅 관리
-- ✅ 실시간 소통: 고객과 실시간으로 소통
-- ✅ 대화 기록: 모든 대화 기록 웹 내 보관
+# 개발 서버 시작
+npm run dev
 
-#### 비즈니스 측면
-- ✅ 독립적인 시스템: 외부 의존성 없는 완전한 웹 채팅
-- ✅ 사용자 경험: 간편하고 직관적인 채팅 인터페이스
-- ✅ 데이터 통합: 웹 내에서 모든 데이터 관리
+# 브라우저에서 확인
+# http://localhost:3011
+```
+
+## 📚 문서
+
+### 배포 관련
+- [📖 전체 스택 배포 가이드](FULL_STACK_DEPLOY_GUIDE.md)
+- [🔧 GitHub Secrets 설정 가이드](GITHUB_SECRETS_SETUP.md)
+- [🌐 호스팅어 VPS 배포 가이드](HOSTINGER_VPS_DEPLOY_GUIDE.md)
+- [🔐 OAuth 설정 가이드](OAUTH_SETUP_GUIDE.md)
+
+### 스크립트 파일
+- [🚀 VPS 초기 설정](hostinger-vps-setup.sh)
+- [🌐 Nginx 설정](hostinger-nginx-setup.sh)
+- [🔧 환경 변수 설정](hostinger-env-setup.sh)
+- [📦 전체 스택 배포](hostinger-full-stack-deploy.sh)
+- [🐳 Docker 배포](hostinger-docker-deploy.sh)
+
+## 🔄 자동 배포
+
+### GitHub Actions 워크플로우
+- **워크플로우 파일**: [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)
+- **트리거**: main 브랜치에 푸시 시 자동 배포
+- **순서**: 백엔드 → 프론트엔드 → 헬스체크
+
+### 수동 배포
+```bash
+# VPS에 SSH 접속
+ssh username@72.60.40.57
+
+# 전체 스택 배포
+chmod +x hostinger-full-stack-deploy.sh
+./hostinger-full-stack-deploy.sh
+```
+
+## 🛠️ 관리 명령어
+
+### PM2 관리
+```bash
+# 상태 확인
+pm2 status
+
+# 로그 확인
+pm2 logs ta-ja-backend
+pm2 logs ta-go
+
+# 재시작
+pm2 restart all
+```
+
+### Nginx 관리
+```bash
+# 상태 확인
+sudo systemctl status nginx
+
+# 재시작
+sudo systemctl restart nginx
+```
+
+## 📞 지원
+
+### 문제 해결
+- [GitHub Actions 로그](https://github.com/your-username/ta-go/actions)
+- [VPS 로그 확인](#로그-확인)
+- [헬스체크](#헬스체크)
+
+### 연락처
+- **GitHub Issues**: [이슈 등록](https://github.com/your-username/ta-go/issues)
+- **VPS 접속**: `ssh username@72.60.40.57`
+
+## 🔗 유용한 링크
+
+### 배포된 서비스
+- 🌐 [프론트엔드](http://72.60.40.57)
+- 🔧 [백엔드 API](http://72.60.40.57:3000)
+- 📊 [GraphQL Playground](http://72.60.40.57:3000/graphql)
+- 🏥 [백엔드 헬스체크](http://72.60.40.57:3000/health)
+
+### 개발 도구
+- 📚 [Next.js 문서](https://nextjs.org/docs)
+- 🎨 [Material-UI 문서](https://mui.com/)
+- 🔍 [Apollo GraphQL](https://www.apollographql.com/docs/)
+- 🚀 [PM2 문서](https://pm2.keymetrics.io/docs/)
+
+### 호스팅 서비스
+- 🌐 [호스팅어 VPS](https://www.hostinger.com/vps-hosting)
+- 🔐 [GitHub](https://github.com)
+- 🐳 [Docker Hub](https://hub.docker.com)
+
+## 📊 프로젝트 상태
+
+- ✅ **VPS 설정**: 완료
+- ✅ **백엔드 배포**: 완료
+- ✅ **프론트엔드 배포**: 완료
+- ✅ **Nginx 설정**: 완료
+- ✅ **GitHub Actions**: 완료
+- ✅ **자동 배포**: 완료
+- ✅ **SSL 인증서**: 선택사항
+- ✅ **도메인 연결**: 선택사항
+
+## 🎯 다음 단계
+
+1. **GitHub Secrets 설정** - [가이드 보기](GITHUB_SECRETS_SETUP.md)
+2. **첫 번째 배포** - [가이드 보기](FULL_STACK_DEPLOY_GUIDE.md)
+3. **도메인 연결** (선택사항)
+4. **SSL 인증서 설치** (선택사항)
 
 ---
 
-## 🎉 완성된 웹 채팅 시스템
-
-이제 TA-GO 플랫폼에서 완전한 웹 채팅 시스템을 사용할 수 있습니다! 
-
-### 🆕 핵심 기능:
-
-#### 💬 완전한 웹 채팅 시스템
-- **외부 연락 수단 완전 제거**: 카카오톡, 네이버톡, 이메일, 전화번호 모두 제거
-- **웹 내 실시간 채팅**: 매물 상세 페이지에서 바로 채팅 가능
-- **채팅방 헤더**: 매물 정보 (제목, 가격, 썸네일) 표시
-- **실시간 메시지**: 3초마다 자동 새로고침으로 실시간 대화
-- **타이핑 인디케이터**: 생동감 있는 UX
-- **빠른 답변 버튼**: 자주 묻는 질문으로 편리한 문의
-- **자동 스크롤**: 새 메시지 자동 스크롤
-- **반응형 디자인**: PC와 모바일 모두 최적화
-
-#### 🎨 개선된 매물 상세정보
-- 이미지 갤러리 및 썸네일 뷰
-- 매물 통계 (조회수, 관심, 댓글, 순위)
-- 판매자 정보 및 평점
-- 플로팅 채팅 버튼으로 쉬운 접근
-- 반응형 그리드 레이아웃
-
-#### 💬 사용자 경험 향상
-- **사용자**: 웹에서만 모든 문의를 처리할 수 있습니다
-- **에이전트**: 웹 채팅을 통해 고객과 실시간으로 소통할 수 있습니다
-- **관리자**: 웹 내에서 모든 대화 기록을 관리할 수 있습니다
-
-모든 컴포넌트가 반응형으로 구현되어 PC와 모바일에서 모두 최적의 경험을 제공합니다! 🚀
+**마지막 업데이트**: 2024년 12월
+**버전**: 2.2.0

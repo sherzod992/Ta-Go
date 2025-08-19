@@ -34,6 +34,7 @@ import { BoardArticleCategory } from '../../libs/enums/board-article.enum';
 import { CommentGroup } from '../../libs/enums/comment.enum';
 import { Comment, CommentSortBy } from '../../libs/types/comment/comment';
 import YouTubeStyleComments from '../../libs/components/community/YouTubeStyleComments';
+import { GetStaticProps } from 'next';
 
 interface CommunityDetailPageProps {
   id: string;
@@ -368,7 +369,14 @@ const CommunityDetailPage: NextPage<CommunityDetailPageProps> = ({ id }) => {
   );
 };
 
-export const getServerSideProps: GetServerSideProps = async ({ params, locale }) => {
+export const getStaticPaths = async () => {
+  return {
+    paths: [],
+    fallback: 'blocking',
+  };
+};
+
+export const getStaticProps: GetStaticProps = async ({ params, locale }) => {
   const id = params?.id as string;
 
   return {

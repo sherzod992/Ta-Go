@@ -1,6 +1,6 @@
 import React from 'react';
 import { NextPage } from 'next';
-import { GetServerSideProps } from 'next';
+import { GetStaticProps } from 'next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import withLayoutBasic from '../../libs/components/layout/LayoutBasic';
 import useDeviceDetect from '../../libs/hooks/useDeviceDetect';
@@ -16,7 +16,7 @@ const AgentPage: NextPage = () => {
   return <AgentDesktop />;
 };
 
-export const getServerSideProps: GetServerSideProps = async ({ locale }) => {
+export const getStaticProps: GetStaticProps = async ({ locale }) => {
   return {
     props: {
       ...(await serverSideTranslations(locale || 'ko', ['common'])),

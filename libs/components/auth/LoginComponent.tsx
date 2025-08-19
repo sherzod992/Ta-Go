@@ -20,6 +20,8 @@ import {
   Chip,
 } from '@mui/material';
 import { useRouter } from 'next/router';
+import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
+import 'react-phone-number-input/style.css';
 import { 
   logIn, 
   signUp, 
@@ -111,6 +113,13 @@ const LoginComponent: React.FC = () => {
 
     if (!signupContact.trim()) {
       setError('연락처를 입력해주세요.');
+      setLoading(false);
+      return;
+    }
+
+    // 전화번호 유효성 검사 (전화번호 인증 방식인 경우)
+    if (signupAuthType === MemberAuthType.PHONE && !isValidPhoneNumber(signupContact)) {
+      setError('올바른 전화번호를 입력해주세요.');
       setLoading(false);
       return;
     }
@@ -316,16 +325,33 @@ const LoginComponent: React.FC = () => {
                   <MenuItem value={MemberType.AGENT}>에이전트</MenuItem>
                 </Select>
               </FormControl>
-              <TextField
-                fullWidth
-                label={getContactLabel()}
-                value={signupContact}
-                onChange={(e) => setSignupContact(e.target.value)}
-                margin="normal"
-                required
-                disabled={loading}
-                placeholder={getContactPlaceholder()}
-              />
+              {signupAuthType === MemberAuthType.PHONE ? (
+                <Box sx={{ mt: 2, mb: 1 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                    전화번호
+                  </Typography>
+                  <PhoneInput
+                    international
+                    defaultCountry="KR"
+                    value={signupContact}
+                    onChange={(value) => setSignupContact(value || '')}
+                    placeholder="전화번호를 입력하세요"
+                    disabled={loading}
+                    className={loading ? 'Mui-disabled' : ''}
+                  />
+                </Box>
+              ) : (
+                <TextField
+                  fullWidth
+                  label={getContactLabel()}
+                  value={signupContact}
+                  onChange={(e) => setSignupContact(e.target.value)}
+                  margin="normal"
+                  required
+                  disabled={loading}
+                  placeholder={getContactPlaceholder()}
+                />
+              )}
               <Button
                 type="submit"
                 fullWidth

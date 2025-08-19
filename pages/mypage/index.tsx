@@ -4,6 +4,7 @@ import { Box, Grid } from '@mui/material';
 import { useReactiveVar } from '@apollo/client';
 import { userVar } from '../../apollo/store';
 import { MemberType } from '../../libs/enums/member.enum';
+import withLayoutBasic from '../../libs/components/layout/LayoutBasic';
 import MyMenu from '../../libs/components/mypage/MyMenu';
 import MyProperties from '../../libs/components/mypage/MyProperties';
 import MyFavorites from '../../libs/components/mypage/MyFavorites';
@@ -67,6 +68,6 @@ const MyPage: React.FC = () => {
   );
 };
 
-export default MyPage;
+export default withLayoutBasic(MyPage);
 
 

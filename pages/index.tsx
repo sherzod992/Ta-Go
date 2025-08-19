@@ -3,7 +3,7 @@ import { NextPage } from 'next';
 import { GetStaticProps } from 'next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'next-i18next';
-import { Box, Container, Stack } from '@mui/material';
+import { Box, Stack } from '@mui/material';
 import useDeviceDetect from '../libs/hooks/useDeviceDetect';
 import withLayoutHome from '../libs/components/layout/LayoutHome';
 
@@ -19,7 +19,7 @@ const HomePage: NextPage = () => {
   const device = useDeviceDetect();
 
   return (
-    <Box sx={{ maxWidth: 1200, mx: 'auto', px: 2, py: 4 }}>
+    <Box sx={{ width: '100%' }}>
       <Stack spacing={0}>
         {/* 1. 히어로 섹션 */}
         <HeroSection />

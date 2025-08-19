@@ -1,15 +1,15 @@
-import { GetServerSideProps } from 'next';
+import { useEffect } from 'react';
+import { useRouter } from 'next/router';
 
-export const getServerSideProps: GetServerSideProps = async () => {
-  return {
-    redirect: {
-      destination: '/cs',
-      permanent: true,
-    },
-  };
-};
+export default function RedirectHelp() {
+  const router = useRouter();
 
-export default function RedirectHelp() { return null; }
+  useEffect(() => {
+    router.replace('/cs');
+  }, [router]);
+
+  return null;
+}
 
 
 

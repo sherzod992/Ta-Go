@@ -5,7 +5,6 @@ import { useRouter } from 'next/router';
 import { 
   Box, 
   Typography, 
-  Container, 
   Grid, 
   Card, 
   CardMedia, 
@@ -63,6 +62,7 @@ const SuggestedBikes: React.FC = () => {
 
   return (
     <Box sx={{ py: 8, backgroundColor: '#f8f9fa' }}>
+      <Box sx={{ maxWidth: '1400px', mx: 'auto', px: 3 }}>
         <Typography
           variant="h2"
           sx={{
@@ -102,24 +102,31 @@ const SuggestedBikes: React.FC = () => {
                   <CardMedia
                     component="img"
                     height="200"
-                    image={property.propertyImages?.[0] || '/img/typeImages/type1.png'}
+                    image={property.propertyImages?.[0] || '/img/logo/Honda_Logo.svg'}
                     alt={property.propertyTitle}
                     sx={{ objectFit: 'cover' }}
                   />
-                  <CardContent sx={{ flexGrow: 1, textAlign: 'center' }}>
+                  <CardContent sx={{ flexGrow: 1 }}>
                     <Typography variant="h6" component="h3" gutterBottom>
                       {property.propertyTitle}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
-                      {property.propertyBrand} {property.propertyModel}
+                    
+                    <Typography variant="h5" color="primary" gutterBottom>
+                      {new Intl.NumberFormat('ko-KR').format(property.propertyPrice)}원
                     </Typography>
-                    <Typography variant="h5" color="primary" fontWeight="bold">
-                      ${property.propertyPrice?.toLocaleString()}
-                    </Typography>
+                    
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        {property.propertyLocation}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {property.propertyYear}년
+                      </Typography>
+                    </Box>
+                    
                     <Button
                       variant="contained"
                       color="primary"
-                      sx={{ mt: 2 }}
                       fullWidth
                       onClick={(e) => {
                         e.stopPropagation();
@@ -134,6 +141,7 @@ const SuggestedBikes: React.FC = () => {
             ))}
           </Grid>
         )}
+      </Box>
     </Box>
   );
 };
