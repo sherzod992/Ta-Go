@@ -26,16 +26,16 @@ jobs:
     - name: Build application
       run: npm run build
       env:
-        NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
-        NEXT_PUBLIC_API_GRAPHQL_URL: ${{ secrets.NEXT_PUBLIC_API_GRAPHQL_URL }}
-        NEXT_PUBLIC_API_WS: ${{ secrets.NEXT_PUBLIC_API_WS }}
+        NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || vars.NEXT_PUBLIC_API_URL }}
+        NEXT_PUBLIC_API_GRAPHQL_URL: ${{ secrets.NEXT_PUBLIC_API_GRAPHQL_URL || vars.NEXT_PUBLIC_API_GRAPHQL_URL }}
+        NEXT_PUBLIC_API_WS: ${{ secrets.NEXT_PUBLIC_API_WS || vars.NEXT_PUBLIC_API_WS }}
     
     - name: Deploy to VPS
       uses: appleboy/ssh-action@v0.1.5
       with:
-        host: ${{ secrets.VPS_HOST }}
-        username: ${{ secrets.VPS_USERNAME }}
-        key: ${{ secrets.VPS_SSH_KEY }}
+        host: ${{ secrets.VPS_HOST || vars.VPS_HOST }}
+        username: ${{ secrets.VPS_USERNAME || vars.VPS_USERNAME }}
+        key: ${{ secrets.VPS_SSH_KEY || vars.VPS_SSH_KEY }}
         script: |
           cd /var/www/ta-go
           git pull origin main

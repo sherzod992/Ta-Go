@@ -98,6 +98,27 @@ GitHub 저장소 → Settings → Secrets and variables → Actions에서 설정
 - `VPS_USERNAME`: VPS 사용자명
 - `VPS_SSH_KEY`: SSH 개인키
 - `BACKEND_REPOSITORY`: `your-username/ta-go-backend`
+
+#### 프론트엔드 API URL Secrets (선택사항):
+- `NEXT_PUBLIC_API_URL`: `http://72.60.40.57:3000`
+- `NEXT_PUBLIC_API_GRAPHQL_URL`: `http://72.60.40.57:3000/graphql`
+- `NEXT_PUBLIC_API_WS`: `ws://72.60.40.57:3000`
+
+### 8단계: PM2 설정
+
+```bash
+# PM2 ecosystem 파일 복사
+cp ecosystem.config.js /var/www/ta-go/
+
+# PM2로 전체 스택 시작
+pm2 start ecosystem.config.js
+
+# PM2 상태 확인
+pm2 status
+
+# PM2 로그 확인
+pm2 logs
+```
 - `DATABASE_URL`: 데이터베이스 연결 문자열
 - `JWT_SECRET`: JWT 암호화 키
 - `NEXT_PUBLIC_API_URL`: `http://72.60.40.57:3000`
