@@ -23,27 +23,13 @@ npm run dev
 # 의존성 설치
 npm install
 
-# 로컬 개발용 빌드 및 실행
-npm run serve:local
-```
-
-또는 개발 모드로 실행:
-```bash
+# 개발 모드로 실행
 npm run dev
 ```
 
-### 프로덕션 배포
-
-#### 자동 배포 (GitHub Actions)
-1. `main` 브랜치에 푸시하면 자동으로 배포됩니다
-2. GitHub Secrets 설정이 필요합니다 (자세한 내용은 `FULL_STACK_DEPLOY_GUIDE.md` 참조)
-
-#### 수동 배포
+또는 정적 빌드 후 서빙:
 ```bash
-# 프로덕션 빌드
 npm run build
-
-# 정적 사이트 서빙
 npm run serve
 ```
 
@@ -65,12 +51,9 @@ ta-go/
 ## 🔧 환경 설정
 
 ### 로컬 개발
-- `next.config.local.js`: 로컬 개발용 설정 (localhost:3000 API)
-- `npm run serve:local`: 로컬 개발용 빌드 및 실행
-
-### 프로덕션
-- `next.config.js`: 프로덕션 설정 (72.60.40.57:3000 API)
-- 환경 변수로 API URL 설정 가능
+- `next.config.js`: 로컬 개발용 설정 (localhost:3000 API)
+- `npm run dev`: 개발 모드 실행
+- `npm run build && npm run serve`: 정적 빌드 후 서빙
 
 ## 📚 주요 기능
 
@@ -86,12 +69,10 @@ ta-go/
 - **Frontend**: Next.js, React, TypeScript, Material-UI
 - **Backend**: Node.js, GraphQL, Prisma
 - **Database**: PostgreSQL
-- **Deployment**: PM2, Nginx, GitHub Actions
+- **Development**: Next.js, React, TypeScript
 
-## 📖 자세한 문서
+## 📖 개발 가이드
 
-- [전체 스택 배포 가이드](FULL_STACK_DEPLOY_GUIDE.md)
-- [VPS 설정 가이드](HOSTINGER_VPS_DEPLOY_GUIDE.md)
 - [OAuth 설정 가이드](OAUTH_SETUP_GUIDE.md)
 
 ## 🤝 기여하기
