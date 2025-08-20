@@ -1,0 +1,117 @@
+services:
+  # 프론트엔드 서비스
+  ta-go-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ta-go-frontend
+    restart: unless-stopped
+    ports:
+      - "3011:80"  # 프론트엔드 포트
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:3012/graphql
+      - NEXT_PUBLIC_API_WS=ws://localhost:3012/graphql
+    depends_on:
+      - ta-ja-api
+    networks:
+      - ta-go-network
+
+  # API 서버 (기존 Ta-Ja API)
+  ta-ja-api:
+    build:
+      context: ./apps/Ta-Ja-Api
+      dockerfile: Dockerfile
+    container_name: ta-ja-api
+    restart: unless-stopped
+    ports:
+      - "3012:3012"
+    environment:
+      - NODE_ENV=production
+      - PORT=3012
+      - MONGODB_URI=mongodb://ta-ja-mongodb:27017/ta-ja
+      - POSTGRES_HOST=ta-ja-postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=ta_ja_user
+      - POSTGRES_PASSWORD=ta_ja_password
+      - POSTGRES_DB=ta_ja_db
+      - REDIS_URL=redis://ta-ja-redis:6379
+    depends_on:
+      - ta-ja-mongodb
+      - ta-ja-postgres
+      - ta-ja-redis
+    networks:
+      - ta-go-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3012/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # MongoDB
+  ta-ja-mongodb:
+    image: mongo:6.0
+    container_name: ta-ja-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - ta-go-network
+
+  # PostgreSQL
+  ta-ja-postgres:
+    image: postgres:15-alpine
+    container_name: ta-ja-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=ta_ja_user
+      - POSTGRES_PASSWORD=ta_ja_password
+      - POSTGRES_DB=ta_ja_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - ta-go-network
+
+  # Redis
+  ta-ja-redis:
+    image: redis:7-alpine
+    container_name: ta-ja-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - ta-go-network
+
+  # Nginx 리버스 프록시
+  nginx:
+    image: nginx:alpine
+    container_name: ta-go-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - ta-ja-api
+      - ta-go-frontend
+    networks:
+      - ta-go-network
+
+volumes:
+  mongodb_data:
+  postgres_data:
+  redis_data:
+
+networks:
+  ta-go-network:
+    driver: bridge

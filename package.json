@@ -6,6 +6,7 @@
 	"scripts": {
 		"dev": "next dev -p 3011",
 		"build": "next build",
+		"build:static": "cp next.config.static.js next.config.js && next build",
 		"start": "next start -p 3011",
 		"serve": "npx serve@latest out -p 3011",
 		"lint": "next lint"

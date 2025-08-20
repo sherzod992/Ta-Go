@@ -1,9 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
 	reactStrictMode: true,
-	// GitHub Pages를 위한 설정
-	output: 'export',
-	trailingSlash: true,
+	// 로컬 개발을 위한 설정
 	images: {
 		unoptimized: true
 	},

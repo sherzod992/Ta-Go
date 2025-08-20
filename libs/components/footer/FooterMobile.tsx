@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Container, Grid, Typography, Link, IconButton } from '@mui/material';
+import { Box, Container, Typography, Link, IconButton } from '@mui/material';
 import { Facebook, Twitter, Instagram, LinkedIn } from '@mui/icons-material';
 
 const FooterMobile: React.FC = () => {
@@ -12,107 +12,40 @@ const FooterMobile: React.FC = () => {
             ta-Go
           </Typography>
           <Typography variant="body2" className="company-description">
-            Your trusted partner for finding the perfect motorcycle. 
-            We connect riders with their dream bikes through our comprehensive platform.
+            오토바이 거래의 새로운 기준
           </Typography>
-          <Box className="social-links">
-            <IconButton className="social-icon">
-              <Facebook />
-            </IconButton>
-            <IconButton className="social-icon">
-              <Twitter />
-            </IconButton>
-            <IconButton className="social-icon">
-              <Instagram />
-            </IconButton>
-            <IconButton className="social-icon">
-              <LinkedIn />
-            </IconButton>
-          </Box>
         </Box>
 
-        {/* Footer Sections */}
-        <Box className="footer-sections">
-          {/* Quick Links */}
-          <Box className="footer-section">
-            <Typography variant="h6" className="section-title">
-              Quick Links
-            </Typography>
-            <Box className="section-links">
-              <Link href="/property" className="footer-link">
-                Properties
-              </Link>
-              <Link href="/agent" className="footer-link">
-                Agents
-              </Link>
-              <Link href="/community" className="footer-link">
-                Community
-              </Link>
-              <Link href="/cs" className="footer-link">
-                Customer Service
-              </Link>
-            </Box>
-          </Box>
+        {/* Quick Links */}
+        <Box className="quick-links">
+          <Link href="/property" className="footer-link">
+            매물
+          </Link>
+          <Link href="/agent" className="footer-link">
+            중개사
+          </Link>
+          <Link href="/community" className="footer-link">
+            커뮤니티
+          </Link>
+          <Link href="/cs" className="footer-link">
+            고객센터
+          </Link>
+        </Box>
 
-          {/* Support */}
-          <Box className="footer-section">
-            <Typography variant="h6" className="section-title">
-              Support
-            </Typography>
-            <Box className="section-links">
-              <Link href="/help" className="footer-link">
-                Help Center
-              </Link>
-              <Link href="/contact" className="footer-link">
-                Contact Us
-              </Link>
-              <Link href="/faq" className="footer-link">
-                FAQ
-              </Link>
-              <Link href="/terms" className="footer-link">
-                Terms of Service
-              </Link>
-            </Box>
-          </Box>
-
-          {/* Legal */}
-          <Box className="footer-section">
-            <Typography variant="h6" className="section-title">
-              Legal
-            </Typography>
-            <Box className="section-links">
-              <Link href="/privacy" className="footer-link">
-                Privacy Policy
-              </Link>
-              <Link href="/terms" className="footer-link">
-                Terms of Use
-              </Link>
-              <Link href="/cookies" className="footer-link">
-                Cookie Policy
-              </Link>
-              <Link href="/disclaimer" className="footer-link">
-                Disclaimer
-              </Link>
-            </Box>
-          </Box>
-
-          {/* Contact Info */}
-          <Box className="footer-section">
-            <Typography variant="h6" className="section-title">
-              Contact
-            </Typography>
-            <Box className="contact-info">
-              <Typography variant="body2" className="contact-item">
-                Email: info@ta-go.com
-              </Typography>
-              <Typography variant="body2" className="contact-item">
-                Phone: +82 2-1234-5678
-              </Typography>
-              <Typography variant="body2" className="contact-item">
-                Address: Seoul, South Korea
-              </Typography>
-            </Box>
-          </Box>
+        {/* Social Links */}
+        <Box className="social-links">
+          <IconButton className="social-icon">
+            <Facebook />
+          </IconButton>
+          <IconButton className="social-icon">
+            <Twitter />
+          </IconButton>
+          <IconButton className="social-icon">
+            <Instagram />
+          </IconButton>
+          <IconButton className="social-icon">
+            <LinkedIn />
+          </IconButton>
         </Box>
 
         {/* Bottom Bar */}
