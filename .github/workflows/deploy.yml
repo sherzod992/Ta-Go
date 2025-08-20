@@ -84,7 +84,7 @@ jobs:
           git pull origin main
           npm ci
           npm run build
-          pm2 restart ta-go
+          pm2 restart ta-go-frontend
           echo "✅ 프론트엔드 배포 완료!"
 
   health-check:
