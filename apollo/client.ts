@@ -200,10 +200,25 @@ const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) 
 // WebSocket 비활성화 (안정성을 위해)
 const safeSplitLink = from([tokenRefreshLink, errorLink, authLink, httpLink]);
 
+// WebSocket 링크 활성화 (Subscription 지원)
+const splitLink = wsLink 
+  ? split(
+      ({ query }) => {
+        const definition = getMainDefinition(query);
+        return (
+          definition.kind === 'OperationDefinition' &&
+          definition.operation === 'subscription'
+        );
+      },
+      wsLink,
+      from([tokenRefreshLink, errorLink, authLink, httpLink])
+    )
+  : from([tokenRefreshLink, errorLink, authLink, httpLink]);
+
 // Apollo Client 생성
 export function createApolloClient(initialState = {}) {
   return new ApolloClient({
-    link: safeSplitLink,
+    link: splitLink, // safeSplitLink 대신 splitLink 사용
     cache: new InMemoryCache({
       typePolicies: {
         Query: {
@@ -215,6 +230,21 @@ export function createApolloClient(initialState = {}) {
               },
             },
             properties: {
+              merge(existing = [], incoming) {
+                return incoming;
+              },
+            },
+          },
+        },
+        // Subscription 캐시 정책 추가
+        Subscription: {
+          fields: {
+            messageSent: {
+              merge(existing = [], incoming) {
+                return incoming;
+              },
+            },
+            chatRoomUpdated: {
               merge(existing = [], incoming) {
                 return incoming;
               },
@@ -249,14 +279,9 @@ export function createApolloClient(initialState = {}) {
           errorPolicy: 'ignore', // 개발 환경에서는 에러를 무시
         }),
       },
+      // Subscription 설정은 별도로 처리
     },
     ssrMode: typeof window === 'undefined',
-    ssrForceFetchDelay: 100,
-    // 개발 환경에서 추가 안정성 설정
-    ...(process.env.NODE_ENV === 'development' && {
-      connectToDevTools: false,
-      assumeImmutableResults: true,
-    }),
   });
 }
 

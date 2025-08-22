@@ -860,6 +860,37 @@ export const GET_ALL_USER_CHAT_ROOMS = gql`
 	}
 `;
 
+// 채팅방 목록 조회 쿼리 추가
+export const GET_CHAT_ROOMS = gql`
+	query GetChatRooms($input: ChatRoomQueryInput!) {
+		getMyChatRooms(input: $input) {
+			list {
+				_id
+				roomId
+				roomType
+				userId
+				agentId
+				propertyId
+				status
+				lastMessageContent
+				lastMessageSenderId
+				lastMessageTime
+				unreadCountForUser
+				unreadCountForAgent
+				propertyTitle
+				userNickname
+				agentNickname
+				createdAt
+				updatedAt
+			}
+			metaCounter {
+				total
+			}
+			totalUnreadCount
+		}
+	}
+`;
+
 // 메시지 조회 문제 진단을 위한 새로운 쿼리들
 export const GET_CHAT_ROOM_MESSAGES = gql`
 	query GetChatRoomMessages($roomId: String!) {

@@ -13,6 +13,7 @@ export interface SendMessageInput {
 export interface ChatRoomQueryInput {
 	agentId?: string;
 	status?: 'ACTIVE' | 'CLOSED' | 'PENDING';
+	roomType?: string;
 	page?: number;
 	limit?: number;
 }

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery } from '@apollo/client';
 import { GET_PROPERTY } from '../../../apollo/user/query';
-import { WebChat } from '../chat/WebChat';
+import UnifiedChatLayout from '../chat/UnifiedChatLayout';
 import { RelatedProperties } from './RelatedProperties';
 import useDeviceDetect from '../../hooks/useDeviceDetect';
 import { sweetMixinSuccessAlert } from '../../sweetAlert';
@@ -152,13 +152,9 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) =>
 
 			{/* 웹 채팅 */}
 			{showWebChat && (
-				<WebChat
+				<UnifiedChatLayout
 					propertyId={propertyId}
-					propertyTitle={property.propertyTitle}
-					propertyImage={property.propertyImages?.[0]}
-					propertyPrice={property.propertyPrice}
-					userId="current-user-id" // 실제로는 로그인된 사용자 ID를 사용해야 함
-					onClose={handleWebChatClose}
+					onBack={() => setShowWebChat(false)}
 				/>
 			)}
 

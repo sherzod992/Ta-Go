@@ -1,7 +1,7 @@
 import React from 'react';
 import { useRouter } from 'next/router';
 import LayoutBasic from '../../../libs/components/layout/LayoutBasic';
-import UnifiedChat from '../../../libs/components/chat/UnifiedChat';
+import UnifiedChatLayout from '../../../libs/components/chat/UnifiedChatLayout';
 
 const PropertyChatPage: React.FC = () => {
 	const router = useRouter();
@@ -16,12 +16,9 @@ const PropertyChatPage: React.FC = () => {
 	};
 
 	return (
-		<UnifiedChat
+		<UnifiedChatLayout
 			propertyId={propertyId as string}
-			onChatCreated={handleChatCreated}
-			onBack={handleBack}
-			showHeader={true}
-			showPropertyInfo={true}
+			onBack={() => router.back()}
 		/>
 	);
 };
