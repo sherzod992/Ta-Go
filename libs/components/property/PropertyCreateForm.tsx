@@ -34,13 +34,14 @@ import {
   PropertyLocation,
   FuelType,
   TransmissionType,
-  ConditionType,
+  PropertyCondition,
 } from '../../enums/property.enum';
 import { MemberType } from '../../enums/member.enum';
 import { PropertyInput } from '../../types/property/property.input';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CloseIcon from '@mui/icons-material/Close';
+import { safeRedirect } from '../../utils/security';
 
 // 오토바이 타입 배열 (홈페이지와 동일한 구조)
 const bikeCategories = [
@@ -103,17 +104,17 @@ const colorOptions = [
 
 // 상태별 별점 매핑
 const conditionRatingMap = {
-  [ConditionType.EXCELLENT]: 5,
-  [ConditionType.GOOD]: 4,
-  [ConditionType.FAIR]: 3,
-  [ConditionType.POOR]: 2,
+  [PropertyCondition.EXCELLENT]: 5,
+  [PropertyCondition.GOOD]: 4,
+  [PropertyCondition.FAIR]: 3,
+  [PropertyCondition.POOR]: 2,
 };
 
 const ratingConditionMap = {
-  5: ConditionType.EXCELLENT,
-  4: ConditionType.GOOD,
-  3: ConditionType.FAIR,
-  2: ConditionType.POOR,
+  5: PropertyCondition.EXCELLENT,
+  4: PropertyCondition.GOOD,
+  3: PropertyCondition.FAIR,
+  2: PropertyCondition.POOR,
 };
 
 const PropertyCreateForm: React.FC = () => {
@@ -151,7 +152,7 @@ const PropertyCreateForm: React.FC = () => {
     propertyFuelType: FuelType.GASOLINE,
     propertyTransmission: TransmissionType.MANUAL,
     propertyColor: '',
-    propertyCondition: ConditionType.GOOD,
+    propertyCondition: PropertyCondition.GOOD,
     propertyImages: [] as string[],
     propertyDesc: '',
   });
@@ -174,7 +175,7 @@ const PropertyCreateForm: React.FC = () => {
         </Alert>
         <Button 
           variant="contained" 
-          onClick={() => router.push('/login')}
+          onClick={() => safeRedirect('/login')}
           sx={{ mt: 2 }}
         >
           로그인하기
@@ -186,7 +187,7 @@ const PropertyCreateForm: React.FC = () => {
   // 토큰이 없으면 로그인 페이지로 리다이렉트
   if (!token) {
     console.log('No token found, redirecting to login');
-    router.push('/login');
+    safeRedirect('/login');
     return null;
   }
 
@@ -203,7 +204,7 @@ const PropertyCreateForm: React.FC = () => {
           </Typography>
           <Button 
             variant="contained" 
-            onClick={() => router.push('/property')}
+            onClick={() => safeRedirect('/property')}
             sx={{ mt: 2 }}
           >
             매물 목록으로 돌아가기
@@ -226,7 +227,7 @@ const PropertyCreateForm: React.FC = () => {
           </Typography>
           <Button 
             variant="contained" 
-            onClick={() => router.push('/mypage')}
+            onClick={() => safeRedirect('/mypage')}
             sx={{ mt: 2 }}
           >
             내 정보 확인하기
@@ -447,7 +448,7 @@ const PropertyCreateForm: React.FC = () => {
       if (result.data?.createProperty) {
         setSuccess('매물이 성공적으로 등록되었습니다!');
         setTimeout(() => {
-          router.push('/property?type=buy');
+          safeRedirect('/property?type=buy');
         }, 2000);
       }
     } catch (err: any) {
@@ -460,7 +461,7 @@ const PropertyCreateForm: React.FC = () => {
           setError('매물 등록 권한이 없습니다. 일반 사용자 또는 에이전트 계정으로 로그인해주세요.');
         } else if (graphQLError.message.includes('Unauthorized')) {
           setError('로그인이 필요합니다. 다시 로그인해주세요.');
-          setTimeout(() => router.push('/login'), 2000);
+          setTimeout(() => safeRedirect('/login'), 2000);
         } else {
           setError(`매물 등록 실패: ${graphQLError.message}`);
         }
@@ -922,7 +923,7 @@ const PropertyCreateForm: React.FC = () => {
               </Typography>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <Rating
-                  value={conditionRatingMap[formData.propertyCondition as ConditionType] || 0}
+                  value={conditionRatingMap[formData.propertyCondition as PropertyCondition] || 0}
                   onChange={(_, newValue) => {
                     if (newValue) {
                       handleInputChange('propertyCondition', ratingConditionMap[newValue as keyof typeof ratingConditionMap]);

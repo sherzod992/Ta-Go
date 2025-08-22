@@ -53,7 +53,7 @@ import {
   PropertyLocation,
   FuelType,
   TransmissionType,
-  ConditionType,
+  PropertyCondition,
 } from '../../enums/property.enum';
 
 const BuyPageDesktop: React.FC = () => {
@@ -130,9 +130,9 @@ const BuyPageDesktop: React.FC = () => {
       search.locationList = [locationMap[filters.location]];
     }
     if (filters.condition !== 'all') {
-      const conditionMap: { [key: string]: ConditionType } = {
-        'new': ConditionType.EXCELLENT,
-        'used': ConditionType.GOOD
+      const conditionMap: { [key: string]: PropertyCondition } = {
+        'new': PropertyCondition.EXCELLENT,
+        'used': PropertyCondition.GOOD
       };
       search.options = [conditionMap[filters.condition]];
     }

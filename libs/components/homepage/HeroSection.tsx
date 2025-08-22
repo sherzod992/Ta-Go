@@ -21,7 +21,7 @@ import {
   Slider
 } from '@mui/material';
 import { GET_PROPERTIES } from '../../../apollo/user/query';
-import { PropertyLocation, PropertyType, PropertyStatus, ConditionType } from '../../enums/property.enum';
+import { PropertyLocation, PropertyType, PropertyStatus, PropertyCondition } from '../../enums/property.enum';
 
 const HeroSection: React.FC = () => {
   const { t } = useTranslation('common');
@@ -86,9 +86,9 @@ const HeroSection: React.FC = () => {
     }
     if (condition !== 'all') {
       // 상태 이름을 enum 값으로 변환
-      const conditionMap: { [key: string]: ConditionType } = {
-        'new': ConditionType.EXCELLENT,
-        'used': ConditionType.GOOD
+      const conditionMap: { [key: string]: PropertyCondition } = {
+        'new': PropertyCondition.EXCELLENT,
+        'used': PropertyCondition.GOOD
       };
       search.options = [conditionMap[condition]];
     }

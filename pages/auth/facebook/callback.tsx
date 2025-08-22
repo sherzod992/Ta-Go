@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { Box, CircularProgress, Typography } from '@mui/material';
-import { socialLogin, MemberAuthType } from '../../../libs/auth';
+import { socialLogin, AuthProvider } from '../../../libs/auth';
 
 const FacebookCallback = () => {
   const router = useRouter();
@@ -34,7 +34,7 @@ const FacebookCallback = () => {
           const { accessToken, userInfo } = await response.json();
           
           // 소셜 로그인 처리
-          await socialLogin(MemberAuthType.FACEBOOK, accessToken);
+          await socialLogin(AuthProvider.FACEBOOK, accessToken);
           
           router.push('/');
         } catch (error) {

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, Button, Container } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import { useTranslation } from 'next-i18next';
 import withLayoutModern from '../libs/components/layout/LayoutModern';
 import ModernCardGrid from '../libs/components/common/ModernCardGrid';
 import FluidTypography from '../libs/components/common/FluidTypography';
@@ -48,6 +49,8 @@ const FluidButton = styled(Button)(({ theme }) => ({
 }));
 
 const ModernHomePage: React.FC = () => {
+  const { t } = useTranslation('common');
+  
   // 샘플 데이터
   const featuredProperties = [
     {
@@ -120,7 +123,7 @@ const ModernHomePage: React.FC = () => {
               glow
               sx={{ mb: 3 }}
             >
-              Find Your Perfect Motorcycle
+              {t('Find Your Perfect Motorcycle')}
             </FluidTypography>
             
             <FluidTypography 
@@ -131,8 +134,7 @@ const ModernHomePage: React.FC = () => {
                 lineHeight: 1.4
               }}
             >
-              Discover the best motorcycles from trusted sellers and expert agents. 
-              Buy, sell, and connect with the motorcycle community.
+              {t('Discover thousands of motorcycles from trusted sellers')}
             </FluidTypography>
             
             <Box sx={{ 

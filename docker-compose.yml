@@ -9,43 +9,10 @@ services:
     ports:
       - "3011:80"  # 프론트엔드 포트
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:3012/graphql
-      - NEXT_PUBLIC_API_WS=ws://localhost:3012/graphql
-    depends_on:
-      - ta-ja-api
+      - NEXT_PUBLIC_API_URL=http://72.60.40.57:3000/graphql
+      - NEXT_PUBLIC_API_WS=ws://72.60.40.57:3000/graphql
     networks:
       - ta-go-network
-
-  # API 서버 (기존 Ta-Ja API)
-  ta-ja-api:
-    build:
-      context: ./apps/Ta-Ja-Api
-      dockerfile: Dockerfile
-    container_name: ta-ja-api
-    restart: unless-stopped
-    ports:
-      - "3012:3012"
-    environment:
-      - NODE_ENV=production
-      - PORT=3012
-      - MONGODB_URI=mongodb://ta-ja-mongodb:27017/ta-ja
-      - POSTGRES_HOST=ta-ja-postgres
-      - POSTGRES_PORT=5432
-      - POSTGRES_USER=ta_ja_user
-      - POSTGRES_PASSWORD=ta_ja_password
-      - POSTGRES_DB=ta_ja_db
-      - REDIS_URL=redis://ta-ja-redis:6379
-    depends_on:
-      - ta-ja-mongodb
-      - ta-ja-postgres
-      - ta-ja-redis
-    networks:
-      - ta-go-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3012/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
   # MongoDB
   ta-ja-mongodb:
@@ -102,7 +69,6 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./nginx/ssl:/etc/nginx/ssl
     depends_on:
-      - ta-ja-api
       - ta-go-frontend
     networks:
       - ta-go-network

@@ -57,6 +57,7 @@ import { useQuery } from '@apollo/client';
 import { GET_AGENTS, GET_MEMBER_PROPERTY_STATS, GET_MEMBER_PROPERTIES } from '../../../apollo/user/query';
 import { PropertyLocation, PropertyType } from '../../enums/property.enum';
 import { MemberType } from '../../enums/member.enum';
+import { safeReload } from '../../utils/security';
 
 const AgentMobile: React.FC = () => {
   const { t } = useTranslation('common');
@@ -295,7 +296,7 @@ const AgentMobile: React.FC = () => {
             variant="contained" 
             color="primary"
             size="small"
-            onClick={() => window.location.reload()}
+            onClick={() => safeReload()}
           >
             다시 시도
           </Button>
@@ -501,7 +502,7 @@ const AgentMobile: React.FC = () => {
               variant="outlined" 
               color="primary"
               size="small"
-              onClick={() => window.location.reload()}
+              onClick={() => safeReload()}
             >
               새로고침
             </Button>

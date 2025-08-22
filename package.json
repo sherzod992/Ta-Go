@@ -4,12 +4,14 @@
 	"private": true,
 	"license": "ITC",
 	"scripts": {
-		"dev": "next dev -p 3011",
-		"build": "next build",
-		"build:static": "cp next.config.static.js next.config.js && next build",
-		"start": "next start -p 3011",
-		"serve": "npx serve@latest out -p 3011",
-		"lint": "next lint"
+		"dev": "yarn next dev -p 3011",
+		"dev:stable": "yarn NODE_ENV=development next dev -p 3011 --no-fast-refresh",
+		"dev:no-refresh": "yarn NODE_ENV=development next dev -p 3011 --no-fast-refresh --no-hot-reload",
+		"build": "yarn next build",
+		"build:static": "STATIC_EXPORT=true yarn next build",
+		"start": "yarn next start -p 3011",
+		"serve": "yarn serve out -p 3011",
+		"lint": "yarn next lint"
 	},
 	"dependencies": {
 		"@apollo/client": "^3.5.10",
@@ -40,6 +42,7 @@
 		"chart.js": "^3.8.0",
 		"date-fns": "^2.28.0",
 		"graphql": "^15.5.0",
+		"graphql-ws": "^6.0.6",
 		"i18next": "^21.6.11",
 		"js-cookie": "^3.0.1",
 		"jwt-decode": "^3.1.2",

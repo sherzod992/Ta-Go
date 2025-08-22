@@ -1,4 +1,4 @@
-import { MemberAuthType, MemberStatus, MemberType } from '../../enums/member.enum';
+import { AuthProvider, MemberStatus, MemberType } from '../../enums/member.enum';
 import { Direction } from '../../enums/common.enum';
 
 export interface MemberInput {
@@ -6,7 +6,7 @@ export interface MemberInput {
 	memberPassword: string;
 	memberPhone: string;
 	memberType?: MemberType;
-	memberAuthType?: MemberAuthType;
+	memberAuthType?: AuthProvider;
 }
 
 export interface LoginInput {

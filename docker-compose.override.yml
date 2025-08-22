@@ -1,0 +1,6 @@
+services:
+  ta-go-frontend:
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://72.60.40.57:3000/graphql
+      - NEXT_PUBLIC_API_WS=ws://72.60.40.57:3000/graphql

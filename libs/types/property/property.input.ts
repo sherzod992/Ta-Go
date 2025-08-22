@@ -1,4 +1,4 @@
-import { PropertyLocation, PropertyStatus, PropertyType, FuelType, TransmissionType, ConditionType } from '../../enums/property.enum';
+import { PropertyLocation, PropertyStatus, PropertyType, FuelType, TransmissionType, PropertyCondition } from '../../enums/property.enum';
 import { Direction } from '../../enums/common.enum';
 
 export interface PropertyInput {
@@ -15,7 +15,7 @@ export interface PropertyInput {
 	propertyFuelType: FuelType;
 	propertyTransmission: TransmissionType;
 	propertyColor: string;
-	propertyCondition: ConditionType;
+	propertyCondition: PropertyCondition;
 	propertyImages: string[];
 	propertyDesc?: string;
 	manufacturedAt?: Date;

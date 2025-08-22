@@ -36,15 +36,43 @@ const TopMobile: React.FC = () => {
   };
 
   const handleLanguageChange = (languageCode: string) => {
-    const { pathname, asPath, query } = router;
-    router.push(
-      { pathname, query },
-      asPath,
-      { 
-        locale: languageCode,
-        shallow: false 
-      }
-    );
+    console.log('언어 변경 시도:', languageCode, '현재 언어:', router.locale);
+    
+    // 현재 언어와 같으면 메뉴만 닫기
+    if (languageCode === router.locale) {
+      console.log('같은 언어 선택됨, 메뉴만 닫기');
+      handleLanguageClose();
+      return;
+    }
+    
+    // 무한 루프 방지
+    const lastLanguageChange = sessionStorage.getItem('lastLanguageChange');
+    const now = Date.now();
+    
+    if (lastLanguageChange && (now - parseInt(lastLanguageChange)) < 2000) {
+      console.warn('너무 빠른 언어 변경 시도가 감지되어 무시됩니다.');
+      handleLanguageClose();
+      return;
+    }
+    
+    sessionStorage.setItem('lastLanguageChange', now.toString());
+    
+    const { pathname, query } = router;
+    console.log('언어 변경 실행:', { pathname, query, locale: languageCode });
+    
+    // 안전한 언어 변경
+    try {
+      const newUrl = `/${languageCode}${pathname}`;
+      console.log('새 URL:', newUrl);
+      
+      // 페이지 이동으로 언어 변경
+      window.location.href = newUrl;
+    } catch (error) {
+      console.error('언어 변경 중 오류:', error);
+      // 오류 시 홈페이지로 이동
+      window.location.href = `/${languageCode}`;
+    }
+    
     handleLanguageClose();
   };
 
@@ -120,6 +148,7 @@ const TopMobile: React.FC = () => {
             key={language.code}
             onClick={() => handleLanguageChange(language.code)}
             selected={language.code === currentLanguage.code}
+            disabled={false}
           >
             <span style={{ fontSize: '1.2rem', marginRight: '0.5rem' }}>{language.flag}</span>
             <Typography variant="body2">{language.name}</Typography>

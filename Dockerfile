@@ -1,5 +1,5 @@
 # 프론트엔드 Dockerfile
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
@@ -12,6 +12,10 @@ RUN yarn install --frozen-lockfile
 
 # 소스 코드 복사
 COPY . .
+
+# 환경 변수 설정
+ENV NEXT_PUBLIC_API_URL=http://72.60.40.57:3000/graphql
+ENV NEXT_PUBLIC_API_WS=ws://72.60.40.57:3000/graphql
 
 # 빌드
 RUN yarn build

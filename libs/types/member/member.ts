@@ -1,4 +1,4 @@
-import { MemberAuthType, MemberStatus, MemberType } from '../../enums/member.enum';
+import { AuthProvider, MemberStatus, MemberType } from '../../enums/member.enum';
 import { MeLiked, TotalCounter } from '../property/property';
 import { MeFollowed } from '../follow/follow';
 
@@ -6,7 +6,7 @@ export interface Member {
 	_id: string;
 	memberType: MemberType;
 	memberStatus: MemberStatus;
-	memberAuthType: MemberAuthType;
+	memberAuthType: AuthProvider;
 	memberPhone: string;
 	memberNick: string;
 	memberPassword?: string;

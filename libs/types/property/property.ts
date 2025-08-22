@@ -1,4 +1,4 @@
-import { PropertyLocation, PropertyStatus, PropertyType, FuelType, TransmissionType, ConditionType } from '../../enums/property.enum';
+import { PropertyLocation, PropertyStatus, PropertyType, FuelType, TransmissionType, PropertyCondition } from '../../enums/property.enum';
 import { Member } from '../member/member';
 
 export interface MeLiked {
@@ -27,7 +27,7 @@ export interface Property {
 	propertyFuelType: FuelType;
 	propertyTransmission: TransmissionType;
 	propertyColor: string;
-	propertyCondition: ConditionType;
+	propertyCondition: PropertyCondition;
 	propertyViews: number;
 	propertyLikes: number;
 	propertyComments: number;

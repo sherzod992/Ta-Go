@@ -1,6 +1,7 @@
 import Swal from 'sweetalert2';
 import 'animate.css';
 import { Messages } from './config';
+import { safeReload } from './utils/security';
 
 export const sweetErrorHandling = async (err: any) => {
 	await Swal.fire({
@@ -124,8 +125,9 @@ export const sweetTopSmallSuccessAlert = async (
 		icon: 'success',
 		title: msg,
 	}).then((data) => {
-		if (enable_forward) {
-			window.location.reload();
+		if (enable_forward && typeof window !== 'undefined') {
+			// 무한 새로고침 방지를 위해 안전한 새로고침 함수 사용
+			safeReload();
 		}
 	});
 };

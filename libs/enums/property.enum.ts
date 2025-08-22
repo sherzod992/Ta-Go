@@ -1,16 +1,3 @@
-// 서버 사이드에서만 GraphQL 등록을 수행
-let registerEnumType: any = null;
-
-// 클라이언트 사이드에서는 registerEnumType을 사용하지 않음
-if (typeof window === 'undefined') {
-  try {
-    const { registerEnumType: regEnumType } = require('@nestjs/graphql');
-    registerEnumType = regEnumType;
-  } catch (error) {
-    // GraphQL 모듈이 없는 경우 무시
-  }
-}
-
 export enum PropertyType {
 	ADVENTURE_TOURERS = 'ADVENTURE_TOURERS',
 	AGRICULTURE = 'AGRICULTURE',
@@ -22,24 +9,20 @@ export enum PropertyType {
 	SXS_UTV = 'SXS_UTV',
 }
 
-if (registerEnumType) {
-	registerEnumType(PropertyType, {
-		name: 'PropertyType',
-	});
-}
-
 export enum PropertyStatus {
-	HOLD = 'HOLD',
-	ACTIVE = 'ACTIVE',
+	AVAILABLE = 'AVAILABLE',
 	SOLD = 'SOLD',
 	RESERVED = 'RESERVED',
-	DELETE = 'DELETE',
+	UNAVAILABLE = 'UNAVAILABLE',
 }
 
-if (registerEnumType) {
-	registerEnumType(PropertyStatus, {
-		name: 'PropertyStatus',
-	});
+export enum PropertyCondition {
+	NEW = 'NEW',
+	LIKE_NEW = 'LIKE_NEW',
+	EXCELLENT = 'EXCELLENT',
+	GOOD = 'GOOD',
+	FAIR = 'FAIR',
+	POOR = 'POOR',
 }
 
 export enum PropertyLocation {
@@ -61,45 +44,17 @@ export enum PropertyLocation {
 	GYEONGNAM = 'GYEONGNAM',
 }
 
-if (registerEnumType) {
-	registerEnumType(PropertyLocation, {
-		name: 'PropertyLocation',
-	});
-}
-
 export enum FuelType {
 	GASOLINE = 'GASOLINE',
+	DIESEL = 'DIESEL',
 	ELECTRIC = 'ELECTRIC',
 	HYBRID = 'HYBRID',
-}
-
-if (registerEnumType) {
-	registerEnumType(FuelType, {
-		name: 'FuelType',
-	});
+	LPG = 'LPG',
 }
 
 export enum TransmissionType {
 	MANUAL = 'MANUAL',
 	AUTOMATIC = 'AUTOMATIC',
 	CVT = 'CVT',
-}
-
-if (registerEnumType) {
-	registerEnumType(TransmissionType, {
-		name: 'TransmissionType',
-	});
-}
-
-export enum ConditionType {
-	EXCELLENT = 'EXCELLENT',
-	GOOD = 'GOOD',
-	FAIR = 'FAIR',
-	POOR = 'POOR',
-}
-
-if (registerEnumType) {
-	registerEnumType(ConditionType, {
-		name: 'ConditionType',
-	});
+	SEMI_AUTO = 'SEMI_AUTO',
 }

@@ -4,14 +4,17 @@ import { userVar } from '../../apollo/store';
 import { CustomJwtPayload } from '../types/customJwtPayload';
 import { sweetMixinErrorAlert } from '../types/sweetAlert';
 import { LOGIN, SIGN_UP } from '../../apollo/user/mutation';
-import { MemberAuthType, MemberType } from '../enums/member.enum';
+import { AuthProvider, MemberRole, MemberType } from '../enums/member.enum';
+import { safeLogout } from '../utils/security';
 
-// Export MemberAuthType for use in components
-export { MemberAuthType, MemberType };
+// Export AuthProvider for use in components
+export { AuthProvider, MemberRole, MemberType };
+// Backward compatibility alias
+export { AuthProvider as MemberAuthType };
 
 // 인증 관련 상수들
 export const AUTH_CONSTANTS = {
-	DEFAULT_AUTH_TYPE: MemberAuthType.PHONE,
+	DEFAULT_AUTH_TYPE: AuthProvider.EMAIL,
 	TOKEN_KEY: 'accessToken',
 	LOGIN_TIME_KEY: 'login',
 	LOGOUT_TIME_KEY: 'logout',
@@ -77,7 +80,7 @@ const requestJwtToken = async ({
 	}
 };
 
-export const signUp = async (nick: string, password: string, phone: string, authType: MemberAuthType, memberType: MemberType = MemberType.USER): Promise<void> => {
+export const signUp = async (nick: string, password: string, phone: string, authType: AuthProvider, memberType: MemberType = MemberType.USER): Promise<void> => {
 	try {
 		const { jwtToken } = await requestSignUpJwtToken({ nick, password, phone, authType, memberType });
 
@@ -102,7 +105,7 @@ const requestSignUpJwtToken = async ({
 	nick: string;
 	password: string;
 	phone: string;
-	authType: MemberAuthType;
+	authType: AuthProvider;
 	memberType: MemberType;
 }): Promise<{ jwtToken: string }> => {
 	const apolloClient = await initializeApollo();
@@ -209,7 +212,8 @@ export const updateUserInfo = (jwtToken: any) => {
 export const logOut = () => {
 	deleteStorage();
 	deleteUserInfo();
-	window.location.reload();
+	// 무한 새로고침 방지를 위해 안전한 로그아웃 함수 사용
+	safeLogout();
 };
 
 const deleteStorage = () => {
@@ -240,48 +244,44 @@ const deleteUserInfo = () => {
 	});
 };
 
-// MemberAuthType 유틸리티 함수들
-export const isValidAuthType = (authType: string): authType is MemberAuthType => {
-	return Object.values(MemberAuthType).includes(authType as MemberAuthType);
+// AuthProvider 유틸리티 함수들
+export const isValidAuthType = (authType: string): authType is AuthProvider => {
+	return Object.values(AuthProvider).includes(authType as AuthProvider);
 };
 
-export const getAuthTypeDisplayName = (authType: MemberAuthType): string => {
+export const getAuthTypeDisplayName = (authType: AuthProvider): string => {
 	switch (authType) {
-		case MemberAuthType.PHONE:
-			return '전화번호';
-		case MemberAuthType.EMAIL:
-			return '이메일';
-		case MemberAuthType.TELEGRAM:
-			return '텔레그램';
-		case MemberAuthType.KAKAO:
-			return '카카오';
-		case MemberAuthType.GITHUB:
-			return 'GitHub';
-		case MemberAuthType.FACEBOOK:
-			return 'Facebook';
-		case MemberAuthType.GOOGLE:
+		case AuthProvider.EMAIL:
+		case AuthProvider.PHONE:
+			return '로컬';
+		case AuthProvider.GOOGLE:
 			return 'Google';
+		case AuthProvider.FACEBOOK:
+			return 'Facebook';
+		case AuthProvider.KAKAO:
+			return '카카오';
+		case AuthProvider.GITHUB:
+			return 'GitHub';
 		default:
 			return '알 수 없음';
 	}
 };
 
-export const isSocialAuthType = (authType: MemberAuthType): boolean => {
+export const isSocialAuthType = (authType: AuthProvider): boolean => {
 	return [
-		MemberAuthType.TELEGRAM,
-		MemberAuthType.KAKAO,
-		MemberAuthType.GITHUB,
-		MemberAuthType.FACEBOOK,
-		MemberAuthType.GOOGLE,
+		AuthProvider.GOOGLE,
+		AuthProvider.FACEBOOK,
+		AuthProvider.KAKAO,
+		AuthProvider.GITHUB,
 	].includes(authType);
 };
 
-export const isTraditionalAuthType = (authType: MemberAuthType): boolean => {
-	return [MemberAuthType.PHONE, MemberAuthType.EMAIL].includes(authType);
+export const isTraditionalAuthType = (authType: AuthProvider): boolean => {
+	return [AuthProvider.EMAIL, AuthProvider.PHONE].includes(authType);
 };
 
 // 소셜 로그인 함수들
-export const socialLogin = async (authType: MemberAuthType, token: string): Promise<void> => {
+export const socialLogin = async (authType: AuthProvider, token: string): Promise<void> => {
 	if (!isSocialAuthType(authType)) {
 		throw new Error('Invalid social auth type');
 	}
@@ -304,7 +304,7 @@ const requestSocialJwtToken = async ({
 	authType,
 	token,
 }: {
-	authType: MemberAuthType;
+	authType: AuthProvider;
 	token: string;
 }): Promise<{ jwtToken: string }> => {
 	const apolloClient = await initializeApollo();
@@ -337,10 +337,10 @@ const requestSocialJwtToken = async ({
 
 // 이메일 인증 함수
 export const emailSignUp = async (nick: string, password: string, email: string, memberType: MemberType = MemberType.USER): Promise<void> => {
-	return signUp(nick, password, email, MemberAuthType.EMAIL, memberType);
+	return signUp(nick, password, email, AuthProvider.EMAIL, memberType);
 };
 
 // 전화번호 인증 함수
 export const phoneSignUp = async (nick: string, password: string, phone: string, memberType: MemberType = MemberType.USER): Promise<void> => {
-	return signUp(nick, password, phone, MemberAuthType.PHONE, memberType);
+	return signUp(nick, password, phone, AuthProvider.PHONE, memberType);
 };

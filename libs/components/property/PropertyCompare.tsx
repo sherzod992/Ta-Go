@@ -34,7 +34,7 @@ import {
   PropertyLocation,
   FuelType,
   TransmissionType,
-  ConditionType,
+  PropertyCondition,
 } from '../../enums/property.enum';
 
 // 비교용 하드코드 데이터
@@ -49,7 +49,7 @@ const mockCompareProperties = [
     type: PropertyType.ADVENTURE_TOURERS,
     fuelType: FuelType.GASOLINE,
     transmission: TransmissionType.MANUAL,
-    condition: ConditionType.EXCELLENT,
+    condition: PropertyCondition.EXCELLENT,
     brand: 'Honda',
     model: 'CBR1000RR-R Fireblade',
     color: '빨강',
@@ -71,7 +71,7 @@ const mockCompareProperties = [
     type: PropertyType.ADVENTURE_TOURERS,
     fuelType: FuelType.GASOLINE,
     transmission: TransmissionType.MANUAL,
-    condition: ConditionType.GOOD,
+    condition: PropertyCondition.GOOD,
     brand: 'Yamaha',
     model: 'YZF-R1',
     color: '파랑',
@@ -93,7 +93,7 @@ const mockCompareProperties = [
     type: PropertyType.ADVENTURE_TOURERS,
     fuelType: FuelType.GASOLINE,
     transmission: TransmissionType.MANUAL,
-    condition: ConditionType.EXCELLENT,
+    condition: PropertyCondition.EXCELLENT,
     brand: 'BMW',
     model: 'R 1250 GS Adventure',
     color: '검정',

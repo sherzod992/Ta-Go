@@ -8,6 +8,12 @@ import { Stack, Typography, Box } from '@mui/material';
 import { getJwtToken, updateUserInfo } from '../../auth';
 import { useReactiveVar } from '@apollo/client';
 import { userVar } from '../../../apollo/store';
+import { 
+  preventInfiniteLoop, 
+  resetLoopCounter, 
+  preventExcessiveMounts, 
+  resetMountCounter 
+} from '../../utils/security';
 
 const withLayoutBasic = (Component: any) => {
 	return (props: any) => {
@@ -76,12 +82,19 @@ const withLayoutBasic = (Component: any) => {
 			}
 
 			return { title, desc, bgImage };
-		}, [router.pathname]);
+		}, [router.pathname, router.locale]);
 
 		/** LIFECYCLES **/
 		useEffect(() => {
-			const jwt = getJwtToken();
-			if (jwt) updateUserInfo(jwt);
+			// 클라이언트에서만 실행
+			if (typeof window !== 'undefined') {
+				try {
+					const jwt = getJwtToken();
+					if (jwt) updateUserInfo(jwt);
+				} catch (error) {
+					console.error('인증 처리 중 오류:', error);
+				}
+			}
 		}, []);
 
 		/** HANDLERS **/

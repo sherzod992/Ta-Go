@@ -1,4 +1,4 @@
-import { PropertyLocation, PropertyStatus, PropertyType, FuelType, TransmissionType, ConditionType } from '../../enums/property.enum';
+import { PropertyLocation, PropertyStatus, PropertyType, FuelType, TransmissionType, PropertyCondition } from '../../enums/property.enum';
 
 export interface PropertyUpdate {
 	_id: string;
@@ -16,7 +16,7 @@ export interface PropertyUpdate {
 	propertyFuelType?: FuelType;
 	propertyTransmission?: TransmissionType;
 	propertyColor?: string;
-	propertyCondition?: ConditionType;
+	propertyCondition?: PropertyCondition;
 	propertyImages?: string[];
 	propertyDesc?: string;
 	propertyWarranty?: boolean;

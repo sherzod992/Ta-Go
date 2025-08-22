@@ -1,9 +1,10 @@
 import React from 'react';
 import { Button, Typography } from '@mui/material';
-import { MemberAuthType } from '../../auth';
+import { AuthProvider } from '../../auth';
+import { safeExternalRedirect } from '../../utils/security';
 
 interface SocialLoginButtonsProps {
-  onSocialLogin: (authType: MemberAuthType, token: string, userInfo?: any) => void;
+  onSocialLogin: (authType: AuthProvider, token: string, userInfo?: any) => void;
   loading: boolean;
 }
 
@@ -13,48 +14,34 @@ const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = ({ onSocialLogin, 
   const handleGoogleLogin = () => {
     // Google OAuth 2.0 구현
     const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(window.location.origin + '/auth/google/callback')}&response_type=code&scope=openid%20email%20profile`;
-    window.location.href = googleAuthUrl;
+    safeExternalRedirect(googleAuthUrl);
   };
 
   // Kakao 로그인
   const handleKakaoLogin = () => {
     // Kakao OAuth 구현
     const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_KAKAO_CLIENT_ID}&redirect_uri=${encodeURIComponent(window.location.origin + '/auth/kakao/callback')}&response_type=code`;
-    window.location.href = kakaoAuthUrl;
+    safeExternalRedirect(kakaoAuthUrl);
   };
 
   // Facebook 로그인
   const handleFacebookLogin = () => {
     // Facebook OAuth 구현
     const facebookAuthUrl = `https://www.facebook.com/v12.0/dialog/oauth?client_id=${process.env.NEXT_PUBLIC_FACEBOOK_APP_ID}&redirect_uri=${encodeURIComponent(window.location.origin + '/auth/facebook/callback')}&scope=email,public_profile`;
-    window.location.href = facebookAuthUrl;
+    safeExternalRedirect(facebookAuthUrl);
   };
 
   // GitHub 로그인
   const handleGitHubLogin = () => {
     // GitHub OAuth 구현
     const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID}&redirect_uri=${encodeURIComponent(window.location.origin + '/auth/github/callback')}&scope=user:email`;
-    window.location.href = githubAuthUrl;
+    safeExternalRedirect(githubAuthUrl);
   };
 
   // Telegram 로그인 (Telegram Login Widget 사용)
   const handleTelegramLogin = () => {
-    // Telegram Login Widget 구현
-    if (typeof window !== 'undefined' && window.Telegram && window.Telegram.Login) {
-      window.Telegram.Login.auth(
-        { bot_id: process.env.NEXT_PUBLIC_TELEGRAM_BOT_ID || '' },
-        (data: any) => {
-          if (data) {
-            onSocialLogin(MemberAuthType.TELEGRAM, data.hash, data);
-          }
-        }
-      );
-    } else {
-      // Telegram Login Widget이 로드되지 않은 경우
-      console.error('Telegram Login Widget not loaded');
-      // 임시로 다른 방식으로 처리
-      onSocialLogin(MemberAuthType.TELEGRAM, 'mock_telegram_token', {});
-    }
+    // Telegram 로그인은 현재 지원하지 않습니다
+    console.warn('Telegram login is not supported');
   };
 
   return (
