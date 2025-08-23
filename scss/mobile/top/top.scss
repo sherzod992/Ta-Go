@@ -1,155 +1,30 @@
+/** MOBILE TOP STYLES **/
+
+// TopMobile 컴포넌트는 이제 인라인 스타일을 사용하므로 
+// 기본적인 모바일 네비게이션 스타일만 유지
+
+// 모바일 네비게이션 기본 스타일
 .top-mobile {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 16px;
-  background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  height: 60px;
-  border-bottom: 1px solid #e0e0e0;
+  // 기본 스타일은 컴포넌트에서 인라인으로 처리됨
+}
 
-  // 왼쪽: 햄버거 메뉴 버튼
-  .hamburger-section {
-    flex: 1;
-    display: flex;
-    justify-content: flex-start;
+// 햄버거 메뉴 드로어 기본 스타일
+.mobile-drawer {
+  // 기본 스타일은 컴포넌트에서 인라인으로 처리됨
+}
 
-    .hamburger-button {
-      color: #333;
-      padding: 8px;
-      
-      &:hover {
-        background-color: rgba(0, 0, 0, 0.04);
-      }
-    }
-  }
-
-  // 중앙: 로고
-  .logo-section {
-    flex: 2;
-    display: flex;
-    justify-content: center;
-
-    .logo {
-      a {
-        text-decoration: none;
-        color: inherit;
-      }
-
-      h6 {
-        font-weight: bold;
-        margin: 0;
-        font-size: 1.5rem;
-        color: #667eea;
-      }
-    }
-  }
-
-  // 오른쪽: 언어 선택 + 로그인
-  .right-section {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 8px;
-
-    .language-selector {
-      color: #333;
-      padding: 8px;
-      
-      &:hover {
-        background-color: rgba(0, 0, 0, 0.04);
-      }
-
-      .flag {
-        font-size: 1.2rem;
-      }
-    }
-
-    .login-button {
-      padding: 4px 12px;
-      font-size: 0.8rem;
-      font-weight: 500;
-      text-transform: none;
-      border-radius: 4px;
-      min-width: auto;
-      height: 32px;
-    }
-
-    .user-avatar {
-      width: 32px;
-      height: 32px;
-      cursor: pointer;
-    }
+// 모바일 메뉴 아이템 호버 효과
+.menu-item {
+  &:hover {
+    background-color: rgba(102, 126, 234, 0.1);
   }
 }
 
-// 햄버거 메뉴 드로어 스타일
-.mobile-drawer {
-  .MuiDrawer-paper {
-    width: 280px;
-    box-sizing: border-box;
-  }
-
-  .drawer-content {
-    padding: 16px;
-
-    .user-section {
-      padding: 16px;
-      border-bottom: 1px solid #e0e0e0;
-      margin-bottom: 16px;
-
-      .user-info {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        margin-bottom: 8px;
-
-        .user-avatar {
-          width: 48px;
-          height: 48px;
-        }
-
-        .user-details {
-          .user-name {
-            font-weight: bold;
-            font-size: 1rem;
-          }
-
-          .user-phone {
-            color: #666;
-            font-size: 0.875rem;
-          }
-        }
-      }
-
-      .logout-button {
-        width: 100%;
-        margin-top: 8px;
-      }
-    }
-
-    .menu-list {
-      .menu-item {
-        border-radius: 4px;
-        margin-bottom: 4px;
-
-        &:hover {
-          background-color: rgba(102, 126, 234, 0.1);
-        }
-
-        .menu-icon {
-          margin-right: 16px;
-          color: #667eea;
-        }
-
-        .menu-text {
-          font-weight: 500;
-        }
-      }
+// 언어 선택 메뉴 스타일
+.language-menu {
+  .MuiMenuItem-root {
+    &:hover {
+      background-color: rgba(102, 126, 234, 0.1);
     }
   }
 }

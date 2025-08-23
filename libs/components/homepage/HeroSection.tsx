@@ -239,7 +239,158 @@ const HeroSection: React.FC = () => {
               {t('Search Your Dream Bike')}
             </Typography>
 
-            {/* 검색 조건 영역 - 모바일에서는 가로 정렬 */}
+            {/* 매물 타입 영역 - 모바일에서는 가로 스크롤로 4개씩 보이기 */}
+            <Box sx={{ marginBottom: 2 }}>
+              <Typography variant="body2" gutterBottom sx={{ 
+                fontSize: { xs: '0.9rem', md: '1rem' },
+                fontWeight: 500,
+                marginBottom: 1
+              }}>
+                {t('Bike Categories')}:
+              </Typography>
+              
+              {isMobile ? (
+                // 모바일: 가로 스크롤로 4개씩 보이기
+                <Box sx={{
+                  display: 'flex',
+                  gap: 1,
+                  overflowX: 'auto',
+                  paddingBottom: 1,
+                  scrollSnapType: 'x mandatory',
+                  '&::-webkit-scrollbar': {
+                    height: 4,
+                  },
+                  '&::-webkit-scrollbar-track': {
+                    backgroundColor: '#f1f1f1',
+                    borderRadius: 2,
+                  },
+                  '&::-webkit-scrollbar-thumb': {
+                    backgroundColor: '#c1c1c1',
+                    borderRadius: 2,
+                  },
+                  '&::-webkit-scrollbar-thumb:hover': {
+                    backgroundColor: '#a8a8a8',
+                  },
+                }}>
+                  {bikeCategories.map((categoryItem) => (
+                    <Box
+                      key={categoryItem.value}
+                      onClick={() => setSelectedCategory(categoryItem.name)}
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        padding: 1,
+                        border: selectedCategory === categoryItem.name ? '2px solid #1976d2' : '2px solid transparent',
+                        borderRadius: 2,
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease',
+                        backgroundColor: selectedCategory === categoryItem.name ? 'rgba(25, 118, 210, 0.1)' : 'transparent',
+                        minWidth: '80px',
+                        flexShrink: 0,
+                        scrollSnapAlign: 'start',
+                        '&:hover': {
+                          backgroundColor: 'rgba(25, 118, 210, 0.05)',
+                          borderColor: '#1976d2',
+                        },
+                      }}
+                    >
+                      <Box
+                        component="img"
+                        src={categoryItem.image}
+                        alt={categoryItem.name}
+                        sx={{
+                          width: '60px',
+                          height: '60px',
+                          objectFit: 'cover',
+                          borderRadius: 1,
+                          marginBottom: 0.5,
+                        }}
+                      />
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          textAlign: 'center',
+                          fontWeight: 500,
+                          color: selectedCategory === categoryItem.name ? '#1976d2' : '#333',
+                          fontSize: '0.65rem',
+                          lineHeight: 1.2,
+                          wordBreak: 'break-word',
+                        }}
+                      >
+                        {categoryItem.name}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Box>
+              ) : (
+                // 데스크톱: 개선된 그리드 레이아웃
+                <Grid container spacing={2}>
+                  {bikeCategories.map((categoryItem) => (
+                    <Grid item xs={3} sm={1.5} key={categoryItem.value}>
+                      <Box
+                        onClick={() => setSelectedCategory(categoryItem.name)}
+                        sx={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          padding: 1.5,
+                          border: selectedCategory === categoryItem.name ? '3px solid #1976d2' : '2px solid #e0e0e0',
+                          borderRadius: 3,
+                          cursor: 'pointer',
+                          transition: 'all 0.3s ease',
+                          backgroundColor: selectedCategory === categoryItem.name ? 'rgba(25, 118, 210, 0.08)' : 'white',
+                          boxShadow: selectedCategory === categoryItem.name 
+                            ? '0 4px 12px rgba(25, 118, 210, 0.2)' 
+                            : '0 2px 8px rgba(0, 0, 0, 0.1)',
+                          '&:hover': {
+                            backgroundColor: selectedCategory === categoryItem.name 
+                              ? 'rgba(25, 118, 210, 0.12)' 
+                              : 'rgba(25, 118, 210, 0.04)',
+                            borderColor: '#1976d2',
+                            transform: 'translateY(-2px)',
+                            boxShadow: '0 6px 16px rgba(25, 118, 210, 0.25)',
+                          },
+                        }}
+                      >
+                        <Box
+                          component="img"
+                          src={categoryItem.image}
+                          alt={categoryItem.name}
+                          sx={{
+                            width: '100%',
+                            height: '140px',
+                            objectFit: 'cover',
+                            borderRadius: 2,
+                            marginBottom: 1,
+                            aspectRatio: '1/1',
+                            transition: 'transform 0.3s ease',
+                            '&:hover': {
+                              transform: 'scale(1.05)',
+                            },
+                          }}
+                        />
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            textAlign: 'center',
+                            fontWeight: selectedCategory === categoryItem.name ? 600 : 500,
+                            color: selectedCategory === categoryItem.name ? '#1976d2' : '#333',
+                            fontSize: '0.85rem',
+                            lineHeight: 1.3,
+                            transition: 'all 0.3s ease',
+                          }}
+                        >
+                          {categoryItem.name}
+                        </Typography>
+                      </Box>
+                    </Grid>
+                  ))}
+                </Grid>
+              )}
+            </Box>
+
+            {/* 검색 조건 영역 - 매물 타입 바로 아래에 가로형으로 정렬 */}
             <Box sx={{ 
               display: 'flex', 
               flexDirection: { xs: 'row', md: 'column' },
@@ -469,7 +620,7 @@ const HeroSection: React.FC = () => {
               )}
             </Box>
 
-            {/* Price Range Filter - PC에서 더 시각적으로 개선 */}
+            {/* Price Range Filter - 매물 타입 바로 아래로 이동 */}
             <Box sx={{ marginBottom: 2 }}>
               <Typography variant="body2" gutterBottom sx={{ 
                 fontSize: { xs: '0.9rem', md: '1.1rem' },
@@ -538,12 +689,12 @@ const HeroSection: React.FC = () => {
               </Box>
             </Box>
 
-            {/* Action Buttons Row - PC에서는 더 효율적인 레이아웃 */}
+            {/* Action Buttons Row - 모바일에서는 한 줄에 나란히 정렬 */}
             <Box sx={{ 
               display: 'flex', 
               gap: 2,
               marginBottom: 2,
-              flexDirection: { xs: 'column', md: 'row' }
+              flexDirection: { xs: 'row', md: 'row' }
             }}>
               <Button
                 variant="contained"
@@ -558,6 +709,7 @@ const HeroSection: React.FC = () => {
                   color: searchResultCount === 0 ? 'rgba(0, 0, 0, 0.26)' : 'white',
                   fontSize: { xs: '1rem', md: '1.1rem' },
                   fontWeight: { xs: 500, md: 600 },
+                  flex: { xs: 1, md: 1 },
                   '&:hover': { 
                     backgroundColor: searchResultCount === 0 ? 'rgba(0, 0, 0, 0.12)' : '#b71c1c',
                     transform: 'translateY(-1px)',
@@ -587,6 +739,7 @@ const HeroSection: React.FC = () => {
                   fontSize: { xs: '1rem', md: '1rem' },
                   fontWeight: { xs: 500, md: 500 },
                   borderWidth: '2px',
+                  flex: { xs: 0, md: 0 },
                   '&:hover': {
                     borderWidth: '2px',
                     backgroundColor: 'rgba(211, 47, 47, 0.04)',
