@@ -96,73 +96,29 @@ hr {
 	}
 }
 
-// PhoneInput 스타일 커스터마이징
+// PhoneInput 스타일 개선
 .PhoneInput {
-  display: flex;
-  align-items: center;
-  border: 1px solid rgba(0, 0, 0, 0.23);
-  border-radius: 4px;
-  padding: 0;
-  font-family: inherit;
-  transition: border-color 0.2s ease;
-  
-  &:focus-within {
-    border-color: #1976d2;
-    border-width: 2px;
+  .PhoneInputCountry {
+    margin-right: 8px;
   }
   
-  &.Mui-disabled {
-    background-color: rgba(0, 0, 0, 0.12);
-    color: rgba(0, 0, 0, 0.38);
-  }
-}
-
-.PhoneInputCountry {
-  display: flex;
-  align-items: center;
-  padding: 0 12px;
-  border-right: 1px solid rgba(0, 0, 0, 0.23);
-  background-color: #f5f5f5;
-  min-width: 80px;
-}
-
-.PhoneInputCountrySelect {
-  background: none;
-  border: none;
-  font-size: 14px;
-  font-weight: 500;
-  color: #333;
-  cursor: pointer;
-  padding: 8px 4px;
-  width: 100%;
-  
-  &:focus {
+  .PhoneInputInput {
+    border: none;
     outline: none;
+    background: transparent;
+    font-size: 16px;
+    width: 100%;
+    padding: 0;
+    
+    &:focus {
+      outline: none;
+    }
   }
 }
 
-.PhoneInputCountryIcon {
-  width: 20px;
-  height: 15px;
-  margin-right: 8px;
-}
-
-.PhoneInputInput {
-  flex: 1;
-  border: none;
-  outline: none;
-  padding: 16.5px 14px;
-  font-size: 16px;
-  font-family: inherit;
-  background: transparent;
-  
-  &::placeholder {
-    color: rgba(0, 0, 0, 0.54);
-  }
-  
-  &:disabled {
-    background-color: rgba(0, 0, 0, 0.12);
-    color: rgba(0, 0, 0, 0.38);
+.PhoneInput--error {
+  .PhoneInputInput {
+    color: #d32f2f;
   }
 }
 

@@ -258,84 +258,31 @@ const BuyPageMobile: React.FC = () => {
 
         {/* 검색 필터 */}
         <Paper className="search-section" sx={{ p: 2, mb: 2 }}>
-          {/* Top Row Filters */}
-          <Grid container spacing={2} sx={{ marginBottom: 2 }}>
-            <Grid item xs={12} sm={6} md={3}>
-              <FormControl fullWidth size="small">
-                <InputLabel>{t('Brand')}</InputLabel>
-                <Select
-                  value={filters.brand}
-                  label={t('Brand')}
-                  onChange={(e) => setFilters({ ...filters, brand: e.target.value })}
-                >
-                  <MenuItem value="all">{t('All brands')}</MenuItem>
-                  <MenuItem value="Honda">Honda</MenuItem>
-                  <MenuItem value="Yamaha">Yamaha</MenuItem>
-                  <MenuItem value="Suzuki">Suzuki</MenuItem>
-                  <MenuItem value="Kawasaki">Kawasaki</MenuItem>
-                  <MenuItem value="BMW">BMW</MenuItem>
-                  <MenuItem value="Ducati">Ducati</MenuItem>
-                  <MenuItem value="KTM">KTM</MenuItem>
-                  <MenuItem value="Harley-Davidson">Harley-Davidson</MenuItem>
-                  <MenuItem value="Triumph">Triumph</MenuItem>
-                  <MenuItem value="Aprilia">Aprilia</MenuItem>
-                  <MenuItem value="Moto Guzzi">Moto Guzzi</MenuItem>
-                  <MenuItem value="MV Agusta">MV Agusta</MenuItem>
-                  <MenuItem value="Royal Enfield">Royal Enfield</MenuItem>
-                  <MenuItem value="Zero">Zero</MenuItem>
-                  <MenuItem value="Hero">Hero</MenuItem>
-                  <MenuItem value="TVS">TVS</MenuItem>
-                  <MenuItem value="Bajaj">Bajaj</MenuItem>
-                  <MenuItem value="other">{t('Other')}</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <TextField
-                fullWidth
-                size="small"
-                label={t('Keyword')}
-                placeholder={t('Search by keyword')}
-                value={filters.keyword}
-                onChange={(e) => setFilters({ ...filters, keyword: e.target.value })}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <FormControl fullWidth size="small">
-                <InputLabel>{t('Location')}</InputLabel>
-                <Select
-                  value={filters.location}
-                  label={t('Location')}
-                  onChange={(e) => setFilters({ ...filters, location: e.target.value })}
-                >
-                  <MenuItem value="all">{t('All locations')}</MenuItem>
-                  <MenuItem value="seoul">Seoul</MenuItem>
-                  <MenuItem value="busan">Busan</MenuItem>
-                  <MenuItem value="daegu">Daegu</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <FormControl fullWidth size="small">
-                <InputLabel>{t('New and used')}</InputLabel>
-                <Select
-                  value={filters.condition}
-                  label={t('New and used')}
-                  onChange={(e) => setFilters({ ...filters, condition: e.target.value })}
-                >
-                  <MenuItem value="all">{t('Any')}</MenuItem>
-                  <MenuItem value="new">New</MenuItem>
-                  <MenuItem value="used">Used</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-          </Grid>
-
-          {/* Motorcycle Types Row */}
-          <Grid container spacing={1} sx={{ marginBottom: 2 }}>
-            {bikeCategories.map((categoryItem) => (
-              <Grid item xs={6} sm={4} md={1.5} key={categoryItem.name}>
+          {/* 매물 타입 - 가로 레이아웃, 한 화면에 4개만 보이고 나머지는 가로 스크롤 */}
+          <Box sx={{ marginBottom: 2 }}>
+            <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', mb: 1 }}>
+              {t('Motorcycle Types')}
+            </Typography>
+            <Box sx={{ 
+              display: 'flex', 
+              gap: 1, 
+              overflowX: 'auto',
+              pb: 1,
+              '&::-webkit-scrollbar': {
+                height: '4px'
+              },
+              '&::-webkit-scrollbar-track': {
+                background: '#f1f1f1',
+                borderRadius: '2px'
+              },
+              '&::-webkit-scrollbar-thumb': {
+                background: '#c1c1c1',
+                borderRadius: '2px'
+              }
+            }}>
+              {bikeCategories.map((categoryItem) => (
                 <Box
+                  key={categoryItem.name}
                   onClick={() => {
                     setSelectedCategory(selectedCategory === categoryItem.name ? 'all' : categoryItem.name);
                   }}
@@ -349,6 +296,8 @@ const BuyPageMobile: React.FC = () => {
                     transition: 'all 0.2s',
                     backgroundColor: selectedCategory === categoryItem.name ? 'rgba(25, 118, 210, 0.1)' : 'transparent',
                     border: selectedCategory === categoryItem.name ? '2px solid #1976d2' : '2px solid transparent',
+                    minWidth: '80px',
+                    flexShrink: 0,
                     '&:hover': {
                       backgroundColor: 'rgba(0, 0, 0, 0.05)',
                       transform: 'translateY(-2px)',
@@ -378,29 +327,130 @@ const BuyPageMobile: React.FC = () => {
                     {categoryItem.name}
                   </Typography>
                 </Box>
-              </Grid>
-            ))}
-          </Grid>
+              ))}
+            </Box>
+          </Box>
 
-          {/* Price Range Filter */}
+          {/* 브랜드/키워드/위치/컨디션 - 매물 타입 아래에 가로 정렬 */}
           <Grid container spacing={2} sx={{ marginBottom: 2 }}>
-            <Grid item xs={12}>
-              <Box>
-                <Typography variant="body2" gutterBottom>
-                  {t('Price Range')}: {formatPrice(filters.priceRange[0])} - {formatPrice(filters.priceRange[1])}
-                </Typography>
-                <Slider
-                  value={filters.priceRange}
-                  onChange={(_, value) => setFilters({ ...filters, priceRange: value as number[] })}
-                  valueLabelDisplay="auto"
-                  min={0}
-                  max={50000000}
-                  step={1000000}
-                  valueLabelFormat={(value) => formatPrice(value)}
-                />
-              </Box>
+            <Grid item xs={6}>
+              <FormControl fullWidth size="small">
+                <InputLabel>{t('Brand')}</InputLabel>
+                <Select
+                  value={filters.brand}
+                  label={t('Brand')}
+                  onChange={(e) => setFilters({ ...filters, brand: e.target.value })}
+                >
+                  <MenuItem value="all">{t('All brands')}</MenuItem>
+                  <MenuItem value="Honda">Honda</MenuItem>
+                  <MenuItem value="Yamaha">Yamaha</MenuItem>
+                  <MenuItem value="Suzuki">Suzuki</MenuItem>
+                  <MenuItem value="Kawasaki">Kawasaki</MenuItem>
+                  <MenuItem value="BMW">BMW</MenuItem>
+                  <MenuItem value="Ducati">Ducati</MenuItem>
+                  <MenuItem value="KTM">KTM</MenuItem>
+                  <MenuItem value="Harley-Davidson">Harley-Davidson</MenuItem>
+                  <MenuItem value="Triumph">Triumph</MenuItem>
+                  <MenuItem value="Aprilia">Aprilia</MenuItem>
+                  <MenuItem value="Moto Guzzi">Moto Guzzi</MenuItem>
+                  <MenuItem value="MV Agusta">MV Agusta</MenuItem>
+                  <MenuItem value="Royal Enfield">Royal Enfield</MenuItem>
+                  <MenuItem value="Zero">Zero</MenuItem>
+                  <MenuItem value="Hero">Hero</MenuItem>
+                  <MenuItem value="TVS">TVS</MenuItem>
+                  <MenuItem value="Bajaj">Bajaj</MenuItem>
+                  <MenuItem value="other">{t('Other')}</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={6}>
+              <TextField
+                fullWidth
+                size="small"
+                label={t('Keyword')}
+                placeholder={t('Search by keyword')}
+                value={filters.keyword}
+                onChange={(e) => setFilters({ ...filters, keyword: e.target.value })}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <FormControl fullWidth size="small">
+                <InputLabel>{t('Location')}</InputLabel>
+                <Select
+                  value={filters.location}
+                  label={t('Location')}
+                  onChange={(e) => setFilters({ ...filters, location: e.target.value })}
+                >
+                  <MenuItem value="all">{t('All locations')}</MenuItem>
+                  <MenuItem value="seoul">Seoul</MenuItem>
+                  <MenuItem value="busan">Busan</MenuItem>
+                  <MenuItem value="daegu">Daegu</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={6}>
+              <FormControl fullWidth size="small">
+                <InputLabel>{t('New and used')}</InputLabel>
+                <Select
+                  value={filters.condition}
+                  label={t('New and used')}
+                  onChange={(e) => setFilters({ ...filters, condition: e.target.value })}
+                >
+                  <MenuItem value="all">{t('Any')}</MenuItem>
+                  <MenuItem value="new">New</MenuItem>
+                  <MenuItem value="used">Used</MenuItem>
+                </Select>
+              </FormControl>
             </Grid>
           </Grid>
+
+          {/* 가격 범위 - 매물 타입 아래로 이동 */}
+          <Box sx={{ marginBottom: 2 }}>
+            <Typography variant="body2" gutterBottom>
+              {t('Price Range')}: {formatPrice(filters.priceRange[0])} - {formatPrice(filters.priceRange[1])}
+            </Typography>
+            <Slider
+              value={filters.priceRange}
+              onChange={(_, value) => setFilters({ ...filters, priceRange: value as number[] })}
+              valueLabelDisplay="auto"
+              min={0}
+              max={50000000}
+              step={1000000}
+              valueLabelFormat={(value) => formatPrice(value)}
+            />
+          </Box>
+
+          {/* 바이크 보기 + 모두 지우기 버튼 - 한 줄에 나란히 배치 */}
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <Button
+              variant="contained"
+              color="primary"
+              fullWidth
+              startIcon={<SearchIcon />}
+              sx={{ flex: 1 }}
+            >
+              {t('View Bikes')}
+            </Button>
+            <Button
+              variant="outlined"
+              color="secondary"
+              onClick={() => {
+                setFilters({
+                  keyword: '',
+                  brand: 'all',
+                  location: 'all',
+                  condition: 'all',
+                  priceRange: [0, 50000000],
+                  yearRange: [1990, new Date().getFullYear()],
+                  mileageRange: [0, 100000],
+                });
+                setSelectedCategory('all');
+              }}
+              sx={{ flex: 1 }}
+            >
+              {t('Clear All')}
+            </Button>
+          </Box>
         </Paper>
 
         {/* 정렬 및 뷰 모드 */}

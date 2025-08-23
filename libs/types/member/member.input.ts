@@ -4,7 +4,8 @@ import { Direction } from '../../enums/common.enum';
 export interface MemberInput {
 	memberNick: string;
 	memberPassword: string;
-	memberPhone: string;
+	memberPhone?: string;
+	memberEmail?: string;
 	memberType?: MemberType;
 	memberAuthType?: AuthProvider;
 }

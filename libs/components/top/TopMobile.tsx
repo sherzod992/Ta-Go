@@ -120,96 +120,83 @@ const TopMobile: React.FC = () => {
         height: '60px',
         borderBottom: '1px solid #e0e0e0'
       }}>
-        {/* 왼쪽: 햄버거 메뉴 버튼 */}
-        <Box sx={{ flex: 1, display: 'flex', justifyContent: 'flex-start' }}>
-          <IconButton
-            onClick={handleDrawerToggle}
+        {/* 1. 햄버거 메뉴 버튼 */}
+        <IconButton
+          onClick={handleDrawerToggle}
+          sx={{
+            color: '#333',
+            padding: '8px',
+            '&:hover': {
+              backgroundColor: 'rgba(0, 0, 0, 0.04)'
+            }
+          }}
+        >
+          <MenuIcon />
+        </IconButton>
+
+        {/* 2. 로고 */}
+        <Link href="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+          <Typography 
+            variant="h6" 
+            component="div" 
             sx={{
-              color: '#333',
-              padding: '8px',
-              '&:hover': {
-                backgroundColor: 'rgba(0, 0, 0, 0.04)'
-              }
+              fontWeight: 'bold',
+              margin: 0,
+              fontSize: '1.5rem',
+              color: '#667eea'
             }}
           >
-            <MenuIcon />
-          </IconButton>
-        </Box>
+            ta-Go
+          </Typography>
+        </Link>
 
-        {/* 중앙: 로고 */}
-        <Box sx={{ flex: 2, display: 'flex', justifyContent: 'center' }}>
-          <Link href="/" style={{ textDecoration: 'none', color: 'inherit' }}>
-            <Typography 
-              variant="h6" 
-              component="div" 
+        {/* 3. 언어 선택 버튼 */}
+        <IconButton 
+          onClick={handleLanguageMenu}
+          sx={{
+            color: '#333',
+            padding: '8px',
+            '&:hover': {
+              backgroundColor: 'rgba(0, 0, 0, 0.04)'
+            }
+          }}
+        >
+          <span style={{ fontSize: '1.2rem' }}>{currentLanguage.flag}</span>
+        </IconButton>
+        
+        {/* 4. 로그인/사용자 버튼 */}
+        {user?._id ? (
+          <Link href="/mypage">
+            <Avatar 
+              src={user.memberImage} 
+              alt={user.memberNick} 
               sx={{
-                fontWeight: 'bold',
-                margin: 0,
-                fontSize: '1.5rem',
-                color: '#667eea'
+                width: '32px',
+                height: '32px',
+                cursor: 'pointer'
+              }}
+            />
+          </Link>
+        ) : (
+          <Link href="/login">
+            <Button 
+              variant="contained" 
+              color="primary" 
+              size="small"
+              sx={{
+                padding: '4px 12px',
+                fontSize: '0.8rem',
+                fontWeight: 500,
+                textTransform: 'none',
+                borderRadius: '4px',
+                minWidth: 'auto',
+                height: '32px'
               }}
             >
-              ta-Go
-            </Typography>
+              {t('Login')}
+            </Button>
           </Link>
-        </Box>
-
-        {/* 오른쪽: 언어 선택 + 로그인 */}
-        <Box sx={{ 
-          flex: 1, 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'flex-end', 
-          gap: '8px' 
-        }}>
-          {/* 언어 선택 버튼 */}
-          <IconButton 
-            onClick={handleLanguageMenu}
-            sx={{
-              color: '#333',
-              padding: '8px',
-              '&:hover': {
-                backgroundColor: 'rgba(0, 0, 0, 0.04)'
-              }
-            }}
-          >
-            <span style={{ fontSize: '1.2rem' }}>{currentLanguage.flag}</span>
-          </IconButton>
-          
-          {/* 로그인/사용자 버튼 */}
-          {user?._id ? (
-            <Link href="/mypage">
-              <Avatar 
-                src={user.memberImage} 
-                alt={user.memberNick} 
-                sx={{
-                  width: '32px',
-                  height: '32px',
-                  cursor: 'pointer'
-                }}
-              />
-            </Link>
-          ) : (
-            <Link href="/login">
-              <Button 
-                variant="contained" 
-                color="primary" 
-                size="small"
-                sx={{
-                  padding: '4px 12px',
-                  fontSize: '0.8rem',
-                  fontWeight: 500,
-                  textTransform: 'none',
-                  borderRadius: '4px',
-                  minWidth: 'auto',
-                  height: '32px'
-                }}
-              >
-                {t('Login')}
-              </Button>
-            </Link>
-          )}
-        </Box>
+        )}
       </Box>
 
       {/* 햄버거 메뉴 드로어 */}

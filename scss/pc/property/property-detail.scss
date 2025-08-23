@@ -61,6 +61,7 @@
     border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     padding: 2rem;
+    margin: 2rem 0;
 
     .inquiry-btn {
       width: 100%;
@@ -557,6 +558,130 @@
         border-color: #007bff;
         color: #007bff;
       }
+    }
+  }
+}
+
+// 채팅 레이아웃 개선
+.property-detail {
+  .inquiry-section {
+    margin: 2rem 0;
+    
+    .MuiButton-root {
+      font-weight: 600;
+      text-transform: none;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+      transition: all 0.3s ease;
+      
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      }
+    }
+  }
+}
+
+// 채팅 메시지 스타일 개선
+.chat-message {
+  &.my-message {
+    .message-bubble {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 18px 18px 4px 18px;
+      margin-left: auto;
+      max-width: 70%;
+      
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: -8px;
+        width: 0;
+        height: 0;
+        border-left: 8px solid #667eea;
+        border-top: 8px solid transparent;
+      }
+    }
+    
+    .message-time {
+      text-align: right;
+      margin-right: 8px;
+    }
+  }
+  
+  &.other-message {
+    .message-bubble {
+      background: white;
+      color: #333;
+      border-radius: 18px 18px 18px 4px;
+      margin-right: auto;
+      max-width: 70%;
+      border: 1px solid #e0e0e0;
+      
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -8px;
+        width: 0;
+        height: 0;
+        border-right: 8px solid white;
+        border-top: 8px solid transparent;
+      }
+    }
+    
+    .message-time {
+      text-align: left;
+      margin-left: 8px;
+    }
+  }
+}
+
+// 채팅 입력 영역 개선
+.chat-input-area {
+  .MuiTextField-root {
+    .MuiOutlinedInput-root {
+      border-radius: 20px;
+      background-color: #f8f9fa;
+      
+      &:hover {
+        background-color: #e9ecef;
+      }
+      
+      &.Mui-focused {
+        background-color: white;
+      }
+    }
+  }
+  
+  .MuiButton-root {
+    border-radius: 50%;
+    min-width: 40px;
+    height: 40px;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    
+    &:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+  }
+}
+
+// 채팅 헤더 개선
+.chat-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  
+  .MuiTypography-h6 {
+    font-weight: 600;
+  }
+  
+  .MuiIconButton-root {
+    color: white;
+    
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1);
     }
   }
 }

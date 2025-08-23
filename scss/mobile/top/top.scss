@@ -1,9 +1,51 @@
 /** MOBILE TOP STYLES **/
 
-// TopMobile 컴포넌트는 이제 인라인 스타일을 사용하므로 
-// 기본적인 모바일 네비게이션 스타일만 유지
-
-
+// 모바일 Top 네비게이션 스타일
+.top-mobile {
+  // 한 줄에 4가지 요소 정렬을 위한 스타일
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 0 16px !important;
+  height: 60px !important;
+  
+  // 각 요소의 크기 조정
+  .MuiIconButton-root {
+    min-width: 40px !important;
+    height: 40px !important;
+    padding: 8px !important;
+  }
+  
+  // 로고 스타일
+  .MuiTypography-h6 {
+    font-size: 1.5rem !important;
+    font-weight: bold !important;
+    color: #667eea !important;
+    margin: 0 !important;
+  }
+  
+  // 언어 선택 버튼
+  .language-button {
+    font-size: 1.2rem !important;
+  }
+  
+  // 로그인 버튼
+  .MuiButton-root {
+    height: 32px !important;
+    padding: 4px 12px !important;
+    font-size: 0.8rem !important;
+    font-weight: 500 !important;
+    text-transform: none !important;
+    border-radius: 4px !important;
+    min-width: auto !important;
+  }
+  
+  // 아바타 스타일
+  .MuiAvatar-root {
+    width: 32px !important;
+    height: 32px !important;
+  }
+}
 
 // 모바일 메뉴 아이템 호버 효과
 .menu-item {
@@ -17,6 +59,40 @@
   .MuiMenuItem-root {
     &:hover {
       background-color: rgba(102, 126, 234, 0.1);
+    }
+  }
+}
+
+// 햄버거 메뉴 드로어 스타일
+.MuiDrawer-paper {
+  width: 280px !important;
+  box-sizing: border-box !important;
+}
+
+// 반응형 조정
+@media (max-width: 480px) {
+  .top-mobile {
+    padding: 0 12px !important;
+    
+    .MuiTypography-h6 {
+      font-size: 1.3rem !important;
+    }
+    
+    .MuiIconButton-root {
+      min-width: 36px !important;
+      height: 36px !important;
+      padding: 6px !important;
+    }
+    
+    .MuiButton-root {
+      height: 28px !important;
+      padding: 2px 8px !important;
+      font-size: 0.7rem !important;
+    }
+    
+    .MuiAvatar-root {
+      width: 28px !important;
+      height: 28px !important;
     }
   }
 }

@@ -80,56 +80,56 @@ const requestJwtToken = async ({
 	}
 };
 
-export const signUp = async (nick: string, password: string, phone: string, authType: AuthProvider, memberType: MemberType = MemberType.USER): Promise<void> => {
+export const signUp = async (nick: string, password: string, contactInfo: string, authType: AuthProvider, memberType: MemberType = MemberType.USER): Promise<void> => {
 	try {
-		const { jwtToken } = await requestSignUpJwtToken({ nick, password, phone, authType, memberType });
+		const { jwtToken } = await requestSignUpJwtToken({ nick, password, contactInfo, authType, memberType });
 
 		if (jwtToken) {
 			updateStorage({ jwtToken });
 			updateUserInfo(jwtToken);
 		}
 	} catch (err) {
-		console.warn('login err', err);
+		console.warn('signup err', err);
 		logOut();
-		throw new Error('Login Err');
+		throw new Error('Signup Err');
 	}
 };
 
 const requestSignUpJwtToken = async ({
 	nick,
 	password,
-	phone,
+	contactInfo,
 	authType,
 	memberType,
 }: {
 	nick: string;
 	password: string;
-	phone: string;
+	contactInfo: string;
 	authType: AuthProvider;
 	memberType: MemberType;
 }): Promise<{ jwtToken: string }> => {
 	const apolloClient = await initializeApollo();
 
 	try {
-		console.log('Sending signup mutation with variables:', {
-			memberNick: nick, 
-			memberPassword: password, 
-			memberPhone: phone, 
+		// 인증 타입에 따라 적절한 필드 설정
+		const input: any = {
+			memberNick: nick,
+			memberPassword: password,
 			memberType: memberType,
-			memberAuthType: authType 
-		});
+			memberAuthType: authType
+		};
+
+		if (authType === AuthProvider.EMAIL) {
+			input.memberEmail = contactInfo;
+		} else if (authType === AuthProvider.PHONE) {
+			input.memberPhone = contactInfo;
+		}
+
+		console.log('Sending signup mutation with variables:', input);
 		
 		const result = await apolloClient.mutate({
 			mutation: SIGN_UP,
-			variables: {
-				input: { 
-					memberNick: nick, 
-					memberPassword: password, 
-					memberPhone: phone, 
-					memberType: memberType,
-					memberAuthType: authType 
-				},
-			},
+			variables: { input },
 			fetchPolicy: 'network-only',
 		});
 
@@ -156,6 +156,15 @@ const requestSignUpJwtToken = async ({
 					break;
 				case 'Definer: user has been blocked!':
 					await sweetMixinErrorAlert('User has been blocked!');
+					break;
+				case 'Definer: user already exists':
+					await sweetMixinErrorAlert('이미 존재하는 사용자입니다.');
+					break;
+				case 'Definer: invalid email format':
+					await sweetMixinErrorAlert('올바른 이메일 형식을 입력해주세요.');
+					break;
+				case 'Definer: invalid phone format':
+					await sweetMixinErrorAlert('올바른 전화번호 형식을 입력해주세요.');
 					break;
 				default:
 					await sweetMixinErrorAlert(errorMessage || '회원가입 중 오류가 발생했습니다.');

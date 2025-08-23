@@ -270,3 +270,199 @@
     }
   }
 }
+
+/** MOBILE BUY PAGE STYLES **/
+
+// 검색 섹션 스타일
+.search-section {
+  .motorcycle-types {
+    // 가로 스크롤 스타일
+    .types-scroll {
+      display: flex !important;
+      gap: 8px !important;
+      overflow-x: auto !important;
+      padding-bottom: 8px !important;
+      
+      // 스크롤바 스타일
+      &::-webkit-scrollbar {
+        height: 4px !important;
+      }
+      
+      &::-webkit-scrollbar-track {
+        background: #f1f1f1 !important;
+        border-radius: 2px !important;
+      }
+      
+      &::-webkit-scrollbar-thumb {
+        background: #c1c1c1 !important;
+        border-radius: 2px !important;
+      }
+      
+      // 타입 아이템 스타일
+      .type-item {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        cursor: pointer !important;
+        padding: 8px !important;
+        border-radius: 8px !important;
+        transition: all 0.2s !important;
+        min-width: 80px !important;
+        flex-shrink: 0 !important;
+        
+        &.selected {
+          background-color: rgba(25, 118, 210, 0.1) !important;
+          border: 2px solid #1976d2 !important;
+          
+          .type-name {
+            color: #1976d2 !important;
+          }
+        }
+        
+        &:hover {
+          background-color: rgba(0, 0, 0, 0.05) !important;
+          transform: translateY(-2px) !important;
+        }
+        
+        .type-image {
+          width: 40px !important;
+          height: 40px !important;
+          object-fit: contain !important;
+          margin-bottom: 4px !important;
+        }
+        
+        .type-name {
+          text-align: center !important;
+          font-weight: 500 !important;
+          font-size: 0.7rem !important;
+          color: #333 !important;
+        }
+      }
+    }
+  }
+  
+  // 필터 그리드 스타일
+  .filter-grid {
+    .MuiGrid-item {
+      // 브랜드/키워드/위치/컨디션을 2x2 그리드로 배치
+      &:nth-child(odd) {
+        padding-right: 4px !important;
+      }
+      
+      &:nth-child(even) {
+        padding-left: 4px !important;
+      }
+    }
+  }
+  
+  // 가격 범위 스타일
+  .price-range {
+    margin: 16px 0 !important;
+    
+    .MuiSlider-root {
+      color: #1976d2 !important;
+    }
+  }
+  
+  // 버튼 그룹 스타일
+  .button-group {
+    display: flex !important;
+    gap: 16px !important;
+    
+    .MuiButton-root {
+      flex: 1 !important;
+      height: 40px !important;
+      font-weight: 500 !important;
+      text-transform: none !important;
+    }
+  }
+}
+
+// 매물 카드 스타일
+.property-card {
+  cursor: pointer !important;
+  transition: all 0.2s !important;
+  
+  &:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  }
+  
+  // 리스트 모드 스타일
+  &.list-mode {
+    display: flex !important;
+    flex-direction: row !important;
+    
+    .MuiCardMedia-root {
+      width: 120px !important;
+      height: 120px !important;
+      flex-shrink: 0 !important;
+      border-radius: 8px 0 0 8px !important;
+    }
+    
+    .MuiCardContent-root {
+      flex: 1 !important;
+      padding: 16px !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: space-between !important;
+    }
+  }
+  
+  // 그리드 모드 스타일
+  &.grid-mode {
+    .MuiCardMedia-root {
+      height: 200px !important;
+      border-radius: 8px 8px 0 0 !important;
+    }
+  }
+}
+
+// 반응형 조정
+@media (max-width: 480px) {
+  .search-section {
+    padding: 12px !important;
+    
+    .motorcycle-types {
+      .types-scroll {
+        gap: 6px !important;
+        
+        .type-item {
+          min-width: 70px !important;
+          padding: 6px !important;
+          
+          .type-image {
+            width: 35px !important;
+            height: 35px !important;
+          }
+          
+          .type-name {
+            font-size: 0.65rem !important;
+          }
+        }
+      }
+    }
+    
+    .button-group {
+      gap: 12px !important;
+      
+      .MuiButton-root {
+        height: 36px !important;
+        font-size: 0.9rem !important;
+      }
+    }
+  }
+  
+  .property-card {
+    &.list-mode {
+      .MuiCardMedia-root {
+        width: 100px !important;
+        height: 100px !important;
+      }
+      
+      .MuiCardContent-root {
+        padding: 12px !important;
+      }
+    }
+  }
+}

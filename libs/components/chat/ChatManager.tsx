@@ -4,6 +4,7 @@ import { useChatSubscriptions } from '../../hooks/useChatSubscriptions';
 import { GET_CHAT_ROOMS } from '../../../apollo/user/query';
 import { ChatRoom, ChatMessage } from '../../types/chat/chat';
 import PropertyChat from './PropertyChat';
+import useDeviceDetect from '../../hooks/useDeviceDetect';
 import {
   Box,
   List,
@@ -34,6 +35,7 @@ const ChatManager: React.FC<ChatManagerProps> = ({
   propertyImage,
   onBack,
 }) => {
+  const { isMobile } = useDeviceDetect();
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>([]);
   const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
@@ -132,11 +134,9 @@ const ChatManager: React.FC<ChatManagerProps> = ({
     return (
       <PropertyChat
         propertyId={selectedRoom.propertyId}
-        roomId={selectedRoomId}
         propertyTitle={selectedRoom.propertyTitle}
-        propertyImage={propertyImage}
-        onBack={handleBackToList}
-        onMessageSent={handleMessageSent}
+        onClose={handleBackToList}
+        isMobile={isMobile}
       />
     );
   }

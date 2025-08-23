@@ -2,9 +2,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { GET_ALL_USER_CHAT_ROOMS, GET_CHAT_MESSAGES } from '../../apollo/user/query';
 import { CREATE_CHAT_ROOM } from '../../apollo/user/mutation';
-import { ChatRoom } from '../types/chat/chat';
+import { ChatRoom, ChatMessage } from '../types/chat/chat';
 import { CreateChatRoomInput } from '../types/chat/chat.input';
 import { sweetErrorAlert } from '../sweetAlert';
+import { useChatSubscriptions } from './useChatSubscriptions';
 
 export const useChatManager = () => {
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>([]);
@@ -34,6 +35,40 @@ export const useChatManager = () => {
       console.error('채팅방 생성 에러:', error);
       sweetErrorAlert('채팅방 생성에 실패했습니다.');
     }
+  });
+
+  // GraphQL Subscription 사용
+  const { onChatRoomUpdated, onMessageSent } = useChatSubscriptions({
+    onChatRoomUpdated: (room: ChatRoom) => {
+      console.log('채팅방 업데이트 수신:', room);
+      setChatRooms(prev => {
+        const existingIndex = prev.findIndex(r => r._id === room._id);
+        if (existingIndex >= 0) {
+          // 기존 채팅방 업데이트 및 맨 위로 이동
+          const updated = [...prev];
+          updated[existingIndex] = room;
+          return [room, ...updated.filter((_, index) => index !== existingIndex)];
+        } else {
+          // 새 채팅방 추가
+          return [room, ...prev];
+        }
+      });
+    },
+    onMessageSent: (message: ChatMessage) => {
+      console.log('새 메시지 수신:', message);
+      // 채팅방 목록에서 해당 채팅방의 최근 메시지 업데이트
+      setChatRooms(prev => prev.map(room => {
+        if (room._id === message.roomId || room.roomId === message.roomId) {
+          return {
+            ...room,
+            lastMessageContent: message.content,
+            lastMessageTime: message.createdAt,
+            unreadCountForUser: room.unreadCountForUser + 1
+          };
+        }
+        return room;
+      }));
+    },
   });
 
   // 채팅방 찾기 또는 생성
@@ -73,8 +108,8 @@ export const useChatManager = () => {
         const newRoom = result.data.createChatRoom;
         console.log('채팅방 생성 성공:', newRoom);
         
-        // 채팅방 목록 새로고침
-        await refetchChatRooms();
+        // 채팅방 목록에 즉시 추가 (Subscription 대기 없이)
+        setChatRooms(prev => [newRoom, ...prev]);
         
         return newRoom;
       }
@@ -95,7 +130,7 @@ export const useChatManager = () => {
     }
 
     return null;
-  }, [userId, chatRooms, createChatRoom, refetchChatRooms]);
+  }, [userId, chatRooms, createChatRoom]);
 
   // 채팅방 선택
   const selectChatRoom = useCallback((chatId: string) => {
@@ -131,6 +166,26 @@ export const useChatManager = () => {
     ));
   }, []);
 
+  // 새 채팅방 추가 (외부에서 호출 가능)
+  const addNewChatRoom = useCallback((newRoom: ChatRoom) => {
+    setChatRooms(prev => [newRoom, ...prev]);
+  }, []);
+
+  // 메시지 전송 후 채팅방 업데이트
+  const updateChatRoomWithMessage = useCallback((roomId: string, message: ChatMessage) => {
+    setChatRooms(prev => prev.map(room => {
+      if (room._id === roomId || room.roomId === roomId) {
+        return {
+          ...room,
+          lastMessageContent: message.content,
+          lastMessageTime: message.createdAt,
+          unreadCountForUser: room.unreadCountForUser + 1
+        };
+      }
+      return room;
+    }));
+  }, []);
+
   return {
     // 상태
     chatRooms,
@@ -145,5 +200,7 @@ export const useChatManager = () => {
     refreshChatRooms,
     updateChatRoomStatus,
     refetchChatRooms,
+    addNewChatRoom,
+    updateChatRoomWithMessage,
   };
 };

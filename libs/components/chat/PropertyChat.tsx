@@ -1,207 +1,168 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useQuery, useMutation } from '@apollo/client';
-import { useChatSubscriptions } from '../../hooks/useChatSubscriptions';
+import React, { useState, useEffect, useRef } from 'react';
+import { useMutation, useQuery } from '@apollo/client';
+import { CREATE_CHAT_ROOM, SEND_MESSAGE } from '../../../apollo/user/mutation';
 import { GET_CHAT_MESSAGES } from '../../../apollo/user/query';
-import { SEND_MESSAGE } from '../../../apollo/user/mutation';
+import { useChatSubscriptions } from '../../hooks/useChatSubscriptions';
 import { ChatMessage } from '../../types/chat/chat';
 import {
   Box,
+  Typography,
   TextField,
   Button,
-  Typography,
+  IconButton,
   Paper,
   Avatar,
+  Divider,
   CircularProgress,
-  Alert,
-  IconButton,
+  useTheme,
+  useMediaQuery
 } from '@mui/material';
 import {
   Send as SendIcon,
-  ArrowBack as ArrowBackIcon,
-  KeyboardArrowUp as KeyboardArrowUpIcon,
+  Close as CloseIcon,
+  Chat as ChatIcon
 } from '@mui/icons-material';
+import { format } from 'date-fns';
+import { ko } from 'date-fns/locale';
 
 interface PropertyChatProps {
   propertyId: string;
-  roomId?: string;
-  propertyTitle?: string;
-  propertyImage?: string;
-  onBack?: () => void;
-  onMessageSent?: (message: ChatMessage) => void;
-}
-
-interface MessageGroup {
-  senderId: string;
-  isAgent: boolean;
-  messages: ChatMessage[];
-  timestamp: Date;
+  propertyTitle: string;
+  onClose: () => void;
+  isMobile: boolean;
+  onChatRoomCreated?: (roomId: string) => void; // 채팅방 생성 콜백 추가
+  onMessageSent?: (message: ChatMessage) => void; // 메시지 전송 콜백 추가
 }
 
 const PropertyChat: React.FC<PropertyChatProps> = ({
   propertyId,
-  roomId,
   propertyTitle,
-  propertyImage,
-  onBack,
-  onMessageSent,
+  onClose,
+  isMobile,
+  onChatRoomCreated,
+  onMessageSent
 }) => {
+  const theme = useTheme();
+  const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
+  
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [messageGroups, setMessageGroups] = useState<MessageGroup[]>([]);
   const [newMessage, setNewMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [hasMoreMessages, setHasMoreMessages] = useState(true);
+  const [chatRoomId, setChatRoomId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [sending, setSending] = useState(false);
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const messagesContainerRef = useRef<HTMLDivElement>(null);
-  const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  // 채팅 메시지 조회
+  // 채팅방 생성 mutation
+  const [createChatRoom] = useMutation(CREATE_CHAT_ROOM);
+  
+  // 메시지 전송 mutation
+  const [sendMessage] = useMutation(SEND_MESSAGE);
+
+  // 채팅방 메시지 조회
   const { data: messagesData, loading: messagesLoading, refetch: refetchMessages } = useQuery(GET_CHAT_MESSAGES, {
-    variables: { input: { roomId: roomId || '', page: currentPage, limit: 20 } },
-    skip: !roomId,
-  });
-
-  // 메시지 전송 뮤테이션
-  const [sendMessage, { loading: sendingMessage }] = useMutation(SEND_MESSAGE, {
-    onCompleted: (data) => {
-      setNewMessage('');
-      refetchMessages();
-      
-      // 부모 컴포넌트에 메시지 전송 알림
-      if (data?.sendMessage && onMessageSent) {
-        onMessageSent(data.sendMessage);
-      }
+    variables: { 
+      input: { 
+        roomId: chatRoomId,
+        page: 1, 
+        limit: 100 
+      } 
     },
-    onError: (error) => {
-      console.error('메시지 전송 실패:', error);
-      setIsLoading(false);
-    },
+    skip: !chatRoomId,
   });
 
   // GraphQL Subscription 사용
   const { onMessageSent: onSubscriptionMessageSent } = useChatSubscriptions({
-    roomId,
     onMessageSent: (message: ChatMessage) => {
-      console.log('새 메시지 수신:', message);
-      setMessages(prev => [...prev, message]);
-      setShouldAutoScroll(true);
-      scrollToBottom();
+      if (message.roomId === chatRoomId) {
+        setMessages(prev => [...prev, message]);
+        scrollToBottom();
+        
+        // 부모 컴포넌트에 메시지 전송 알림
+        onMessageSent?.(message);
+      }
     },
   });
 
-  // 메시지를 그룹으로 묶는 함수
-  const groupMessages = useCallback((messages: ChatMessage[]): MessageGroup[] => {
-    if (!messages.length) return [];
-    
-    const groups: MessageGroup[] = [];
-    let currentGroup: MessageGroup | null = null;
-    
-    // 시간 순서대로 정렬 (오래된 메시지부터)
-    const sortedMessages = [...messages].sort((a, b) => 
-      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-    );
-    
-    sortedMessages.forEach((message) => {
-      const messageTime = new Date(message.createdAt);
-      
-      // 새로운 그룹을 시작하는 조건
-      if (!currentGroup || 
-          currentGroup.senderId !== message.senderId ||
-          messageTime.getTime() - currentGroup.timestamp.getTime() > 5 * 60 * 1000) { // 5분 이상 차이나면 새 그룹
+  // 채팅방 생성 또는 기존 채팅방 찾기
+  useEffect(() => {
+    const initializeChat = async () => {
+      setLoading(true);
+      try {
+        // 기존 채팅방이 있는지 확인하고, 없으면 새로 생성
+        const result = await createChatRoom({
+          variables: {
+            input: {
+              roomType: 'PROPERTY_INQUIRY',
+              propertyId: propertyId
+            }
+          }
+        });
         
-        currentGroup = {
-          senderId: message.senderId,
-          isAgent: message.isAgent,
-          messages: [message],
-          timestamp: messageTime,
-        };
-        groups.push(currentGroup);
-      } else {
-        // 기존 그룹에 메시지 추가
-        currentGroup.messages.push(message);
+        const roomId = result.data?.createChatRoom?._id;
+        if (roomId) {
+          setChatRoomId(roomId);
+          
+          // 부모 컴포넌트에 채팅방 생성 알림
+          onChatRoomCreated?.(roomId);
+          
+          console.log('채팅방 생성 완료:', roomId);
+        }
+      } catch (error) {
+        console.error('채팅방 생성 실패:', error);
+      } finally {
+        setLoading(false);
       }
-    });
-    
-    return groups;
-  }, []);
+    };
+
+    if (propertyId) {
+      initializeChat();
+    }
+  }, [propertyId, createChatRoom, onChatRoomCreated]);
 
   // 메시지 데이터 처리
   useEffect(() => {
     if (messagesData?.getChatMessages?.list) {
-      const newMessages = messagesData.getChatMessages.list;
-      
-      if (currentPage === 1) {
-        // 첫 페이지 로드
-        setMessages(newMessages);
-        setHasMoreMessages(newMessages.length === 20);
-      } else {
-        // 추가 페이지 로드 (기존 메시지 앞에 추가)
-        setMessages(prev => [...newMessages, ...prev]);
-        setHasMoreMessages(newMessages.length === 20);
-      }
+      const chatMessages = messagesData.getChatMessages.list;
+      setMessages(chatMessages);
+      scrollToBottom();
     }
-  }, [messagesData, currentPage]);
+  }, [messagesData]);
 
-  // 메시지 그룹 업데이트
-  useEffect(() => {
-    setMessageGroups(groupMessages(messages));
-  }, [messages, groupMessages]);
-
-  // 스크롤을 맨 아래로 이동
+  // 자동 스크롤
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // 스크롤 위치 감지
-  const handleScroll = useCallback(() => {
-    if (!messagesContainerRef.current) return;
-    
-    const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
-    const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
-    
-    setShouldAutoScroll(isNearBottom);
-    
-    // 맨 위에 도달했을 때 과거 메시지 로드
-    if (scrollTop === 0 && hasMoreMessages && !isLoadingMore) {
-      loadMoreMessages();
-    }
-  }, [hasMoreMessages, isLoadingMore]);
-
-  // 과거 메시지 로드
-  const loadMoreMessages = async () => {
-    if (isLoadingMore || !hasMoreMessages) return;
-    
-    setIsLoadingMore(true);
-    setCurrentPage(prev => prev + 1);
-    setIsLoadingMore(false);
-  };
-
-  useEffect(() => {
-    if (shouldAutoScroll) {
-      scrollToBottom();
-    }
-  }, [messageGroups, shouldAutoScroll]);
-
-  // 메시지 전송 핸들러
+  // 메시지 전송
   const handleSendMessage = async () => {
-    if (!newMessage.trim() || !roomId || sendingMessage) return;
+    if (!newMessage.trim() || !chatRoomId || sending) return;
 
-    setIsLoading(true);
+    setSending(true);
     try {
-      await sendMessage({
+      const result = await sendMessage({
         variables: {
           input: {
-            roomId,
+            roomId: chatRoomId,
             content: newMessage.trim(),
-            messageType: 'TEXT',
-          },
-        },
+            messageType: 'TEXT'
+          }
+        }
       });
+      
+      const sentMessage = result.data?.sendMessage;
+      if (sentMessage) {
+        // 부모 컴포넌트에 메시지 전송 알림
+        onMessageSent?.(sentMessage);
+      }
+      
+      setNewMessage('');
+      refetchMessages();
     } catch (error) {
-      console.error('메시지 전송 중 오류:', error);
+      console.error('메시지 전송 실패:', error);
     } finally {
-      setIsLoading(false);
+      setSending(false);
     }
   };
 
@@ -213,230 +174,205 @@ const PropertyChat: React.FC<PropertyChatProps> = ({
     }
   };
 
-  if (messagesLoading) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" height="400px">
-        <CircularProgress />
-      </Box>
-    );
-  }
+  // 메시지 시간 포맷팅
+  const formatMessageTime = (timestamp: string) => {
+    try {
+      return format(new Date(timestamp), 'HH:mm', { locale: ko });
+    } catch {
+      return '';
+    }
+  };
+
+  // 현재 사용자 ID (실제로는 인증된 사용자 정보에서 가져와야 함)
+  const currentUserId = 'current-user-id'; // 임시 값
 
   return (
     <Box sx={{ 
-      height: '600px', 
       display: 'flex', 
       flexDirection: 'column',
-      border: '1px solid #ddd',
-      borderRadius: 2,
-      overflow: 'hidden'
+      height: '100%',
+      backgroundColor: '#f8f9fa'
     }}>
-      {/* 헤더 */}
-      <Box sx={{ 
-        p: 2, 
-        borderBottom: '1px solid #ddd', 
-        bgcolor: '#f5f5f5',
+      {/* 채팅 헤더 */}
+      <Box sx={{
         display: 'flex',
         alignItems: 'center',
-        gap: 2
+        justifyContent: 'space-between',
+        padding: 2,
+        backgroundColor: 'white',
+        borderBottom: '1px solid #e0e0e0',
+        minHeight: 64
       }}>
-        {onBack && (
-          <Button
-            startIcon={<ArrowBackIcon />}
-            onClick={onBack}
-            variant="text"
-            size="small"
-          >
-            뒤로
-          </Button>
-        )}
-        
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flex: 1 }}>
-          {propertyImage && (
-            <Avatar 
-              src={propertyImage} 
-              sx={{ width: 32, height: 32 }}
-            />
-          )}
-          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-            {propertyTitle || '매물 문의'}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <ChatIcon sx={{ color: '#667eea' }} />
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            {propertyTitle}
           </Typography>
         </Box>
+        <IconButton onClick={onClose} size="small">
+          <CloseIcon />
+        </IconButton>
       </Box>
 
-      {/* 메시지 목록 */}
-      <Box 
-        ref={messagesContainerRef}
-        sx={{ 
-          flex: 1, 
-          overflow: 'auto', 
-          bgcolor: '#fafafa',
-          position: 'relative'
-        }}
-        onScroll={handleScroll}
-      >
-        {/* 과거 메시지 로딩 표시 */}
-        {isLoadingMore && (
-          <Box sx={{ p: 2, textAlign: 'center' }}>
-            <CircularProgress size={20} />
+      {/* 메시지 영역 */}
+      <Box sx={{
+        flex: 1,
+        overflow: 'auto',
+        padding: 2,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 1
+      }}>
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+            <CircularProgress />
           </Box>
-        )}
-        
-        {messageGroups.length === 0 ? (
-          <Box display="flex" justifyContent="center" alignItems="center" height="100%">
-            <Typography color="text.secondary">
-              아직 메시지가 없습니다. 첫 메시지를 보내보세요!
+        ) : messages.length === 0 ? (
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            height: '100%',
+            color: '#666'
+          }}>
+            <ChatIcon sx={{ fontSize: 48, mb: 2, opacity: 0.5 }} />
+            <Typography variant="body1" sx={{ mb: 1 }}>
+              채팅을 시작해보세요
+            </Typography>
+            <Typography variant="body2" sx={{ opacity: 0.7 }}>
+              매물에 대한 문의사항을 자유롭게 물어보세요
             </Typography>
           </Box>
         ) : (
-          <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {messageGroups.map((group, groupIndex) => (
+          messages.map((message) => {
+            const isMyMessage = message.senderId === currentUserId;
+            
+            return (
               <Box
-                key={`${group.senderId}-${group.timestamp.getTime()}`}
+                key={message._id}
                 sx={{
                   display: 'flex',
-                  justifyContent: group.isAgent ? 'flex-start' : 'flex-end',
-                  flexDirection: 'column',
+                  justifyContent: isMyMessage ? 'flex-end' : 'flex-start',
+                  mb: 1
                 }}
               >
-                {/* 시간 표시 */}
-                <Box sx={{ 
-                  textAlign: 'center', 
-                  mb: 1,
-                  mx: 'auto'
+                <Box sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  maxWidth: '70%',
+                  alignItems: isMyMessage ? 'flex-end' : 'flex-start'
                 }}>
-                  <Typography 
-                    variant="caption" 
-                    sx={{ 
-                      bgcolor: 'rgba(0,0,0,0.1)', 
-                      px: 1, 
-                      py: 0.5, 
-                      borderRadius: 1,
-                      fontSize: '0.7rem',
-                      color: 'text.secondary'
+                  {/* 메시지 내용 */}
+                  <Paper
+                    elevation={1}
+                    sx={{
+                      padding: 1.5,
+                      backgroundColor: isMyMessage ? '#667eea' : 'white',
+                      color: isMyMessage ? 'white' : 'text.primary',
+                      borderRadius: 2,
+                      borderTopRightRadius: isMyMessage ? 0 : 2,
+                      borderTopLeftRadius: isMyMessage ? 2 : 0,
+                      wordBreak: 'break-word',
+                      position: 'relative',
+                      '&::before': isMyMessage ? {
+                        content: '""',
+                        position: 'absolute',
+                        top: 0,
+                        right: -8,
+                        width: 0,
+                        height: 0,
+                        borderLeft: '8px solid #667eea',
+                        borderTop: '8px solid transparent'
+                      } : {
+                        content: '""',
+                        position: 'absolute',
+                        top: 0,
+                        left: -8,
+                        width: 0,
+                        height: 0,
+                        borderRight: '8px solid white',
+                        borderTop: '8px solid transparent'
+                      }
                     }}
                   >
-                    {group.timestamp.toLocaleDateString()} {group.timestamp.toLocaleTimeString()}
+                    <Typography variant="body2">
+                      {message.content}
+                    </Typography>
+                  </Paper>
+                  
+                  {/* 메시지 시간 */}
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      mt: 0.5,
+                      color: '#666',
+                      fontSize: '0.75rem'
+                    }}
+                  >
+                    {formatMessageTime(message.createdAt)}
                   </Typography>
                 </Box>
-                
-                {/* 메시지 그룹 */}
-                <Box sx={{ 
-                  display: 'flex', 
-                  alignItems: 'flex-end', 
-                  gap: 1, 
-                  maxWidth: '70%',
-                  alignSelf: group.isAgent ? 'flex-start' : 'flex-end',
-                  flexDirection: group.isAgent ? 'row' : 'row-reverse'
-                }}>
-                  {/* 아바타 (첫 번째 메시지에만 표시) */}
-                  {group.isAgent && (
-                    <Avatar sx={{ 
-                      width: 32, 
-                      height: 32, 
-                      bgcolor: '#4caf50', 
-                      fontSize: '0.8rem',
-                      alignSelf: 'flex-end',
-                      mb: 0.5
-                    }}>
-                      A
-                    </Avatar>
-                  )}
-                  
-                  {/* 메시지들 */}
-                  <Box sx={{ 
-                    display: 'flex', 
-                    flexDirection: 'column', 
-                    gap: 0.5,
-                    alignItems: group.isAgent ? 'flex-start' : 'flex-end'
-                  }}>
-                    {group.messages.map((message, messageIndex) => (
-                      <Paper
-                        key={message._id}
-                        sx={{
-                          p: 1.5,
-                          backgroundColor: group.isAgent ? '#e3f2fd' : '#FF9500',
-                          color: group.isAgent ? '#333' : 'white',
-                          boxShadow: 1,
-                          maxWidth: '100%',
-                          // 연속된 메시지 스타일링
-                          borderRadius: messageIndex === 0 ? 2 : 
-                                       messageIndex === group.messages.length - 1 ? 2 : 1,
-                          borderTopLeftRadius: group.isAgent && messageIndex > 0 ? 4 : undefined,
-                          borderTopRightRadius: !group.isAgent && messageIndex > 0 ? 4 : undefined,
-                          borderBottomLeftRadius: group.isAgent && messageIndex < group.messages.length - 1 ? 4 : undefined,
-                          borderBottomRightRadius: !group.isAgent && messageIndex < group.messages.length - 1 ? 4 : undefined,
-                        }}
-                      >
-                        <Typography variant="body2" sx={{ wordBreak: 'break-word' }}>
-                          {message.content}
-                        </Typography>
-                      </Paper>
-                    ))}
-                  </Box>
-                  
-                  {/* 아바타 (첫 번째 메시지에만 표시) */}
-                  {!group.isAgent && (
-                    <Avatar sx={{ 
-                      width: 32, 
-                      height: 32, 
-                      bgcolor: '#FF9500', 
-                      fontSize: '0.8rem',
-                      alignSelf: 'flex-end',
-                      mb: 0.5
-                    }}>
-                      나
-                    </Avatar>
-                  )}
-                </Box>
               </Box>
-            ))}
-            <div ref={messagesEndRef} />
-          </Box>
+            );
+          })
         )}
+        <div ref={messagesEndRef} />
       </Box>
 
-      {/* 메시지 입력 */}
-      <Box sx={{ 
-        p: 2, 
-        borderTop: '1px solid #ddd', 
-        bgcolor: 'white',
-        display: 'flex',
-        gap: 1,
-        alignItems: 'flex-end'
+      {/* 메시지 입력 영역 */}
+      <Box sx={{
+        padding: 2,
+        backgroundColor: 'white',
+        borderTop: '1px solid #e0e0e0'
       }}>
-        <TextField
-          fullWidth
-          multiline
-          maxRows={3}
-          placeholder="메시지를 입력하세요..."
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          onKeyPress={handleKeyPress}
-          variant="outlined"
-          size="small"
-          disabled={sendingMessage || isLoading}
-        />
-        <Button
-          variant="contained"
-          onClick={handleSendMessage}
-          disabled={!newMessage.trim() || sendingMessage || isLoading}
-          endIcon={<SendIcon />}
-          sx={{
-            bgcolor: '#FF9500',
-            '&:hover': { bgcolor: '#FF6B00' },
-            minWidth: '80px'
-          }}
-        >
-          전송
-        </Button>
-      </Box>
-
-      {/* 로딩 상태 표시 */}
-      {(sendingMessage || isLoading) && (
-        <Box sx={{ p: 1, textAlign: 'center' }}>
-          <CircularProgress size={20} />
+        <Box sx={{
+          display: 'flex',
+          gap: 1,
+          alignItems: 'flex-end'
+        }}>
+          <TextField
+            ref={inputRef}
+            fullWidth
+            multiline
+            maxRows={4}
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder="메시지를 입력하세요..."
+            variant="outlined"
+            size="small"
+            disabled={sending}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2
+              }
+            }}
+          />
+          <Button
+            variant="contained"
+            onClick={handleSendMessage}
+            disabled={!newMessage.trim() || sending}
+            sx={{
+              minWidth: 48,
+              height: 40,
+              backgroundColor: '#667eea',
+              '&:hover': {
+                backgroundColor: '#5a6fd8'
+              },
+              '&:disabled': {
+                backgroundColor: '#ccc'
+              }
+            }}
+          >
+            {sending ? (
+              <CircularProgress size={20} color="inherit" />
+            ) : (
+              <SendIcon fontSize="small" />
+            )}
+          </Button>
         </Box>
-      )}
+      </Box>
     </Box>
   );
 };

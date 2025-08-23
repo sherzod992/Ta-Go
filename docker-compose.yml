@@ -4,10 +4,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        BUILD_DATE: ${BUILD_DATE:-$(date -u +'%Y-%m-%dT%H:%M:%SZ')}
     container_name: ta-go-frontend
     restart: unless-stopped
     ports:
-      - "3011:80"  # 프론트엔드 포트
+      - "3011:3011"  # 프론트엔드 포트
     environment:
       - NEXT_PUBLIC_API_URL=http://72.60.40.57:3000/graphql
       - NEXT_PUBLIC_API_WS=ws://72.60.40.57:3000/graphql
