@@ -29,7 +29,7 @@ const HeroSection: React.FC = () => {
   const { t } = useTranslation('common');
   const router = useRouter();
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [brand, setBrand] = useState('all');
   const [keyword, setKeyword] = useState('');
   const [location, setLocation] = useState('all');
