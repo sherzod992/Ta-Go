@@ -26,7 +26,13 @@ const useDeviceDetect = (): DeviceInfo => {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {
         const userAgent = navigator.userAgent;
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+        const isMobileUserAgent = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+        
+        // 화면 크기 기반 모바일 감지 (768px 이하를 모바일로 간주)
+        const isMobileScreen = window.innerWidth <= 768;
+        
+        // User Agent 또는 화면 크기 중 하나라도 모바일이면 모바일로 판단
+        const isMobile = isMobileUserAgent || isMobileScreen;
         
         setDeviceInfo({
           isMobile,

@@ -107,45 +107,24 @@ const TopMobile: React.FC = () => {
   return (
     <>
       {/* 모바일 Top 네비게이션 */}
-      <Box component="nav" className="top-mobile" sx={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 16px',
-        height: '60px',
-        backgroundColor: 'white',
-        borderBottom: '1px solid #e0e0e0',
-        position: 'sticky',
-        top: 0,
-        zIndex: 1000,
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-      }}>
+      <Box component="nav" className="top-mobile">
         {/* 왼쪽: 햄버거 메뉴 버튼 */}
-        <Box sx={{ flex: 1, display: 'flex', justifyContent: 'flex-start' }}>
+        <Box className="hamburger-section">
           <IconButton
+            className="hamburger-button"
             onClick={handleDrawerToggle}
-            sx={{
-              color: '#333',
-              '&:hover': {
-                backgroundColor: 'rgba(0,0,0,0.04)'
-              }
-            }}
           >
             <MenuIcon />
           </IconButton>
         </Box>
 
         {/* 중앙: 로고 */}
-        <Box sx={{ flex: 2, display: 'flex', justifyContent: 'center' }}>
+        <Box className="logo-section">
           <Link href="/" style={{ textDecoration: 'none', color: 'inherit' }}>
             <Typography 
               variant="h6" 
               component="div" 
-              sx={{ 
-                fontWeight: 'bold',
-                color: '#667eea',
-                fontSize: '1.5rem'
-              }}
+              className="logo"
             >
               ta-Go
             </Typography>
@@ -153,18 +132,13 @@ const TopMobile: React.FC = () => {
         </Box>
 
         {/* 오른쪽: 언어 선택 + 로그인 */}
-        <Box sx={{ flex: 1, display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+        <Box className="right-section">
           {/* 언어 선택 버튼 */}
           <IconButton 
+            className="language-selector"
             onClick={handleLanguageMenu}
-            sx={{
-              color: '#333',
-              '&:hover': {
-                backgroundColor: 'rgba(0,0,0,0.04)'
-              }
-            }}
           >
-            <span style={{ fontSize: '1.2rem' }}>{currentLanguage.flag}</span>
+            <span className="flag">{currentLanguage.flag}</span>
           </IconButton>
           
           {/* 로그인/사용자 버튼 */}
@@ -173,11 +147,7 @@ const TopMobile: React.FC = () => {
               <Avatar 
                 src={user.memberImage} 
                 alt={user.memberNick} 
-                sx={{ 
-                  width: 32, 
-                  height: 32,
-                  cursor: 'pointer'
-                }} 
+                className="user-avatar"
               />
             </Link>
           ) : (
@@ -186,11 +156,7 @@ const TopMobile: React.FC = () => {
                 variant="contained" 
                 color="primary" 
                 size="small"
-                sx={{
-                  fontSize: '0.8rem',
-                  padding: '4px 12px',
-                  minWidth: 'auto'
-                }}
+                className="login-button"
               >
                 {t('Login')}
               </Button>
@@ -204,44 +170,39 @@ const TopMobile: React.FC = () => {
         anchor="left"
         open={drawerOpen}
         onClose={handleDrawerToggle}
-        sx={{
-          '& .MuiDrawer-paper': {
-            width: 280,
-            boxSizing: 'border-box',
-          },
-        }}
+        className="mobile-drawer"
       >
-        <Box sx={{ width: 280, padding: 2 }}>
+        <Box className="drawer-content">
           {/* 사용자 정보 섹션 */}
           {user?._id ? (
-            <Box sx={{ padding: 2, borderBottom: '1px solid #e0e0e0', marginBottom: 2 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, marginBottom: 1 }}>
+            <Box className="user-section">
+              <Box className="user-info">
                 <Avatar 
                   src={user.memberImage} 
                   alt={user.memberNick}
-                  sx={{ width: 48, height: 48 }}
+                  className="user-avatar"
                 />
-                                 <Box>
-                   <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                     {user.memberNick || t('User')}
-                   </Typography>
-                   <Typography variant="body2" color="text.secondary">
-                     {user.memberPhone}
-                   </Typography>
-                 </Box>
+                <Box className="user-details">
+                  <Typography variant="subtitle1" className="user-name">
+                    {user.memberNick || t('User')}
+                  </Typography>
+                  <Typography variant="body2" className="user-phone">
+                    {user.memberPhone}
+                  </Typography>
+                </Box>
               </Box>
               <Button 
                 variant="outlined" 
                 color="error" 
                 size="small" 
                 onClick={handleLogout}
-                fullWidth
+                className="logout-button"
               >
                 {t('Logout')}
               </Button>
             </Box>
           ) : (
-            <Box sx={{ padding: 2, borderBottom: '1px solid #e0e0e0', marginBottom: 2 }}>
+            <Box className="user-section">
               <Typography variant="h6" sx={{ marginBottom: 2 }}>
                 {t('Welcome')}
               </Typography>
@@ -259,28 +220,20 @@ const TopMobile: React.FC = () => {
           )}
 
           {/* 메뉴 아이템들 */}
-          <List>
+          <List className="menu-list">
             {menuItems.map((item, index) => (
               <React.Fragment key={item.text}>
                 <ListItem 
                   button 
+                  className="menu-item"
                   onClick={() => handleMenuItemClick(item.href)}
-                  sx={{
-                    borderRadius: 1,
-                    marginBottom: 0.5,
-                    '&:hover': {
-                      backgroundColor: 'rgba(102, 126, 234, 0.1)'
-                    }
-                  }}
                 >
-                  <Box sx={{ marginRight: 2, color: '#667eea' }}>
+                  <Box className="menu-icon">
                     {item.icon}
                   </Box>
                   <ListItemText 
                     primary={item.text} 
-                    primaryTypographyProps={{
-                      sx: { fontWeight: 500 }
-                    }}
+                    className="menu-text"
                   />
                 </ListItem>
                 {index < menuItems.length - 1 && <Divider />}
