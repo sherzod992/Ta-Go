@@ -394,18 +394,18 @@ const HeroSection: React.FC = () => {
               )}
             </Box>
 
-            {/* 검색 조건 영역 - PC에서는 세로로, 모바일에서는 가로로 정렬 */}
+            {/* 검색 조건 영역 - 모든 디바이스에서 2개씩 배치 */}
             <Box sx={{ 
               display: 'flex', 
-              flexDirection: { xs: 'row', md: 'column' },
-              gap: { xs: 1, md: 2 },
+              flexDirection: 'row',
+              gap: 2,
               marginBottom: 2,
-              flexWrap: { xs: 'wrap', md: 'nowrap' }
+              flexWrap: 'wrap'
             }}>
               {/* 브랜드 */}
               <FormControl sx={{ 
-                minWidth: { xs: 'calc(50% - 4px)', md: '100%' },
-                flex: { xs: '1 1 calc(50% - 4px)', md: 'none' }
+                minWidth: 'calc(50% - 8px)',
+                flex: '1 1 calc(50% - 8px)'
               }}>
                 <InputLabel sx={{ fontSize: { xs: '0.8rem', md: '1rem' } }}>{t('Brand')}</InputLabel>
                 <Select
@@ -432,15 +432,15 @@ const HeroSection: React.FC = () => {
                 onChange={(e) => setKeyword(e.target.value)}
                 size={isMobile ? 'small' : 'medium'}
                 sx={{ 
-                  minWidth: { xs: 'calc(50% - 4px)', md: '100%' },
-                  flex: { xs: '1 1 calc(50% - 4px)', md: 'none' }
+                  minWidth: 'calc(50% - 8px)',
+                  flex: '1 1 calc(50% - 8px)'
                 }}
               />
 
               {/* 위치 */}
               <FormControl sx={{ 
-                minWidth: { xs: 'calc(50% - 4px)', md: '100%' },
-                flex: { xs: '1 1 calc(50% - 4px)', md: 'none' }
+                minWidth: 'calc(50% - 8px)',
+                flex: '1 1 calc(50% - 8px)'
               }}>
                 <InputLabel sx={{ fontSize: { xs: '0.8rem', md: '1rem' } }}>{t('Location')}</InputLabel>
                 <Select
@@ -458,8 +458,8 @@ const HeroSection: React.FC = () => {
 
               {/* 컨디션 */}
               <FormControl sx={{ 
-                minWidth: { xs: 'calc(50% - 4px)', md: '100%' },
-                flex: { xs: '1 1 calc(50% - 4px)', md: 'none' }
+                minWidth: 'calc(50% - 8px)',
+                flex: '1 1 calc(50% - 8px)'
               }}>
                 <InputLabel sx={{ fontSize: { xs: '0.8rem', md: '1rem' } }}>{t('Condition')}</InputLabel>
                 <Select

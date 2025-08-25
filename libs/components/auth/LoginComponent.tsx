@@ -7,7 +7,9 @@ import {
   Paper, 
   Container,
   Alert,
-  CircularProgress
+  CircularProgress,
+  FormControlLabel,
+  Checkbox
 } from '@mui/material';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
@@ -23,6 +25,7 @@ const LoginComponent: React.FC = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [privacyAgreed, setPrivacyAgreed] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -39,6 +42,11 @@ const LoginComponent: React.FC = () => {
     
     if (!formData.nick || !formData.password) {
       setError('아이디와 비밀번호를 모두 입력해주세요.');
+      return;
+    }
+
+    if (!privacyAgreed) {
+      setError('개인정보 처리방침에 동의해주세요.');
       return;
     }
 
@@ -119,6 +127,23 @@ const LoginComponent: React.FC = () => {
               required
               disabled={loading}
               sx={{ mb: 3 }}
+            />
+
+            {/* 개인정보 동의 체크박스 */}
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={privacyAgreed}
+                  onChange={(e) => setPrivacyAgreed(e.target.checked)}
+                  disabled={loading}
+                />
+              }
+              label={
+                <Typography variant="body2" color="text.secondary">
+                  개인정보 처리방침에 동의합니다
+                </Typography>
+              }
+              sx={{ mb: 2 }}
             />
 
             <Button
