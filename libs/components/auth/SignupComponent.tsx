@@ -235,6 +235,7 @@ const SignupComponent: React.FC = () => {
               margin="normal"
               required
               disabled={loading}
+              autoComplete="username"
               error={!!validationErrors.nick}
               helperText={validationErrors.nick}
               sx={{ mb: 2 }}
@@ -251,6 +252,7 @@ const SignupComponent: React.FC = () => {
               margin="normal"
               required
               disabled={loading}
+              autoComplete="new-password"
               error={!!validationErrors.password}
               helperText={validationErrors.password || "최소 6자 이상"}
               sx={{ mb: 2 }}
@@ -267,6 +269,7 @@ const SignupComponent: React.FC = () => {
               margin="normal"
               required
               disabled={loading}
+              autoComplete="new-password"
               error={!!validationErrors.confirmPassword}
               helperText={validationErrors.confirmPassword}
               sx={{ mb: 2 }}
@@ -320,6 +323,7 @@ const SignupComponent: React.FC = () => {
                 margin="normal"
                 required
                 disabled={loading}
+                autoComplete="email"
                 error={!!validationErrors.email}
                 helperText={validationErrors.email}
                 sx={{ mb: 2 }}

@@ -112,6 +112,7 @@ const LoginComponent: React.FC = () => {
               margin="normal"
               required
               disabled={loading}
+              autoComplete="username"
               sx={{ mb: 2 }}
             />
             
@@ -126,6 +127,7 @@ const LoginComponent: React.FC = () => {
               margin="normal"
               required
               disabled={loading}
+              autoComplete="current-password"
               sx={{ mb: 3 }}
             />
 
