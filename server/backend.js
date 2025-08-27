@@ -7,13 +7,19 @@ const helmet = require('helmet');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// JSON 파서 먼저 설정
+// CORS 설정 (모든 origin 허용)
+app.use(cors({
+  origin: true,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-apollo-operation-name', 'apollo-require-preflight', 'x-requested-with', 'x-apollo-tracing']
+}));
+
+// JSON 파서 설정
 app.use(express.json());
 
 // Helmet 비활성화 (CORS 문제 해결을 위해)
 // app.use(helmet());
-
-// Apollo Server에서 CORS를 처리하므로 제거
 
 // GraphQL 스키마 정의
 const typeDefs = gql`
@@ -132,22 +138,7 @@ async function startServer() {
 
   server.applyMiddleware({
     app,
-    path: '/graphql',
-    cors: {
-      origin: true,  // 모든 origin 허용 (개발 중)
-      credentials: true,  // credentials 허용
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-      allowedHeaders: [
-        'Content-Type',
-        'Authorization',
-        'x-apollo-operation-name',
-        'apollo-require-preflight',
-        'x-requested-with',
-        'x-apollo-tracing'
-      ],
-      optionsSuccessStatus: 200,
-      maxAge: 86400
-    }
+    path: '/graphql'
   });
 
   app.listen(PORT, '0.0.0.0', () => {
