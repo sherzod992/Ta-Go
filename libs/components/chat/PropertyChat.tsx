@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useMutation, useQuery } from '@apollo/client';
-import { CREATE_CHAT_ROOM, SEND_MESSAGE } from '../../../apollo/user/mutation';
-import { GET_CHAT_MESSAGES } from '../../../apollo/user/query';
-import { useChatSubscriptions } from '../../hooks/useChatSubscriptions';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useReactiveVar } from '@apollo/client';
+import { useGlobalChat } from '../../hooks/useGlobalChat';
 import { ChatMessage } from '../../types/chat/chat';
+import { userVar } from '../../../apollo/store';
 import {
   Box,
   Typography,
@@ -44,91 +43,107 @@ const PropertyChat: React.FC<PropertyChatProps> = ({
 }) => {
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
+  const user = useReactiveVar(userVar);
   
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [chatRoomId, setChatRoomId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [sending, setSending] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // 채팅방 생성 mutation
-  const [createChatRoom] = useMutation(CREATE_CHAT_ROOM);
-  
-  // 메시지 전송 mutation
-  const [sendMessage] = useMutation(SEND_MESSAGE);
-
-  // 채팅방 메시지 조회
-  const { data: messagesData, loading: messagesLoading, refetch: refetchMessages } = useQuery(GET_CHAT_MESSAGES, {
-    variables: { 
-      input: { 
-        roomId: chatRoomId,
-        page: 1, 
-        limit: 100 
-      } 
-    },
-    skip: !chatRoomId,
-  });
-
-  // GraphQL Subscription 사용
-  const { onMessageSent: onSubscriptionMessageSent } = useChatSubscriptions({
-    onMessageSent: (message: ChatMessage) => {
-      if (message.roomId === chatRoomId) {
-        setMessages(prev => [...prev, message]);
-        scrollToBottom();
-        
-        // 부모 컴포넌트에 메시지 전송 알림
-        onMessageSent?.(message);
-      }
-    },
-  });
+  // 전역 채팅 훅 사용 (채팅방 ID가 있을 때만)
+  const {
+    messages,
+    loading,
+    errors,
+    sendMessage,
+    createChatRoom,
+    markAsRead,
+    sendTypingStatus,
+    chatRooms,
+  } = useGlobalChat(chatRoomId || undefined);
 
   // 채팅방 생성 또는 기존 채팅방 찾기
   useEffect(() => {
     const initializeChat = async () => {
-      setLoading(true);
+      // 사용자가 로그인하지 않은 경우 채팅방 생성하지 않음
+      if (!user?._id) {
+        console.log('사용자가 로그인하지 않음');
+        return;
+      }
+
+      // 이미 채팅방이 생성된 경우 중복 생성 방지
+      if (chatRoomId) {
+        console.log('이미 채팅방 ID가 설정됨:', chatRoomId);
+        return;
+      }
+
+      console.log('채팅방 초기화 시작:', { propertyId, chatRoomsCount: chatRooms.length });
+
+      // 기존 채팅방이 있는지 확인
+      const existingRoom = chatRooms.find(room => room.propertyId === propertyId);
+      if (existingRoom) {
+        setChatRoomId(existingRoom.roomId);
+        console.log('기존 채팅방 발견:', existingRoom.roomId);
+        return;
+      }
+
+      // 채팅방 목록이 로드되었지만 해당 매물의 채팅방이 없는 경우 새로 생성
+      // 채팅방 목록이 로드되었으면 (빈 배열이어도) 새 채팅방 생성
+      console.log('채팅방 목록 로드 완료, 새 채팅방 생성 시도');
       try {
-        // 기존 채팅방이 있는지 확인하고, 없으면 새로 생성
-        const result = await createChatRoom({
-          variables: {
-            input: {
-              roomType: 'PROPERTY_INQUIRY',
-              propertyId: propertyId
-            }
-          }
-        });
-        
-        const roomId = result.data?.createChatRoom?._id;
-        if (roomId) {
-          setChatRoomId(roomId);
-          
-          // 부모 컴포넌트에 채팅방 생성 알림
-          onChatRoomCreated?.(roomId);
-          
-          console.log('채팅방 생성 완료:', roomId);
-        }
+        console.log('새 채팅방 생성 시작');
+        await createChatRoom(propertyId);
+        console.log('채팅방 생성 완료');
       } catch (error) {
         console.error('채팅방 생성 실패:', error);
-      } finally {
-        setLoading(false);
       }
     };
 
-    if (propertyId) {
+    if (propertyId && !chatRoomId) {
       initializeChat();
     }
-  }, [propertyId, createChatRoom, onChatRoomCreated]);
+  }, [propertyId, user?._id, createChatRoom, chatRooms, chatRoomId]);
 
   // 메시지 데이터 처리
   useEffect(() => {
-    if (messagesData?.getChatMessages?.list) {
-      const chatMessages = messagesData.getChatMessages.list;
-      setMessages(chatMessages);
+    if (messages.length > 0) {
       scrollToBottom();
     }
-  }, [messagesData]);
+  }, [messages]);
+
+  // 새로 생성된 채팅방 ID 설정
+  useEffect(() => {
+    if (!chatRoomId && chatRooms.length > 0) {
+      const newRoom = chatRooms.find(room => room.propertyId === propertyId);
+      if (newRoom) {
+        setChatRoomId(newRoom.roomId);
+        console.log('새 채팅방 ID 설정:', newRoom.roomId);
+      }
+    }
+  }, [chatRooms, propertyId, chatRoomId]);
+
+  // 채팅방 목록이 변경될 때마다 해당 매물의 채팅방 확인
+  useEffect(() => {
+    if (chatRooms.length > 0 && propertyId) {
+      const targetRoom = chatRooms.find(room => room.propertyId === propertyId);
+      if (targetRoom && !chatRoomId) {
+        setChatRoomId(targetRoom.roomId);
+        console.log('채팅방 목록에서 채팅방 발견 및 ID 설정:', targetRoom.roomId);
+      }
+    }
+  }, [chatRooms, propertyId, chatRoomId]);
+
+  // 디버깅: 현재 상태 로그
+  useEffect(() => {
+    console.log('PropertyChat 상태:', {
+      chatRoomId,
+      propertyId,
+      messagesCount: messages.length,
+      loading: loading.messages,
+      chatRoomsCount: chatRooms.length
+    });
+  }, [chatRoomId, propertyId, messages.length, loading.messages, chatRooms.length]);
 
   // 자동 스크롤
   const scrollToBottom = () => {
@@ -137,32 +152,25 @@ const PropertyChat: React.FC<PropertyChatProps> = ({
 
   // 메시지 전송
   const handleSendMessage = async () => {
-    if (!newMessage.trim() || !chatRoomId || sending) return;
+    if (!newMessage.trim() || !chatRoomId || loading.messages) return;
 
-    setSending(true);
+    const messageContent = newMessage.trim();
+    
     try {
-      const result = await sendMessage({
-        variables: {
-          input: {
-            roomId: chatRoomId,
-            content: newMessage.trim(),
-            messageType: 'TEXT'
-          }
-        }
-      });
-      
-      const sentMessage = result.data?.sendMessage;
-      if (sentMessage) {
-        // 부모 컴포넌트에 메시지 전송 알림
-        onMessageSent?.(sentMessage);
-      }
-      
+      // 전역 상태를 통해 메시지 전송
+      await sendMessage(messageContent, 'TEXT');
       setNewMessage('');
-      refetchMessages();
+      
+      // 부모 컴포넌트에 메시지 전송 알림
+      if (onMessageSent) {
+        // 전역 상태에서 가장 최근 메시지를 찾아서 전달
+        const latestMessage = messages[messages.length - 1];
+        if (latestMessage) {
+          onMessageSent(latestMessage);
+        }
+      }
     } catch (error) {
       console.error('메시지 전송 실패:', error);
-    } finally {
-      setSending(false);
     }
   };
 
@@ -223,7 +231,37 @@ const PropertyChat: React.FC<PropertyChatProps> = ({
         flexDirection: 'column',
         gap: 1
       }}>
-        {loading ? (
+        {!user?._id ? (
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            height: '100%',
+            color: '#666',
+            textAlign: 'center',
+            p: 3
+          }}>
+            <ChatIcon sx={{ fontSize: 48, mb: 2, opacity: 0.5 }} />
+            <Typography variant="h6" sx={{ mb: 2 }}>
+              로그인이 필요합니다
+            </Typography>
+            <Typography variant="body1" sx={{ mb: 3, opacity: 0.8 }}>
+              채팅을 이용하려면 로그인해주세요
+            </Typography>
+            <Button 
+              variant="contained" 
+              color="primary"
+              onClick={() => window.location.href = '/login'}
+              sx={{ 
+                backgroundColor: '#667eea',
+                '&:hover': { backgroundColor: '#5a6fd8' }
+              }}
+            >
+              로그인하기
+            </Button>
+          </Box>
+        ) : loading.messages ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
             <CircularProgress />
           </Box>
@@ -320,59 +358,61 @@ const PropertyChat: React.FC<PropertyChatProps> = ({
         <div ref={messagesEndRef} />
       </Box>
 
-      {/* 메시지 입력 영역 */}
-      <Box sx={{
-        padding: 2,
-        backgroundColor: 'white',
-        borderTop: '1px solid #e0e0e0'
-      }}>
+      {/* 메시지 입력 영역 - 로그인한 사용자만 표시 */}
+      {user?._id && (
         <Box sx={{
-          display: 'flex',
-          gap: 1,
-          alignItems: 'flex-end'
+          padding: 2,
+          backgroundColor: 'white',
+          borderTop: '1px solid #e0e0e0'
         }}>
-          <TextField
-            ref={inputRef}
-            fullWidth
-            multiline
-            maxRows={4}
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="메시지를 입력하세요..."
-            variant="outlined"
-            size="small"
-            disabled={sending}
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                borderRadius: 2
-              }
-            }}
-          />
-          <Button
-            variant="contained"
-            onClick={handleSendMessage}
-            disabled={!newMessage.trim() || sending}
-            sx={{
-              minWidth: 48,
-              height: 40,
-              backgroundColor: '#667eea',
-              '&:hover': {
-                backgroundColor: '#5a6fd8'
-              },
-              '&:disabled': {
-                backgroundColor: '#ccc'
-              }
-            }}
-          >
-            {sending ? (
-              <CircularProgress size={20} color="inherit" />
-            ) : (
-              <SendIcon fontSize="small" />
-            )}
-          </Button>
+          <Box sx={{
+            display: 'flex',
+            gap: 1,
+            alignItems: 'flex-end'
+          }}>
+            <TextField
+              ref={inputRef}
+              fullWidth
+              multiline
+              maxRows={4}
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="메시지를 입력하세요..."
+              variant="outlined"
+              size="small"
+              disabled={loading.messages}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2
+                }
+              }}
+            />
+            <Button
+              variant="contained"
+              onClick={handleSendMessage}
+              disabled={!newMessage.trim() || loading.messages}
+              sx={{
+                minWidth: 48,
+                height: 40,
+                backgroundColor: '#667eea',
+                '&:hover': {
+                  backgroundColor: '#5a6fd8'
+                },
+                '&:disabled': {
+                  backgroundColor: '#ccc'
+                }
+              }}
+            >
+              {loading.messages ? (
+                <CircularProgress size={20} color="inherit" />
+              ) : (
+                <SendIcon fontSize="small" />
+              )}
+            </Button>
+          </Box>
         </Box>
-      </Box>
+      )}
     </Box>
   );
 };

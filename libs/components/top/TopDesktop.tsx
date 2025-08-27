@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Button, Typography, Menu, MenuItem, Avatar, Badge, IconButton, Tooltip } from '@mui/material';
-import Link from 'next/link';
+
 import { useTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
 import { useReactiveVar } from '@apollo/client';
@@ -103,33 +103,33 @@ const TopDesktop: React.FC = () => {
     <Box component="nav" className="top-pc">
       {/* Logo */}
       <Box className="logo">
-        <Link href="/">
+        <Box onClick={() => window.location.href = '/'} sx={{ cursor: 'pointer' }}>
           <Typography variant="h5" component="div">
             ta-Go
           </Typography>
-        </Link>
+        </Box>
       </Box>
 
       {/* Navigation Menu */}
       <Box className="navigation">
-        <Link href="/" className="nav-item">
+        <Box className="nav-item" onClick={() => window.location.href = '/'} sx={{ cursor: 'pointer' }}>
           {t('Home')}
-        </Link>
-        <Link href="/property?type=buy" className="nav-item">
+        </Box>
+        <Box className="nav-item" onClick={() => window.location.href = '/property?type=buy'} sx={{ cursor: 'pointer' }}>
           {t('Buy')}
-        </Link>
-        <Link href="/property?type=sell" className="nav-item">
+        </Box>
+        <Box className="nav-item" onClick={() => window.location.href = '/property?type=sell'} sx={{ cursor: 'pointer' }}>
           {t('Sell')}
-        </Link>
-        <Link href="/agent" className="nav-item">
+        </Box>
+        <Box className="nav-item" onClick={() => window.location.href = '/agent'} sx={{ cursor: 'pointer' }}>
           {t('Agents')}
-        </Link>
-        <Link href="/community?articleCategory=FREE" className="nav-item">
+        </Box>
+        <Box className="nav-item" onClick={() => window.location.href = '/community?articleCategory=FREE'} sx={{ cursor: 'pointer' }}>
           {t('Community')}
-        </Link>
-        <Link href="/cs" className="nav-item">
+        </Box>
+        <Box className="nav-item" onClick={() => window.location.href = '/cs'} sx={{ cursor: 'pointer' }}>
           {t('CS')}
-        </Link>
+        </Box>
         {user?.memberType === MemberType.ADMIN && (
           <Button
             className="nav-item admin-nav"
@@ -222,10 +222,11 @@ const TopDesktop: React.FC = () => {
                 horizontal: 'right',
               }}
             >
-              <MenuItem onClick={handleClose}>
-                <Link href="/mypage" style={{ textDecoration: 'none', color: 'inherit' }}>
-                  {t('My Profile')}
-                </Link>
+              <MenuItem onClick={() => {
+                handleClose();
+                window.location.href = '/mypage';
+              }}>
+                {t('My Profile')}
               </MenuItem>
               <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}>
                 {t('Logout')}
@@ -261,11 +262,14 @@ const TopDesktop: React.FC = () => {
         )}
       </Box>
         ) : (
-          <Link href="/login" className="login-button">
-            <Button variant="contained" color="primary">
-              {t('Login')}
-            </Button>
-          </Link>
+          <Button 
+            variant="contained" 
+            color="primary" 
+            className="login-button"
+            onClick={() => window.location.href = '/login'}
+          >
+            {t('Login')}
+          </Button>
         )}
       </Box>
     </Box>

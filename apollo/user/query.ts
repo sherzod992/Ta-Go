@@ -19,11 +19,6 @@ export const GET_AGENTS = gql`
             memberImage
             memberAddress
             memberDesc
-            socialId
-            socialProvider
-            socialAccessToken
-            socialRefreshToken
-            socialTokenExpiresAt
             memberProperties
             memberArticles
             memberFollowers
@@ -167,11 +162,6 @@ export const GET_PROPERTY = gql`
 				memberImage
 				memberAddress
 				memberDesc
-				socialId
-				socialProvider
-				socialAccessToken
-				socialRefreshToken
-				socialTokenExpiresAt
 				memberProperties
 				memberArticles
 				memberFollowers
@@ -239,11 +229,6 @@ export const GET_PROPERTIES = gql`
                 memberImage
                 memberAddress
                 memberDesc
-                socialId
-                socialProvider
-                socialAccessToken
-                socialRefreshToken
-                socialTokenExpiresAt
                 memberProperties
                 memberArticles
                 memberFollowers
@@ -430,11 +415,6 @@ export const GET_VISITED = gql`
 					memberImage
 					memberAddress
 					memberDesc
-					socialId
-					socialProvider
-					socialAccessToken
-					socialRefreshToken
-					socialTokenExpiresAt
 					memberProperties
 					memberArticles
 					memberFollowers
@@ -490,11 +470,6 @@ export const GET_BOARD_ARTICLE = gql`
             memberImage
             memberAddress
             memberDesc
-            socialId
-            socialProvider
-            socialAccessToken
-            socialRefreshToken
-            socialTokenExpiresAt
             memberProperties
             memberArticles
             memberFollowers
@@ -545,11 +520,6 @@ export const GET_BOARD_ARTICLES = gql`
 					memberImage
 					memberAddress
 					memberDesc
-					socialId
-					socialProvider
-					socialAccessToken
-					socialRefreshToken
-					socialTokenExpiresAt
 					memberProperties
 					memberArticles
 					memberFollowers
@@ -848,17 +818,12 @@ export const CHECK_CHAT_ROOM_EXISTS = gql`
 	}
 `;
 
-export const GET_ALL_USER_CHAT_ROOMS = gql`
-	query GetAllUserChatRooms($userId: String!) {
-		getAllUserChatRooms(userId: $userId) {
-			roomId
-			roomType
-			propertyId
-			status
-			createdAt
-		}
-	}
-`;
+// 백엔드에서 [String!]! 타입을 반환하므로 사용하지 않음
+// export const GET_ALL_USER_CHAT_ROOMS = gql`
+// 	query GetAllUserChatRooms {
+// 		getAllUserChatRooms
+// 	}
+// `;
 
 // 채팅방 목록 조회 쿼리 추가
 export const GET_CHAT_ROOMS = gql`

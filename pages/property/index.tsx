@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 import withLayoutBasic from '../../libs/components/layout/LayoutBasic';
 import useDeviceDetect from '../../libs/hooks/useDeviceDetect';
 import { useTranslation } from '../../libs/hooks/useTranslation';
+import LoadingSpinner from '../../libs/components/common/LoadingSpinner';
 
 const PropertyPage: NextPage = () => {
   const router = useRouter();
@@ -24,7 +25,13 @@ const PropertyPage: NextPage = () => {
   }, [type, router]);
 
   // 로딩 중 표시
-  return <div>{t('Redirecting...')}</div>;
+  return (
+    <LoadingSpinner
+      message={t('Redirecting...')}
+      fullScreen={true}
+      variant="dots"
+    />
+  );
 };
 
 export const getStaticProps: GetStaticProps = async () => {

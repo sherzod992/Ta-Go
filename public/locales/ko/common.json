@@ -415,5 +415,10 @@
   "New Bike Showroom": "신차 쇼룸",
   "Suggested bikes for you": "당신을 위한 추천 바이크",
   "Find Your Perfect Motorcycle": "완벽한 오토바이를 찾아보세요",
-  "Discover thousands of motorcycles from trusted sellers": "신뢰할 수 있는 판매자로부터 수천 대의 오토바이를 발견하세요"
+  "Discover thousands of motorcycles from trusted sellers": "신뢰할 수 있는 판매자로부터 수천 대의 오토바이를 발견하세요",
+  "Unknown": "알 수 없음",
+  "Loading chat list...": "채팅 목록을 불러오는 중...",
+  "No chat history yet": "아직 채팅 내역이 없습니다",
+  "No message": "메시지가 없습니다",
+  "{{count}} new messages": "{{count}}개의 새 메시지"
 } 

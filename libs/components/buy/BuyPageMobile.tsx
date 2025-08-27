@@ -51,6 +51,7 @@ import {
   ViewModule as ViewModuleIcon,
   Compare as CompareIcon,
   Close as CloseIcon,
+  Refresh as RefreshIcon,
 } from '@mui/icons-material';
 import { GET_PROPERTIES } from '../../../apollo/user/query';
 import {
@@ -420,7 +421,7 @@ const BuyPageMobile: React.FC = () => {
             />
           </Box>
 
-          {/* 바이크 보기 + 모두 지우기 버튼 - 한 줄에 나란히 배치 */}
+          {/* 바이크 보기 + 새로고침 버튼 - 한 줄에 나란히 배치 */}
           <Box sx={{ display: 'flex', gap: 2 }}>
             <Button
               variant="contained"
@@ -446,9 +447,16 @@ const BuyPageMobile: React.FC = () => {
                 });
                 setSelectedCategory('all');
               }}
-              sx={{ flex: 1 }}
+              sx={{ 
+                minWidth: 'auto',
+                px: 1,
+                '&:hover': {
+                  backgroundColor: 'secondary.main',
+                  color: 'white',
+                }
+              }}
             >
-              {t('Clear All')}
+              <RefreshIcon />
             </Button>
           </Box>
         </Paper>

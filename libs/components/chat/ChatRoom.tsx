@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useQuery, useMutation } from '@apollo/client';
-import { useChatSubscriptions } from '../../hooks/useChatSubscriptions';
-import { GET_CHAT_MESSAGES } from '../../../apollo/user/query';
-import { SEND_MESSAGE } from '../../../apollo/user/mutation';
-import { ChatMessage, ChatRoom as ChatRoomType } from '../../types/chat/chat';
+import { useGlobalChat } from '../../hooks/useGlobalChat';
+import { ChatMessage } from '../../types/chat/chat';
+import { ChatRoom as ChatRoomType } from '../../stores/chatStore';
 import {
   Box,
   TextField,
@@ -37,10 +35,8 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
   selectedRoom,
   onMessageSent,
 }) => {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [messageGroups, setMessageGroups] = useState<MessageGroup[]>([]);
   const [newMessage, setNewMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMoreMessages, setHasMoreMessages] = useState(true);
@@ -48,39 +44,16 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
 
-  // 채팅 메시지 조회
-  const { data: messagesData, loading: messagesLoading, refetch: refetchMessages } = useQuery(GET_CHAT_MESSAGES, {
-    variables: { input: { roomId: selectedRoom?.roomId || '', page: currentPage, limit: 20 } },
-    skip: !selectedRoom?.roomId,
-  });
-
-  // 메시지 전송 뮤테이션
-  const [sendMessage, { loading: sendingMessage }] = useMutation(SEND_MESSAGE, {
-    onCompleted: (data) => {
-      setNewMessage('');
-      refetchMessages();
-      
-      // 부모 컴포넌트에 메시지 전송 알림
-      if (data?.sendMessage && onMessageSent) {
-        onMessageSent(data.sendMessage);
-      }
-    },
-    onError: (error) => {
-      console.error('메시지 전송 실패:', error);
-      setIsLoading(false);
-    },
-  });
-
-  // GraphQL Subscription 사용
-  const { onMessageSent: onSubscriptionMessageSent } = useChatSubscriptions({
-    roomId: selectedRoom?.roomId,
-    onMessageSent: (message: ChatMessage) => {
-      console.log('새 메시지 수신:', message);
-      setMessages(prev => [...prev, message]);
-      setShouldAutoScroll(true);
-      scrollToBottom();
-    },
-  });
+  // 전역 채팅 훅 사용
+  const {
+    messages,
+    loading,
+    errors,
+    sendMessage,
+    markAsRead,
+    sendTypingStatus,
+    refetchMessages,
+  } = useGlobalChat(selectedRoom?.roomId || selectedRoom?._id);
 
   // 메시지를 그룹으로 묶는 함수 (카카오톡 스타일)
   const groupMessages = useCallback((messages: ChatMessage[]): MessageGroup[] => {
@@ -121,20 +94,10 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
 
   // 메시지 데이터 처리
   useEffect(() => {
-    if (messagesData?.getChatMessages?.list) {
-      const newMessages = messagesData.getChatMessages.list;
-      
-      if (currentPage === 1) {
-        // 첫 페이지 로드
-        setMessages(newMessages);
-        setHasMoreMessages(newMessages.length === 20);
-      } else {
-        // 추가 페이지 로드 (기존 메시지 앞에 추가)
-        setMessages(prev => [...newMessages, ...prev]);
-        setHasMoreMessages(newMessages.length === 20);
-      }
+    if (messages.length > 0) {
+      setHasMoreMessages(messages.length >= 20);
     }
-  }, [messagesData, currentPage]);
+  }, [messages]);
 
   // 메시지 그룹 업데이트
   useEffect(() => {
@@ -144,7 +107,6 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
   // 채팅방 변경 시 초기화
   useEffect(() => {
     if (selectedRoom) {
-      setMessages([]);
       setMessageGroups([]);
       setCurrentPage(1);
       setHasMoreMessages(true);
@@ -189,23 +151,22 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
 
   // 메시지 전송 핸들러
   const handleSendMessage = async () => {
-    if (!newMessage.trim() || !selectedRoom?.roomId || sendingMessage) return;
+    if (!newMessage.trim() || !selectedRoom?.roomId || loading.messages) return;
 
-    setIsLoading(true);
     try {
-      await sendMessage({
-        variables: {
-          input: {
-            roomId: selectedRoom.roomId,
-            content: newMessage.trim(),
-            messageType: 'TEXT',
-          },
-        },
-      });
+      await sendMessage(newMessage.trim(), 'TEXT');
+      setNewMessage('');
+      
+      // 부모 컴포넌트에 메시지 전송 알림
+      if (onMessageSent) {
+        // 전역 상태에서 가장 최근 메시지를 찾아서 전달
+        const latestMessage = messages[messages.length - 1];
+        if (latestMessage) {
+          onMessageSent(latestMessage);
+        }
+      }
     } catch (error) {
       console.error('메시지 전송 중 오류:', error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -234,7 +195,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
     );
   }
 
-  if (messagesLoading && currentPage === 1) {
+  if (loading.messages && currentPage === 1) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" height="100%">
         <CircularProgress />
@@ -511,7 +472,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
             onKeyPress={handleKeyPress}
             variant="standard"
             size="small"
-            disabled={sendingMessage || isLoading}
+            disabled={loading.messages}
             sx={{
               '& .MuiInputBase-root': {
                 border: 'none',
@@ -529,7 +490,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
         <Button
           variant="contained"
           onClick={handleSendMessage}
-          disabled={!newMessage.trim() || sendingMessage || isLoading}
+          disabled={!newMessage.trim() || loading.messages}
           sx={{
             bgcolor: newMessage.trim() ? '#FF9500' : '#e0e0e0',
             color: newMessage.trim() ? 'white' : '#999',
@@ -550,7 +511,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
       </Box>
 
       {/* 로딩 상태 표시 */}
-      {(sendingMessage || isLoading) && (
+      {loading.messages && (
         <Box sx={{ p: 1, textAlign: 'center' }}>
           <CircularProgress size={20} />
         </Box>

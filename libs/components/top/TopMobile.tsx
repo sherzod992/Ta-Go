@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Button, Typography, Menu, MenuItem, Avatar, IconButton, Drawer, List, ListItem, ListItemText, Divider } from '@mui/material';
-import Link from 'next/link';
+
 import { useTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
 import { useReactiveVar } from '@apollo/client';
@@ -101,7 +101,7 @@ const TopMobile: React.FC = () => {
 
   const handleMenuItemClick = (href: string) => {
     setDrawerOpen(false);
-    router.push(href);
+    window.location.href = href;
   };
 
   return (
@@ -135,7 +135,14 @@ const TopMobile: React.FC = () => {
         </IconButton>
 
         {/* 2. 로고 */}
-        <Link href="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+        <Box 
+          onClick={() => window.location.href = '/'} 
+          sx={{ 
+            textDecoration: 'none', 
+            color: 'inherit',
+            cursor: 'pointer'
+          }}
+        >
           <Typography 
             variant="h6" 
             component="div" 
@@ -148,7 +155,7 @@ const TopMobile: React.FC = () => {
           >
             ta-Go
           </Typography>
-        </Link>
+        </Box>
 
         {/* 3. 언어 선택 버튼 */}
         <IconButton 
@@ -166,36 +173,34 @@ const TopMobile: React.FC = () => {
         
         {/* 4. 로그인/사용자 버튼 */}
         {user?._id ? (
-          <Link href="/mypage">
-            <Avatar 
-              src={user.memberImage} 
-              alt={user.memberNick} 
-              sx={{
-                width: '32px',
-                height: '32px',
-                cursor: 'pointer'
-              }}
-            />
-          </Link>
+          <Avatar 
+            src={user.memberImage} 
+            alt={user.memberNick} 
+            onClick={() => window.location.href = '/mypage'}
+            sx={{
+              width: '32px',
+              height: '32px',
+              cursor: 'pointer'
+            }}
+          />
         ) : (
-          <Link href="/login">
-            <Button 
-              variant="contained" 
-              color="primary" 
-              size="small"
-              sx={{
-                padding: '4px 12px',
-                fontSize: '0.8rem',
-                fontWeight: 500,
-                textTransform: 'none',
-                borderRadius: '4px',
-                minWidth: 'auto',
-                height: '32px'
-              }}
-            >
-              {t('Login')}
-            </Button>
-          </Link>
+          <Button 
+            variant="contained" 
+            color="primary" 
+            size="small"
+            onClick={() => window.location.href = '/login'}
+            sx={{
+              padding: '4px 12px',
+              fontSize: '0.8rem',
+              fontWeight: 500,
+              textTransform: 'none',
+              borderRadius: '4px',
+              minWidth: 'auto',
+              height: '32px'
+            }}
+          >
+            {t('Login')}
+          </Button>
         )}
       </Box>
 
@@ -253,16 +258,17 @@ const TopMobile: React.FC = () => {
               <Typography variant="h6" sx={{ marginBottom: 2 }}>
                 {t('Welcome')}
               </Typography>
-              <Link href="/login" style={{ textDecoration: 'none' }}>
-                <Button 
-                  variant="contained" 
-                  color="primary" 
-                  fullWidth
-                  onClick={() => setDrawerOpen(false)}
-                >
-                  {t('Login')}
-                </Button>
-              </Link>
+              <Button 
+                variant="contained" 
+                color="primary" 
+                fullWidth
+                onClick={() => {
+                  setDrawerOpen(false);
+                  window.location.href = '/login';
+                }}
+              >
+                {t('Login')}
+              </Button>
             </Box>
           )}
 

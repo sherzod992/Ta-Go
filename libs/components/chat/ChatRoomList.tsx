@@ -14,7 +14,8 @@ import {
   Circle as CircleIcon,
   Home as HomeIcon,
 } from '@mui/icons-material';
-import { ChatRoom } from '../../types/chat/chat';
+import { ChatRoom } from '../../stores/chatStore';
+import { useTranslation } from '../../hooks/useTranslation';
 
 interface ChatRoomListProps {
   chatRooms: ChatRoom[];
@@ -31,6 +32,7 @@ const ChatRoomList: React.FC<ChatRoomListProps> = ({
   onlineUsers = new Set(),
   loading = false,
 }) => {
+  const { t } = useTranslation();
   // 시간 포맷팅 함수
   const formatTime = (dateString: string | null | undefined) => {
     if (!dateString) return '';
@@ -60,14 +62,14 @@ const ChatRoomList: React.FC<ChatRoomListProps> = ({
 
   // 메시지 내용 미리보기 (최대 30자)
   const getMessagePreview = (content: string | null | undefined) => {
-    if (!content) return '메시지가 없습니다';
+    if (!content) return t('No message');
     return content.length > 30 ? content.substring(0, 30) + '...' : content;
   };
 
   if (loading) {
     return (
       <Box sx={{ p: 2, textAlign: 'center' }}>
-        <Typography color="text.secondary">채팅 목록을 불러오는 중...</Typography>
+        <Typography color="text.secondary">{t('Loading chat list...')}</Typography>
       </Box>
     );
   }
@@ -76,7 +78,7 @@ const ChatRoomList: React.FC<ChatRoomListProps> = ({
     return (
       <Box sx={{ p: 4, textAlign: 'center' }}>
         <Typography color="text.secondary" variant="body2">
-          아직 채팅 내역이 없습니다
+          {t('No chat history yet')}
         </Typography>
       </Box>
     );
@@ -129,7 +131,7 @@ const ChatRoomList: React.FC<ChatRoomListProps> = ({
                         whiteSpace: 'nowrap'
                       }}
                     >
-                      {room.agentNickname || room.userNickname || '알 수 없음'}
+                      {room.agentNickname || room.userNickname || t('Unknown')}
                     </Typography>
                     
                     {/* 온라인 상태 */}

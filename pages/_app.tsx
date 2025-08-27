@@ -2,6 +2,7 @@ import type { AppProps } from 'next/app';
 import { ApolloProvider } from '@apollo/client';
 import { initializeApollo } from '../apollo/client';
 import { LanguageProvider } from '../libs/contexts/LanguageContext';
+import { LoadingProvider } from '../libs/contexts/LoadingContext';
 import Head from 'next/head';
 import '../scss/app.scss';
 import { useMemo, useEffect } from 'react';
@@ -13,6 +14,7 @@ import {
   initializeInfiniteLoopDetection
 } from '../libs/utils/security';
 import { appWithTranslation } from 'next-i18next';
+import GlobalLoading from '../libs/components/common/GlobalLoading';
 
 function App({ Component, pageProps }: AppProps) {
   // Apollo Client를 useMemo로 메모이제이션하여 안정성 확보
@@ -32,11 +34,14 @@ function App({ Component, pageProps }: AppProps) {
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
-      <LanguageProvider>
-        <ApolloProvider client={client}>
-          <Component {...pageProps} />
-        </ApolloProvider>
-      </LanguageProvider>
+      <LoadingProvider>
+        <LanguageProvider>
+          <ApolloProvider client={client}>
+            <GlobalLoading />
+            <Component {...pageProps} />
+          </ApolloProvider>
+        </LanguageProvider>
+      </LoadingProvider>
     </>
   );
 }

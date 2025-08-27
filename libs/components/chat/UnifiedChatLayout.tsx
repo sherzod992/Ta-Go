@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useQuery } from '@apollo/client';
-import { useChatSubscriptions } from '../../hooks/useChatSubscriptions';
-import { GET_CHAT_ROOMS } from '../../../apollo/user/query';
-import { ChatRoom as ChatRoomType, ChatMessage } from '../../types/chat/chat';
+import { useRouter } from 'next/router';
+import { useGlobalChat } from '../../hooks/useGlobalChat';
+import { ChatMessage } from '../../types/chat/chat';
+import { ChatRoom as ChatRoomType } from '../../stores/chatStore';
 import ChatRoomList from './ChatRoomList';
 import ChatRoom from './ChatRoom';
+import { useTranslation } from '../../hooks/useTranslation';
 import {
   Box,
   Typography,
@@ -17,7 +18,9 @@ import {
 import {
   Chat as ChatIcon,
   ArrowBack as ArrowBackIcon,
+  Home as HomeIcon,
 } from '@mui/icons-material';
+
 
 interface UnifiedChatLayoutProps {
   initialRoomId?: string;
@@ -30,83 +33,34 @@ const UnifiedChatLayout: React.FC<UnifiedChatLayoutProps> = ({
   propertyId,
   onBack,
 }) => {
+  const { t } = useTranslation();
+  const router = useRouter();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   
-  const [selectedRoomId, setSelectedRoomId] = useState<string | null>(initialRoomId || null);
-  const [chatRooms, setChatRooms] = useState<ChatRoomType[]>([]);
-  const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
   const [showChatRoom, setShowChatRoom] = useState(false); // 모바일용
 
-  // 채팅방 목록 조회
-  const { data: roomsData, loading: roomsLoading, refetch: refetchRooms } = useQuery(GET_CHAT_ROOMS, {
-    variables: { 
-      input: { 
-        page: 1, 
-        limit: 50,
-        status: 'ACTIVE',
-        roomType: propertyId ? 'PROPERTY_INQUIRY' : undefined
-      } 
-    },
-  });
+  // 전역 채팅 훅 사용
+  const {
+    chatRooms,
+    onlineUsers,
+    loading,
+    errors,
+    selectedRoomId,
+    selectRoom,
+    refetchRooms,
+  } = useGlobalChat();
 
-  // GraphQL Subscription 사용
-  const { onChatRoomUpdated, onUserOnlineStatus, onMessageSent } = useChatSubscriptions({
-    onChatRoomUpdated: (room: ChatRoomType) => {
-      console.log('채팅방 업데이트:', room);
-      setChatRooms(prev => {
-        const existingIndex = prev.findIndex(r => r._id === room._id);
-        if (existingIndex >= 0) {
-          // 기존 채팅방 업데이트 및 맨 위로 이동
-          const updated = [...prev];
-          updated[existingIndex] = room;
-          return [room, ...updated.filter((_, index) => index !== existingIndex)];
-        } else {
-          // 새 채팅방 추가
-          return [room, ...prev];
-        }
-      });
-    },
-    onUserOnlineStatus: (status: any) => {
-      console.log('사용자 온라인 상태:', status);
-      if (status.isOnline) {
-        setOnlineUsers(prev => new Set(prev).add(status.userId));
-      } else {
-        setOnlineUsers(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(status.userId);
-          return newSet;
-        });
-      }
-    },
-    onMessageSent: (message: ChatMessage) => {
-      console.log('새 메시지 수신:', message);
-      // 채팅방 목록 새로고침 (새 메시지가 있는 방을 맨 위로 이동)
-      refetchRooms();
-    },
-  });
-
-  // 채팅방 데이터 처리
+  // 초기 채팅방 선택 처리
   useEffect(() => {
-    if (roomsData?.getMyChatRooms?.list) {
-      const rooms = roomsData.getMyChatRooms.list;
-      
-      // 최신순으로 정렬 (lastMessageTime 기준)
-      const sortedRooms = [...rooms].sort((a, b) => {
-        const timeA = a.lastMessageTime ? new Date(a.lastMessageTime).getTime() : 0;
-        const timeB = b.lastMessageTime ? new Date(b.lastMessageTime).getTime() : 0;
-        return timeB - timeA;
-      });
-      
-      setChatRooms(sortedRooms);
-      
+    if (chatRooms.length > 0) {
       // 특정 매물 ID가 있고 해당 매물의 채팅방이 있으면 자동 선택
       if (propertyId && !selectedRoomId) {
-        const propertyRoom = sortedRooms.find(
+        const propertyRoom = chatRooms.find(
           (room: ChatRoomType) => room.propertyId === propertyId
         );
         if (propertyRoom) {
-          setSelectedRoomId(propertyRoom.roomId);
+          selectRoom(propertyRoom.roomId);
           if (isMobile) {
             setShowChatRoom(true);
           }
@@ -115,22 +69,22 @@ const UnifiedChatLayout: React.FC<UnifiedChatLayoutProps> = ({
       
       // initialRoomId가 있으면 해당 방 선택
       if (initialRoomId && !selectedRoomId) {
-        const targetRoom = sortedRooms.find(
+        const targetRoom = chatRooms.find(
           (room: ChatRoomType) => room.roomId === initialRoomId
         );
         if (targetRoom) {
-          setSelectedRoomId(initialRoomId);
+          selectRoom(initialRoomId);
           if (isMobile) {
             setShowChatRoom(true);
           }
         }
       }
     }
-  }, [roomsData, propertyId, initialRoomId, selectedRoomId, isMobile]);
+  }, [chatRooms, propertyId, initialRoomId, selectedRoomId, isMobile, selectRoom]);
 
   // 채팅방 선택 핸들러
   const handleRoomSelect = (roomId: string) => {
-    setSelectedRoomId(roomId);
+    selectRoom(roomId);
     if (isMobile) {
       setShowChatRoom(true);
     }
@@ -146,7 +100,17 @@ const UnifiedChatLayout: React.FC<UnifiedChatLayoutProps> = ({
   // 모바일에서 채팅 목록으로 돌아가기
   const handleBackToList = () => {
     setShowChatRoom(false);
-    setSelectedRoomId(null);
+    // selectRoom은 null을 받지 않으므로 선택 해제는 다른 방법으로 처리
+  };
+
+  // 홈페이지로 이동
+  const handleGoHome = () => {
+    console.log('홈 버튼 클릭됨');
+    console.log('현재 경로:', router.asPath);
+    console.log('현재 쿼리:', router.query);
+    
+    // 직접 window.location을 사용하여 강제 페이지 전환
+    window.location.href = '/';
   };
 
   // 선택된 채팅방 정보
@@ -172,7 +136,7 @@ const UnifiedChatLayout: React.FC<UnifiedChatLayoutProps> = ({
                 <ArrowBackIcon />
               </IconButton>
               <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                {selectedRoom.agentNickname || selectedRoom.userNickname || '알 수 없음'}
+                {selectedRoom.agentNickname || selectedRoom.userNickname || t('Unknown')}
               </Typography>
             </Box>
             
@@ -201,9 +165,16 @@ const UnifiedChatLayout: React.FC<UnifiedChatLayoutProps> = ({
                 </IconButton>
               )}
               <ChatIcon />
-              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                채팅
+              <Typography variant="h6" sx={{ fontWeight: 'bold', flex: 1 }}>
+                {t('Chat')}
               </Typography>
+              <IconButton 
+                size="small" 
+                onClick={() => window.location.href = '/'}
+                sx={{ cursor: 'pointer' }}
+              >
+                <HomeIcon />
+              </IconButton>
               {chatRooms.filter(room => room.unreadCountForUser > 0).length > 0 && (
                 <Typography 
                   variant="caption" 
@@ -212,11 +183,10 @@ const UnifiedChatLayout: React.FC<UnifiedChatLayoutProps> = ({
                     color: 'white', 
                     px: 1, 
                     py: 0.5, 
-                    borderRadius: 1,
-                    ml: 'auto'
+                    borderRadius: 1
                   }}
                 >
-                  {chatRooms.reduce((sum, room) => sum + room.unreadCountForUser, 0)}개의 새 메시지
+                  {t('{{count}} new messages', { count: chatRooms.reduce((sum, room) => sum + room.unreadCountForUser, 0) })}
                 </Typography>
               )}
             </Box>
@@ -227,7 +197,7 @@ const UnifiedChatLayout: React.FC<UnifiedChatLayoutProps> = ({
                 selectedRoomId={selectedRoomId}
                 onRoomSelect={handleRoomSelect}
                 onlineUsers={onlineUsers}
-                loading={roomsLoading}
+                loading={loading.rooms}
               />
             </Box>
           </Box>
@@ -268,8 +238,15 @@ const UnifiedChatLayout: React.FC<UnifiedChatLayoutProps> = ({
           )}
           <ChatIcon sx={{ color: '#FF9500' }} />
           <Typography variant="h6" sx={{ fontWeight: 'bold', flex: 1 }}>
-            채팅
+            {t('Chat')}
           </Typography>
+          <IconButton 
+            size="small" 
+            onClick={() => window.location.href = '/'}
+            sx={{ cursor: 'pointer' }}
+          >
+            <HomeIcon />
+          </IconButton>
           {chatRooms.filter(room => room.unreadCountForUser > 0).length > 0 && (
             <Typography 
               variant="caption" 
@@ -294,7 +271,7 @@ const UnifiedChatLayout: React.FC<UnifiedChatLayoutProps> = ({
             selectedRoomId={selectedRoomId}
             onRoomSelect={handleRoomSelect}
             onlineUsers={onlineUsers}
-            loading={roomsLoading}
+                            loading={loading.rooms}
           />
         </Box>
       </Box>

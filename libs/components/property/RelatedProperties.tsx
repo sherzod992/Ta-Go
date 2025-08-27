@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useQuery } from '@apollo/client';
 import { useRouter } from 'next/router';
-import { GET_AGENT_PROPERTIES } from '../../../apollo/user/query';
+import { GET_PROPERTIES } from '../../../apollo/user/query';
 import useDeviceDetect from '../../hooks/useDeviceDetect';
 
 interface RelatedPropertiesProps {
@@ -14,8 +14,8 @@ export const RelatedProperties: React.FC<RelatedPropertiesProps> = ({ currentPro
 	const scrollContainerRef = useRef<HTMLDivElement>(null);
 	const [showScrollButtons, setShowScrollButtons] = useState(false);
 
-	// 현재 매물을 제외한 다른 매물들을 가져오기
-	const { data, loading, error } = useQuery(GET_AGENT_PROPERTIES, {
+	// 현재 매물을 제외한 다른 매물들을 가져오기 (인증이 필요하지 않은 GET_PROPERTIES 사용)
+	const { data, loading, error } = useQuery(GET_PROPERTIES, {
 		variables: {
 			input: {
 				page: 1,
@@ -48,7 +48,7 @@ export const RelatedProperties: React.FC<RelatedPropertiesProps> = ({ currentPro
 
 	// 컴포넌트가 마운트되고 데이터가 로드된 후 스크롤 버튼 표시 여부 확인
 	useEffect(() => {
-		if (data?.getAgentProperties?.list) {
+		if (data?.getProperties?.list) {
 			// 약간의 지연을 두어 DOM이 완전히 렌더링된 후 확인
 			const timer = setTimeout(() => {
 				handleScroll();
@@ -70,12 +70,12 @@ export const RelatedProperties: React.FC<RelatedPropertiesProps> = ({ currentPro
 		);
 	}
 
-	if (error || !data?.getAgentProperties?.list) {
+	if (error || !data?.getProperties?.list) {
 		return null;
 	}
 
 	// 현재 매물을 제외한 매물들만 필터링 (이미 ACTIVE 상태만 가져왔으므로)
-	const relatedProperties = data.getAgentProperties.list.filter(
+	const relatedProperties = data.getProperties.list.filter(
 		(property: any) => property._id !== currentPropertyId
 	);
 

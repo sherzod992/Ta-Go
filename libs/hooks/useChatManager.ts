@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
-import { GET_ALL_USER_CHAT_ROOMS, GET_CHAT_MESSAGES } from '../../apollo/user/query';
+import { GET_MY_CHAT_ROOMS, GET_CHAT_MESSAGES } from '../../apollo/user/query';
 import { CREATE_CHAT_ROOM } from '../../apollo/user/mutation';
 import { ChatRoom, ChatMessage } from '../types/chat/chat';
-import { CreateChatRoomInput } from '../types/chat/chat.input';
+import { CreateChatRoomInput, ChatRoomQueryInput } from '../types/chat/chat.input';
 import { sweetErrorAlert } from '../sweetAlert';
 import { useChatSubscriptions } from './useChatSubscriptions';
 
@@ -15,16 +15,21 @@ export const useChatManager = () => {
   const userId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null;
 
   // 사용자의 모든 채팅방 조회
-  const { data: userChatRoomsData, loading: loadingChatRooms, refetch: refetchChatRooms } = useQuery(GET_ALL_USER_CHAT_ROOMS, {
-    variables: { userId: userId || '' },
+  const { data: userChatRoomsData, loading: loadingChatRooms, refetch: refetchChatRooms } = useQuery(GET_MY_CHAT_ROOMS, {
+    variables: {
+      input: {
+        page: 1,
+        limit: 50
+      } as ChatRoomQueryInput
+    },
     skip: !userId,
     onError: (error) => {
       console.error('채팅방 목록 조회 에러:', error);
       sweetErrorAlert('채팅방 목록을 불러오는데 실패했습니다.');
     },
     onCompleted: (data) => {
-      if (data?.getAllUserChatRooms) {
-        setChatRooms(data.getAllUserChatRooms);
+      if (data?.getMyChatRooms?.list) {
+        setChatRooms(data.getMyChatRooms.list);
       }
     }
   });
@@ -74,7 +79,7 @@ export const useChatManager = () => {
   // 채팅방 찾기 또는 생성
   const findOrCreateChatRoom = useCallback(async (propertyId: string): Promise<ChatRoom | null> => {
     if (!userId) {
-      sweetErrorAlert('로그인이 필요합니다.');
+      sweetErrorAlert('로그인이 필요합니다. 로그인 후 다시 시도해주세요.');
       return null;
     }
 
@@ -130,7 +135,7 @@ export const useChatManager = () => {
     }
 
     return null;
-  }, [userId, chatRooms, createChatRoom]);
+  }, [userId, chatRooms]); // createChatRoom 제거
 
   // 채팅방 선택
   const selectChatRoom = useCallback((chatId: string) => {
@@ -173,20 +178,39 @@ export const useChatManager = () => {
 
   // 메시지 전송 후 채팅방 업데이트
   const updateChatRoomWithMessage = useCallback((roomId: string, message: ChatMessage) => {
-    setChatRooms(prev => prev.map(room => {
-      if (room._id === roomId || room.roomId === roomId) {
-        return {
-          ...room,
-          lastMessageContent: message.content,
-          lastMessageTime: message.createdAt,
-          unreadCountForUser: room.unreadCountForUser + 1
-        };
+    console.log('채팅방 업데이트:', { roomId, message });
+    setChatRooms(prev => {
+      const updatedRooms = prev.map(room => {
+        if (room._id === roomId || room.roomId === roomId) {
+          const updatedRoom = {
+            ...room,
+            lastMessageContent: message.content,
+            lastMessageTime: message.createdAt,
+            lastMessageSenderId: message.senderId,
+            unreadCountForUser: room.unreadCountForUser + 1
+          };
+          console.log('채팅방 업데이트됨:', updatedRoom);
+          return updatedRoom;
+        }
+        return room;
+      });
+      
+      // 최신 메시지가 있는 채팅방을 맨 위로 이동
+      const targetRoom = updatedRooms.find(room => 
+        room._id === roomId || room.roomId === roomId
+      );
+      if (targetRoom) {
+        const filteredRooms = updatedRooms.filter(room => 
+          room._id !== roomId && room.roomId !== roomId
+        );
+        return [targetRoom, ...filteredRooms];
       }
-      return room;
-    }));
+      
+      return updatedRooms;
+    });
   }, []);
 
-  return {
+  return useMemo(() => ({
     // 상태
     chatRooms,
     currentChatId,
@@ -202,5 +226,19 @@ export const useChatManager = () => {
     refetchChatRooms,
     addNewChatRoom,
     updateChatRoomWithMessage,
-  };
+  }), [
+    chatRooms,
+    currentChatId,
+    isLoading,
+    loadingChatRooms,
+    findOrCreateChatRoom,
+    selectChatRoom,
+    getChatRoomById,
+    getChatRoomByPropertyId,
+    refreshChatRooms,
+    updateChatRoomStatus,
+    refetchChatRooms,
+    addNewChatRoom,
+    updateChatRoomWithMessage,
+  ]);
 };

@@ -18,11 +18,6 @@ mutation UpdateMemberByAdmin($input:MemberUpdate!) {
         memberImage
         memberAddress
         memberDesc
-        socialId
-        socialProvider
-        socialAccessToken
-        socialRefreshToken
-        socialTokenExpiresAt
         memberProperties
         memberArticles
         memberFollowers

@@ -20,8 +20,10 @@ import {
   CircularProgress,
   Slider,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
+  IconButton
 } from '@mui/material';
+import { Refresh as RefreshIcon } from '@mui/icons-material';
 import { GET_PROPERTIES } from '../../../apollo/user/query';
 import { PropertyLocation, PropertyType, PropertyStatus, PropertyCondition } from '../../enums/property.enum';
 
@@ -33,7 +35,7 @@ const HeroSection: React.FC = () => {
   const [brand, setBrand] = useState('all');
   const [keyword, setKeyword] = useState('');
   const [location, setLocation] = useState('all');
-  const [condition, setCondition] = useState('all');
+
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 50000000]);
   const [selectedCategory, setSelectedCategory] = useState('all');
 
@@ -88,14 +90,7 @@ const HeroSection: React.FC = () => {
       };
       search.locationList = [locationMap[location]];
     }
-    if (condition !== 'all') {
-      // 상태 이름을 enum 값으로 변환
-      const conditionMap: { [key: string]: PropertyCondition } = {
-        'new': PropertyCondition.EXCELLENT,
-        'used': PropertyCondition.GOOD
-      };
-      search.options = [conditionMap[condition]];
-    }
+
     if (priceRange[0] > 0 || priceRange[1] < 50000000) {
       search.pricesRange = {
         start: priceRange[0],
@@ -110,7 +105,7 @@ const HeroSection: React.FC = () => {
         search
       }
     };
-  }, [brand, keyword, selectedCategory, location, condition, priceRange]);
+  }, [brand, keyword, selectedCategory, location, priceRange]);
 
   // GraphQL 쿼리 실행
   const { data, loading, error } = useQuery(GET_PROPERTIES, {
@@ -127,7 +122,6 @@ const HeroSection: React.FC = () => {
     setKeyword('');
     setSelectedCategory('all');
     setLocation('all');
-    setCondition('all');
     setPriceRange([0, 50000000]);
   };
 
@@ -139,7 +133,7 @@ const HeroSection: React.FC = () => {
       if (keyword) queryParams.append('keyword', keyword);
       if (selectedCategory !== 'all') queryParams.append('category', selectedCategory);
       if (location !== 'all') queryParams.append('location', location);
-      if (condition !== 'all') queryParams.append('condition', condition);
+
       if (priceRange[0] > 0) queryParams.append('priceMin', priceRange[0].toString());
       if (priceRange[1] < 50000000) queryParams.append('priceMax', priceRange[1].toString());
       
@@ -239,173 +233,33 @@ const HeroSection: React.FC = () => {
               {t('Search Your Dream Bike')}
             </Typography>
 
-            {/* 매물 타입 영역 - PC에서는 한 줄로, 모바일에서는 가로 스크롤로 */}
-            <Box sx={{ marginBottom: 2 }}>
-              <Typography variant="body2" gutterBottom sx={{ 
-                fontSize: { xs: '0.9rem', md: '1rem' },
-                fontWeight: 500,
-                marginBottom: 1
-              }}>
-                {t('Bike Categories')}:
-              </Typography>
-              
-              {isMobile ? (
-                // 모바일: 가로 스크롤로 4개씩 보이기
-                <Box sx={{
-                  display: 'flex',
-                  gap: 1,
-                  overflowX: 'auto',
-                  paddingBottom: 1,
-                  scrollSnapType: 'x mandatory',
-                  '&::-webkit-scrollbar': {
-                    height: 4,
-                  },
-                  '&::-webkit-scrollbar-track': {
-                    backgroundColor: '#f1f1f1',
-                    borderRadius: 2,
-                  },
-                  '&::-webkit-scrollbar-thumb': {
-                    backgroundColor: '#c1c1c1',
-                    borderRadius: 2,
-                  },
-                  '&::-webkit-scrollbar-thumb:hover': {
-                    backgroundColor: '#a8a8a8',
-                  },
-                }}>
-                  {bikeCategories.map((categoryItem) => (
-                    <Box
-                      key={categoryItem.value}
-                      onClick={() => setSelectedCategory(categoryItem.name)}
-                      sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        padding: 1,
-                        border: selectedCategory === categoryItem.name ? '2px solid #1976d2' : '2px solid transparent',
-                        borderRadius: 2,
-                        cursor: 'pointer',
-                        transition: 'all 0.3s ease',
-                        backgroundColor: selectedCategory === categoryItem.name ? 'rgba(25, 118, 210, 0.1)' : 'transparent',
-                        minWidth: '80px',
-                        flexShrink: 0,
-                        scrollSnapAlign: 'start',
-                        '&:hover': {
-                          backgroundColor: 'rgba(25, 118, 210, 0.05)',
-                          borderColor: '#1976d2',
-                        },
-                      }}
-                    >
-                      <Box
-                        component="img"
-                        src={categoryItem.image}
-                        alt={categoryItem.name}
-                        sx={{
-                          width: '60px',
-                          height: '60px',
-                          objectFit: 'cover',
-                          borderRadius: 1,
-                          marginBottom: 0.5,
-                        }}
-                      />
-                      <Typography
-                        variant="caption"
-                        sx={{
-                          textAlign: 'center',
-                          fontWeight: 500,
-                          color: selectedCategory === categoryItem.name ? '#1976d2' : '#333',
-                          fontSize: '0.65rem',
-                          lineHeight: 1.2,
-                          wordBreak: 'break-word',
-                        }}
-                      >
-                        {categoryItem.name}
-                      </Typography>
-                    </Box>
-                  ))}
-                </Box>
-              ) : (
-                // PC: 한 줄로 정렬된 카테고리
-                <Box sx={{
-                  display: 'flex',
-                  gap: 2,
-                  flexWrap: 'wrap',
-                  justifyContent: 'center'
-                }}>
-                  {bikeCategories.map((categoryItem) => (
-                    <Box
-                      key={categoryItem.value}
-                      onClick={() => setSelectedCategory(categoryItem.name)}
-                      sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        padding: 1.5,
-                        border: selectedCategory === categoryItem.name ? '3px solid #1976d2' : '2px solid #e0e0e0',
-                        borderRadius: 3,
-                        cursor: 'pointer',
-                        transition: 'all 0.3s ease',
-                        backgroundColor: selectedCategory === categoryItem.name ? 'rgba(25, 118, 210, 0.08)' : 'white',
-                        boxShadow: selectedCategory === categoryItem.name 
-                          ? '0 4px 12px rgba(25, 118, 210, 0.2)' 
-                          : '0 2px 8px rgba(0, 0, 0, 0.1)',
-                        minWidth: '120px',
-                        '&:hover': {
-                          backgroundColor: selectedCategory === categoryItem.name 
-                            ? 'rgba(25, 118, 210, 0.12)' 
-                            : 'rgba(25, 118, 210, 0.04)',
-                          borderColor: '#1976d2',
-                          transform: 'translateY(-2px)',
-                          boxShadow: '0 6px 16px rgba(25, 118, 210, 0.25)',
-                        },
-                      }}
-                    >
-                      <Box
-                        component="img"
-                        src={categoryItem.image}
-                        alt={categoryItem.name}
-                        sx={{
-                          width: '80px',
-                          height: '80px',
-                          objectFit: 'cover',
-                          borderRadius: 2,
-                          marginBottom: 1,
-                          transition: 'transform 0.3s ease',
-                          '&:hover': {
-                            transform: 'scale(1.05)',
-                          },
-                        }}
-                      />
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          textAlign: 'center',
-                          fontWeight: selectedCategory === categoryItem.name ? 600 : 500,
-                          color: selectedCategory === categoryItem.name ? '#1976d2' : '#333',
-                          fontSize: '0.85rem',
-                          lineHeight: 1.3,
-                          transition: 'all 0.3s ease',
-                        }}
-                      >
-                        {categoryItem.name}
-                      </Typography>
-                    </Box>
-                  ))}
-                </Box>
-              )}
-            </Box>
-
-            {/* 검색 조건 영역 - 모든 디바이스에서 2개씩 배치 */}
+            {/* 검색 조건 영역 - 키워드, 브랜드, 위치를 한 줄에 3개 배치 */}
             <Box sx={{ 
               display: 'flex', 
               flexDirection: 'row',
               gap: 2,
               marginBottom: 2,
-              flexWrap: 'wrap'
+              flexWrap: 'nowrap'
             }}>
+              {/* 키워드 */}
+              <FormControl sx={{ 
+                width: '33.33%',
+                flex: '0 0 33.33%'
+              }}>
+                <TextField
+                  label={t('Keyword')}
+                  placeholder={t('Search by model, year...')}
+                  value={keyword}
+                  onChange={(e) => setKeyword(e.target.value)}
+                  size={isMobile ? 'small' : 'medium'}
+                  fullWidth
+                />
+              </FormControl>
+
               {/* 브랜드 */}
               <FormControl sx={{ 
-                minWidth: 'calc(50% - 8px)',
-                flex: '1 1 calc(50% - 8px)'
+                width: '33.33%',
+                flex: '0 0 33.33%'
               }}>
                 <InputLabel sx={{ fontSize: { xs: '0.8rem', md: '1rem' } }}>{t('Brand')}</InputLabel>
                 <Select
@@ -424,23 +278,10 @@ const HeroSection: React.FC = () => {
                 </Select>
               </FormControl>
 
-              {/* 키워드 */}
-              <TextField
-                label={t('Keyword')}
-                placeholder={t('Search by model, year...')}
-                value={keyword}
-                onChange={(e) => setKeyword(e.target.value)}
-                size={isMobile ? 'small' : 'medium'}
-                sx={{ 
-                  minWidth: 'calc(50% - 8px)',
-                  flex: '1 1 calc(50% - 8px)'
-                }}
-              />
-
               {/* 위치 */}
               <FormControl sx={{ 
-                minWidth: 'calc(50% - 8px)',
-                flex: '1 1 calc(50% - 8px)'
+                width: '33.33%',
+                flex: '0 0 33.33%'
               }}>
                 <InputLabel sx={{ fontSize: { xs: '0.8rem', md: '1rem' } }}>{t('Location')}</InputLabel>
                 <Select
@@ -455,25 +296,101 @@ const HeroSection: React.FC = () => {
                   <MenuItem value="daegu">Daegu</MenuItem>
                 </Select>
               </FormControl>
-
-              {/* 컨디션 */}
-              <FormControl sx={{ 
-                minWidth: 'calc(50% - 8px)',
-                flex: '1 1 calc(50% - 8px)'
-              }}>
-                <InputLabel sx={{ fontSize: { xs: '0.8rem', md: '1rem' } }}>{t('Condition')}</InputLabel>
-                <Select
-                  value={condition}
-                  onChange={(e) => setCondition(e.target.value)}
-                  label={t('Condition')}
-                  size={isMobile ? 'small' : 'medium'}
-                >
-                  <MenuItem value="all">{t('All Conditions')}</MenuItem>
-                  <MenuItem value="new">{t('New')}</MenuItem>
-                  <MenuItem value="used">{t('Used')}</MenuItem>
-                </Select>
-              </FormControl>
             </Box>
+
+            {/* 바이크 카테고리 영역 - 하나의 큰 컨테이너 안에 모든 카테고리 배치 */}
+            <Box sx={{ 
+              marginBottom: 2,
+              padding: 3,
+              border: '2px solid #e0e0e0',
+              borderRadius: 3,
+              backgroundColor: '#f8f9fa'
+            }}>
+              <Typography variant="body2" gutterBottom sx={{ 
+                fontSize: { xs: '0.9rem', md: '1rem' },
+                fontWeight: 500,
+                marginBottom: 2,
+                textAlign: 'center'
+              }}>
+                {t('Bike Categories')}:
+              </Typography>
+              
+              {/* 통합된 바이크 카테고리 그리드 - 8개를 한 줄에 배치 */}
+              <Box sx={{
+                display: 'grid',
+                gridTemplateColumns: { 
+                  xs: 'repeat(2, 1fr)', 
+                  sm: 'repeat(4, 1fr)', 
+                  md: 'repeat(6, 1fr)',
+                  lg: 'repeat(8, 1fr)'
+                },
+                gap: { xs: 1, sm: 1.5, md: 1.5 },
+                justifyContent: 'center',
+                alignItems: 'start'
+              }}>
+                {bikeCategories.map((categoryItem) => (
+                  <Box
+                    key={categoryItem.value}
+                    onClick={() => setSelectedCategory(categoryItem.name)}
+                    sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      padding: { xs: 0.5, sm: 1, md: 1, lg: 0.5 },
+                      border: selectedCategory === categoryItem.name ? '3px solid #1976d2' : '2px solid #e0e0e0',
+                      borderRadius: { xs: 2, sm: 3 },
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease',
+                      backgroundColor: selectedCategory === categoryItem.name ? 'rgba(25, 118, 210, 0.08)' : 'white',
+                      boxShadow: selectedCategory === categoryItem.name 
+                        ? '0 4px 12px rgba(25, 118, 210, 0.2)' 
+                        : '0 2px 8px rgba(0, 0, 0, 0.1)',
+                      '&:hover': {
+                        backgroundColor: selectedCategory === categoryItem.name 
+                          ? 'rgba(25, 118, 210, 0.12)' 
+                          : 'rgba(25, 118, 210, 0.04)',
+                        borderColor: '#1976d2',
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 6px 16px rgba(25, 118, 210, 0.25)',
+                      },
+                    }}
+                  >
+                    <Box
+                      component="img"
+                      src={categoryItem.image}
+                      alt={categoryItem.name}
+                      sx={{
+                        width: { xs: '50px', sm: '60px', md: '70px', lg: '60px' },
+                        height: { xs: '50px', sm: '60px', md: '70px', lg: '60px' },
+                        objectFit: 'cover',
+                        borderRadius: { xs: 1, sm: 2 },
+                        marginBottom: { xs: 0.5, sm: 0.5 },
+                        transition: 'transform 0.3s ease',
+                        '&:hover': {
+                          transform: 'scale(1.05)',
+                        },
+                      }}
+                    />
+                    <Typography
+                      variant={isMobile ? 'caption' : 'body2'}
+                      sx={{
+                        textAlign: 'center',
+                        fontWeight: selectedCategory === categoryItem.name ? 600 : 500,
+                        color: selectedCategory === categoryItem.name ? '#1976d2' : '#333',
+                        fontSize: { xs: '0.6rem', sm: '0.7rem', md: '0.75rem', lg: '0.7rem' },
+                        lineHeight: 1.2,
+                        transition: 'all 0.3s ease',
+                        wordBreak: 'break-word',
+                      }}
+                    >
+                      {categoryItem.name}
+                    </Typography>
+                  </Box>
+                ))}
+              </Box>
+            </Box>
+
+
 
             {/* Price Range Filter - 매물 타입 바로 아래로 이동 */}
             <Box sx={{ marginBottom: 2 }}>
@@ -583,20 +500,16 @@ const HeroSection: React.FC = () => {
                   `${t('Show bikes')} (${searchResultCount})`
                 )}
               </Button>
-              <Button
-                variant="outlined"
+              <IconButton
                 color="error"
                 onClick={handleClearAll}
                 sx={{ 
-                  textTransform: 'none', 
                   height: { xs: '48px', md: '48px' },
-                  minWidth: { xs: 'auto', md: '140px' },
-                  fontSize: { xs: '1rem', md: '1rem' },
-                  fontWeight: { xs: 500, md: 500 },
-                  borderWidth: '2px',
-                  flex: { xs: 0, md: 0 },
+                  width: { xs: '48px', md: '48px' },
+                  border: '2px solid',
+                  borderColor: 'error.main',
+                  color: 'error.main',
                   '&:hover': {
-                    borderWidth: '2px',
                     backgroundColor: 'rgba(211, 47, 47, 0.04)',
                     transform: 'translateY(-1px)',
                     boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
@@ -604,8 +517,8 @@ const HeroSection: React.FC = () => {
                   transition: 'all 0.2s ease'
                 }}
               >
-                {t('Clear all')}
-              </Button>
+                <RefreshIcon />
+              </IconButton>
             </Box>
 
             {/* 검색 결과 안내 */}

@@ -5,6 +5,7 @@ import { GetStaticProps } from 'next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import withLayoutBasic from '../../libs/components/layout/LayoutBasic';
 import { PropertyDetail } from '../../libs/components/property/PropertyDetail';
+import LoadingSpinner from '../../libs/components/common/LoadingSpinner';
 
 const PropertyDetailPage: NextPage = () => {
   const router = useRouter();
@@ -12,7 +13,13 @@ const PropertyDetailPage: NextPage = () => {
 
   // 로딩 중이거나 ID가 없으면 로딩 표시
   if (router.isFallback || !id) {
-    return <div>Loading...</div>;
+    return (
+      <LoadingSpinner
+        message="매물 정보를 불러오는 중..."
+        fullScreen={true}
+        variant="circular"
+      />
+    );
   }
 
   return <PropertyDetail propertyId={id as string} />;

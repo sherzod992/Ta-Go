@@ -227,5 +227,11 @@
   "Search by keyword": "Search by keyword...",
   "Keyword": "Keyword",
   "Find Your Perfect Motorcycle": "Find Your Perfect Motorcycle",
-  "Discover thousands of motorcycles from trusted sellers": "Discover thousands of motorcycles from trusted sellers"
+  "Discover thousands of motorcycles from trusted sellers": "Discover thousands of motorcycles from trusted sellers",
+  "Chat": "Chat",
+  "Unknown": "Unknown",
+  "Loading chat list...": "Loading chat list...",
+  "No chat history yet": "No chat history yet",
+  "No message": "No message",
+  "{{count}} new messages": "{{count}} new messages"
 } 

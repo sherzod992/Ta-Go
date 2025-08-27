@@ -18,11 +18,6 @@ export const SIGN_UP = gql`
 			memberImage
 			memberAddress
 			memberDesc
-			socialId
-			socialProvider
-			socialAccessToken
-			socialRefreshToken
-			socialTokenExpiresAt
 			memberProperties
 			memberArticles
 			memberFollowers
@@ -56,11 +51,6 @@ export const LOGIN = gql`
 			memberImage
 			memberAddress
 			memberDesc
-			socialId
-			socialProvider
-			socialAccessToken
-			socialRefreshToken
-			socialTokenExpiresAt
 			memberProperties
 			memberArticles
 			memberFollowers
@@ -94,11 +84,6 @@ export const UPDATE_MEMBER = gql`
 			memberImage
 			memberAddress
 			memberDesc
-			socialId
-			socialProvider
-			socialAccessToken
-			socialRefreshToken
-			socialTokenExpiresAt
 			memberProperties
 			memberArticles
 			memberFollowers
@@ -132,11 +117,6 @@ export const LIKE_TARGET_MEMBER = gql`
 			memberImage
 			memberAddress
 			memberDesc
-			socialId
-			socialProvider
-			socialAccessToken
-			socialRefreshToken
-			socialTokenExpiresAt
 			memberProperties
 			memberArticles
 			memberFollowers

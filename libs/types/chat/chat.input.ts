@@ -44,9 +44,7 @@ export interface CheckChatRoomExistsInput {
 	roomId: string;
 }
 
-export interface GetAllUserChatRoomsInput {
-	userId: string;
-}
+
 
 // 메시지 조회 문제 진단을 위한 새로운 입력 타입들
 export interface GetChatRoomMessagesInput {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/router';
 import { useQuery, useMutation } from '@apollo/client';
-import { GET_MY_CHAT_ROOMS, GET_ALL_USER_CHAT_ROOMS } from '../../../apollo/user/query';
+import { GET_MY_CHAT_ROOMS } from '../../../apollo/user/query';
 import { CREATE_CHAT_ROOM } from '../../../apollo/user/mutation';
 import { ChatRoom } from '../../../libs/types/chat/chat';
 import { ChatRoomQueryInput } from '../../../libs/types/chat/chat.input';
@@ -76,13 +76,11 @@ const ChatListPage: React.FC = () => {
 	const { data, loading, error, refetch } = useQuery(GET_MY_CHAT_ROOMS, {
 		variables: {
 			input: {
-				userId: userId || '', 
 				page: 1,
 				limit: 50
 			} as ChatRoomQueryInput
 		},
 		skip: !userId || !isMounted,
-		pollInterval: 10000, // 10초마다 폴링
 		onError: (error) => {
 			console.error('채팅방 목록 조회 에러:', error);
 				setHasError(true);
@@ -90,14 +88,7 @@ const ChatListPage: React.FC = () => {
 		}
 	});
 
-	// 사용자의 모든 채팅방 조회 (디버깅용)
-	const { data: userChatRoomsData } = useQuery(GET_ALL_USER_CHAT_ROOMS, {
-		variables: { userId: userId || '' },
-		skip: !userId,
-		onError: (error) => {
-			console.error('사용자 채팅방 조회 에러:', error);
-		}
-	});
+
 
 	// 채팅방 생성
 	const [createChatRoom] = useMutation(CREATE_CHAT_ROOM, {

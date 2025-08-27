@@ -19,11 +19,6 @@ query getAllMembersByAdmin($input: MembersInquiry!) {
             memberImage
             memberAddress
             memberDesc
-            socialId
-            socialProvider
-            socialAccessToken
-            socialRefreshToken
-            socialTokenExpiresAt
             memberProperties
             memberArticles
             memberFollowers
@@ -101,11 +96,6 @@ export const GET_ALL_PROPERTIES_BY_ADMIN = gql`
                 memberImage
                 memberAddress
                 memberDesc
-                socialId
-                socialProvider
-                socialAccessToken
-                socialRefreshToken
-                socialTokenExpiresAt
                 memberProperties
                 memberArticles
                 memberFollowers

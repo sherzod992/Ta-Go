@@ -80,7 +80,8 @@
 		"swiper": "^8.3.1",
 		"three": "0.150.1",
 		"valtio": "1.10.3",
-		"view": "^1.1.1"
+		"view": "^1.1.1",
+		"zustand": "^5.0.8"
 	},
 	"devDependencies": {
 		"@types/apollo-upload-client": "^17.0.0",

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useQuery } from '@apollo/client';
+import React, { useState, useCallback, useMemo } from 'react';
+import { useQuery, useReactiveVar } from '@apollo/client';
 import { GET_PROPERTY } from '../../../apollo/user/query';
 import PropertyChat from '../chat/PropertyChat';
 import { RelatedProperties } from './RelatedProperties';
@@ -9,6 +9,8 @@ import { sweetMixinSuccessAlert } from '../../sweetAlert';
 import { Box, Button, useTheme, useMediaQuery } from '@mui/material';
 import { Chat as ChatIcon, Close as CloseIcon } from '@mui/icons-material';
 import { ChatMessage } from '../../types/chat/chat';
+import { userVar } from '../../../apollo/store';
+import SkeletonUI from '../common/SkeletonUI';
 
 interface PropertyDetailProps {
 	propertyId: string;
@@ -19,20 +21,32 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) =>
 	const theme = useTheme();
 	const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
 	const [showChat, setShowChat] = useState(false);
+	const user = useReactiveVar(userVar);
 	
 	// 채팅 관리자 훅 사용
-	const { addNewChatRoom, updateChatRoomWithMessage } = useChatManager();
+	const { addNewChatRoom, updateChatRoomWithMessage, refreshChatRooms } = useChatManager();
 
 	const { data, loading, error } = useQuery(GET_PROPERTY, {
 		variables: { input: propertyId }
 	});
 
 	if (loading) {
-		return <div className="loading">로딩중...</div>;
+		return <SkeletonUI type="detail" />;
 	}
 
 	if (error || !data?.getProperty) {
-		return <div className="error">매물 정보를 불러올 수 없습니다.</div>;
+		return (
+			<Box sx={{ 
+				display: 'flex', 
+				flexDirection: 'column', 
+				alignItems: 'center', 
+				justifyContent: 'center', 
+				height: '100vh',
+				gap: 2
+			}}>
+				<div className="error">매물 정보를 불러올 수 없습니다.</div>
+			</Box>
+		);
 	}
 
 	const property = data.getProperty;
@@ -77,8 +91,11 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) =>
 	const handleMessageSent = (message: ChatMessage) => {
 		console.log('새 메시지 전송됨:', message);
 		
-		// 채팅 목록의 최근 메시지 업데이트
+		// 채팅 목록의 최근 메시지 즉시 업데이트
 		updateChatRoomWithMessage(message.roomId, message);
+		
+		// 채팅 목록 새로고침 (서버 데이터 동기화)
+		refreshChatRooms();
 	};
 
 	return (
@@ -190,7 +207,7 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) =>
 						</div>
 					)}
 
-					{/* 채팅 문의 버튼 */}
+					{/* 채팅 문의 버튼 - 개발 중에는 항상 표시 */}
 					<div className="inquiry-section">
 						<Button
 							variant="contained"
