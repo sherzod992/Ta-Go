@@ -1,55 +1,54 @@
 # 프론트엔드 Dockerfile
-FROM node:20-alpine AS builder
+FROM node:18-alpine AS base
 
+# 의존성 설치 단계
+FROM base AS deps
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# 패키지 파일 복사
-COPY package*.json ./
-COPY yarn.lock ./
+# package.json과 yarn.lock 복사
+COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
+RUN \
+  if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
+  elif [ -f package-lock.json ]; then npm ci; \
+  elif [ -f pnpm-lock.yaml ]; then yarn global add pnpm && pnpm i --frozen-lockfile; \
+  else echo "Lockfile not found." && exit 1; \
+  fi
 
-# 의존성 설치
-RUN yarn install --frozen-lockfile
-
-# 소스 코드 복사 (캐시 무효화를 위해 타임스탬프 추가)
+# 빌드 단계
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# 빌드 타임스탬프를 환경변수로 설정하여 캐시 무효화
+# 환경 변수 설정
 ARG BUILD_DATE
 ENV BUILD_DATE=${BUILD_DATE}
 
-# 환경 변수 설정
-ENV NEXT_PUBLIC_API_URL=http://72.60.40.57:3000/graphql
-ENV NEXT_PUBLIC_API_WS=ws://72.60.40.57:3000/graphql
-ENV NODE_ENV=production
+# Next.js 빌드
+RUN yarn build
 
-# 빌드 (캐시 무효화를 위해 타임스탬프 사용)
-RUN echo "Build time: $BUILD_DATE" && yarn build
-
-# 프로덕션 이미지
-FROM node:20-alpine AS runner
-
+# 프로덕션 단계
+FROM base AS runner
 WORKDIR /app
 
-# 필요한 파일들만 복사
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/yarn.lock ./
-COPY --from=builder /app/.next ./.next
+ENV NODE_ENV production
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+# 정적 파일 복사
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/next.config.js ./
 
-# 프로덕션 의존성만 설치
-RUN yarn install --production --frozen-lockfile
+# Next.js 빌드 결과 복사
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# 환경 변수 설정
-ENV NODE_ENV=production
-ENV NEXT_PUBLIC_API_URL=http://72.60.40.57:3000/graphql
-ENV NEXT_PUBLIC_API_WS=ws://72.60.40.57:3000/graphql
-
-# 빌드 정보 레이블 추가
-ARG BUILD_DATE
-LABEL build-date="${BUILD_DATE}"
+USER nextjs
 
 EXPOSE 3011
 
-# Next.js 서버 시작
-CMD ["yarn", "start"]
+ENV PORT 3011
+ENV HOSTNAME "0.0.0.0"
+
+CMD ["node", "server.js"]

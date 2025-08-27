@@ -14,6 +14,7 @@ docker-compose down -v
 # 기존 이미지 제거 (캐시 무효화)
 echo "🗑️ 기존 이미지를 제거합니다..."
 docker rmi ta-go-ta-go-frontend:latest 2>/dev/null || true
+docker rmi ta-go-ta-go-backend:latest 2>/dev/null || true
 
 # Docker 빌드 캐시 정리
 echo "🧹 Docker 빌드 캐시를 정리합니다..."
@@ -40,5 +41,5 @@ docker inspect ta-go-ta-go-frontend:latest | grep -A 2 -B 2 "build-date"
 
 echo "✅ 배포가 완료되었습니다!"
 echo "🌐 프론트엔드: http://72.60.40.57:3011"
-echo "🔌 API: http://72.60.40.57:3012"
+echo "🔌 API: http://72.60.40.57:3000"
 echo "📊 로그 확인: docker-compose logs -f"

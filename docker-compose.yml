@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   # 프론트엔드 서비스
   ta-go-frontend:
@@ -7,55 +9,30 @@ services:
       args:
         BUILD_DATE: ${BUILD_DATE:-$(date -u +'%Y-%m-%dT%H:%M:%SZ')}
     container_name: ta-go-frontend
-    restart: unless-stopped
     ports:
-      - "3011:3011"  # 프론트엔드 포트
+      - "3011:3011"
     environment:
-      - NEXT_PUBLIC_API_URL=http://72.60.40.57:3000/graphql
-      - NEXT_PUBLIC_API_WS=ws://72.60.40.57:3000/graphql
+      - NODE_ENV=production
+      - PORT=3011
+      - NEXT_PUBLIC_API_URL=http://72.60.40.57:3000
+      - NEXT_PUBLIC_API_GRAPHQL_URL=http://72.60.40.57:3000/graphql
+      - NEXT_PUBLIC_API_WS=ws://72.60.40.57:3000
+    restart: unless-stopped
     networks:
       - ta-go-network
 
-  # MongoDB
-  ta-ja-mongodb:
-    image: mongo:6.0
-    container_name: ta-ja-mongodb
-    restart: unless-stopped
+  # 백엔드 서비스
+  ta-go-backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.backend
+    container_name: ta-go-backend
     ports:
-      - "27017:27017"
+      - "3000:3000"
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=admin
-      - MONGO_INITDB_ROOT_PASSWORD=password
-    volumes:
-      - mongodb_data:/data/db
-    networks:
-      - ta-go-network
-
-  # PostgreSQL
-  ta-ja-postgres:
-    image: postgres:15-alpine
-    container_name: ta-ja-postgres
+      - NODE_ENV=production
+      - PORT=3000
     restart: unless-stopped
-    ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_USER=ta_ja_user
-      - POSTGRES_PASSWORD=ta_ja_password
-      - POSTGRES_DB=ta_ja_db
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - ta-go-network
-
-  # Redis
-  ta-ja-redis:
-    image: redis:7-alpine
-    container_name: ta-ja-redis
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
     networks:
       - ta-go-network
 
@@ -63,22 +40,18 @@ services:
   nginx:
     image: nginx:alpine
     container_name: ta-go-nginx
-    restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./nginx/ssl:/etc/nginx/ssl
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
     depends_on:
       - ta-go-frontend
+      - ta-go-backend
+    restart: unless-stopped
     networks:
       - ta-go-network
-
-volumes:
-  mongodb_data:
-  postgres_data:
-  redis_data:
 
 networks:
   ta-go-network:

@@ -33,6 +33,6 @@ docker-compose logs --tail=10 ta-go-frontend
 
 echo "✅ 빠른 배포가 완료되었습니다!"
 echo "🌐 프론트엔드: http://72.60.40.57:3011"
-echo "🔌 API: http://72.60.40.57:3012"
+echo "🔌 API: http://72.60.40.57:3000"
 echo ""
 echo "💡 브라우저에서 강제 새로고침(Ctrl+F5)을 해주세요!"

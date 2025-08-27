@@ -44,16 +44,13 @@
 
 #### 3. 수동 해결 방법
 
-##### A. Docker 컨테이너 재시작
+##### A. 개발 서버 재시작
 ```bash
-# 기존 컨테이너 중지
-docker-compose down
+# 기존 프로세스 종료
+lsof -ti:3011 | xargs kill -9
 
-# 새로 빌드
-docker-compose build --no-cache
-
-# 컨테이너 시작
-docker-compose up -d
+# 새로 시작
+npm run dev
 ```
 
 ##### B. 브라우저 캐시 클리어
@@ -77,23 +74,20 @@ docker-compose up -d
 - `scss/mobile/buy/buy.scss` - 매물 검색 영역 스타일
 
 ### 설정 파일
-- `nginx/nginx.conf` - Nginx 캐시 설정 수정
-
-### 배포 스크립트
-- `quick-deploy.sh` - 빠른 배포 스크립트
-- `force-refresh.sh` - 강제 새로고침 스크립트
+- `next.config.js` - Next.js 설정
+- `.env.local` - 환경 변수 설정
 
 ## 🔧 추가 설정
 
-### Nginx 캐시 설정
-- 정적 파일 캐싱: 1년 → 1시간으로 변경
-- HTML 파일: 캐시하지 않음
-- 캐시 무효화 헤더 추가
+### Next.js 캐시 설정
+- 정적 파일 캐싱: 브라우저 캐시 설정
+- 개발 모드: 핫 리로드 활성화
+- 빌드 최적화: `npm run build`
 
-### Docker 빌드 최적화
+### 개발 환경 최적화
 - `--no-cache` 옵션으로 완전 새 빌드
-- 빌드 캐시 클리어
-- 이미지 완전 재생성
+- 브라우저 캐시 클리어
+- 개발 서버 재시작
 
 ## 🐛 문제 해결 체크리스트
 
@@ -106,20 +100,19 @@ docker-compose up -d
 
 ### 로그 확인
 ```bash
-# 컨테이너 상태 확인
-docker-compose ps
+# 프로세스 상태 확인
+ps aux | grep node
 
-# 프론트엔드 로그 확인
-docker-compose logs ta-go-frontend
+# 포트 사용 확인
+lsof -i :3011
 
-# Nginx 로그 확인
-docker-compose logs nginx
+# 개발 서버 로그는 터미널에서 직접 확인
 ```
 
 ### 환경 변수 확인
 ```bash
-# 컨테이너 환경 변수 확인
-docker-compose exec ta-go-frontend env | grep NEXT_PUBLIC
+# 환경 변수 확인
+cat .env.local
 ```
 
 ## 📞 추가 지원

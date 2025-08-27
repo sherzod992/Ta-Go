@@ -32,11 +32,11 @@ const getApiUrl = () => {
   return process.env.NEXT_PUBLIC_API_URL || 
          process.env.NEXT_PUBLIC_API_GRAPHQL_URL || 
          process.env.REACT_PUBLIC_API_GRAPHQL_URL || 
-         'http://localhost:3000/graphql';
+         'http://72.60.40.57:3000/graphql';
 };
 
 const getWsUrl = () => {
-  const baseWsUrl = process.env.NEXT_PUBLIC_API_WS || process.env.REACT_APP_API_WS || 'ws://localhost:3000';
+  const baseWsUrl = process.env.NEXT_PUBLIC_API_WS || process.env.REACT_APP_API_WS || 'ws://72.60.40.57:3000';
   return baseWsUrl.endsWith('/graphql') ? baseWsUrl : `${baseWsUrl}/graphql`;
 };
 
