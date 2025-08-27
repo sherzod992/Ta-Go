@@ -134,7 +134,7 @@ async function startServer() {
     app,
     path: '/graphql',
     cors: {
-      origin: ['http://localhost:3011'],  // 로컬 개발 환경만 허용
+      origin: ['http://localhost:3011', 'http://72.60.40.57:3011'],  // 로컬 및 프로덕션 환경 허용
       credentials: true,  // credentials 허용
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
       allowedHeaders: [
