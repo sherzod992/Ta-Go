@@ -1,5 +1,5 @@
 # 프론트엔드 Dockerfile
-FROM node:18-alpine AS base
+FROM node:20-alpine AS base
 
 # 의존성 설치 단계
 FROM base AS deps
