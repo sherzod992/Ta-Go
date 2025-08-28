@@ -59,6 +59,9 @@ const typeDefs = gql`
     property(id: ID!): Property
     searchProperties(keyword: String): [Property]
     getPropertiesByType(type: PropertyType): [Property]
+    getBoardArticles(input: BoardArticlesInquiry!): BoardArticles
+    getBoardArticle(articleId: String!): BoardArticle
+    getUnreadMessageCount: Int
   }
 
   type Mutation {
@@ -94,6 +97,44 @@ const typeDefs = gql`
     properties: [Property]
   }
 
+  type BoardArticle {
+    _id: String!
+    articleCategory: String
+    articleStatus: String
+    articleTitle: String!
+    articleContent: String
+    articleImage: String
+    articleViews: Int
+    articleLikes: Int
+    articleComments: Int
+    memberId: String
+    createdAt: String
+    updatedAt: String
+    memberData: User
+  }
+
+  type BoardArticles {
+    list: [BoardArticle]
+    metaCounter: [TotalCounter]
+  }
+
+  type TotalCounter {
+    total: Int
+  }
+
+  input BoardArticlesInquiry {
+    page: Int
+    limit: Int
+    sort: String
+    direction: String
+    search: BAISearch
+  }
+
+  input BAISearch {
+    articleCategory: String
+    text: String
+  }
+
   enum PropertyType {
     MOTORCYCLE
     CAR
@@ -124,6 +165,57 @@ const typeDefs = gql`
 const resolvers = {
   Query: {
     hello: () => 'Hello from ta-Go Backend!',
+    getBoardArticles: (_, { input }) => {
+      // 목업 데이터 반환
+      return {
+        list: [
+          {
+            _id: '1',
+            articleCategory: 'FREE',
+            articleStatus: 'ACTIVE',
+            articleTitle: '오토바이 구매 팁',
+            articleContent: '오토바이 구매시 주의사항들...',
+            articleImage: '',
+            articleViews: 150,
+            articleLikes: 25,
+            articleComments: 8,
+            memberId: '1',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            memberData: {
+              id: '1',
+              username: '김바이커',
+              email: 'biker@example.com'
+            }
+          }
+        ],
+        metaCounter: [{ total: 1 }]
+      };
+    },
+    getBoardArticle: (_, { articleId }) => {
+      return {
+        _id: articleId,
+        articleCategory: 'FREE',
+        articleStatus: 'ACTIVE',
+        articleTitle: '오토바이 구매 팁',
+        articleContent: '오토바이 구매시 주의사항들...',
+        articleImage: '',
+        articleViews: 150,
+        articleLikes: 25,
+        articleComments: 8,
+        memberId: '1',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        memberData: {
+          id: '1',
+          username: '김바이커',
+          email: 'biker@example.com'
+        }
+      };
+    },
+    getUnreadMessageCount: () => {
+      return 0; // 목업 데이터
+    },
     properties: () => [
       {
         id: '1',
