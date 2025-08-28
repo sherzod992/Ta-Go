@@ -41,11 +41,11 @@ const getApiUrl = () => {
     return baseUrl.endsWith('/graphql') ? baseUrl : `${baseUrl}/graphql`;
   }
   
-  // 프로덕션에서는 원격 서버 사용
+  // 프로덕션에서는 도메인 사용
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || 
                   process.env.NEXT_PUBLIC_API_GRAPHQL_URL || 
                   process.env.REACT_PUBLIC_API_GRAPHQL_URL || 
-                  'http://72.60.40.57:3001';
+                  'https://ta-go.shop';
   
   // /graphql 엔드포인트가 포함되어 있지 않으면 추가
   return baseUrl.endsWith('/graphql') ? baseUrl : `${baseUrl}/graphql`;
@@ -64,8 +64,8 @@ const getWsUrl = () => {
     return baseWsUrl.endsWith('/graphql') ? baseWsUrl : `${baseWsUrl}/graphql`;
   }
   
-  // 프로덕션에서는 원격 서버 사용
-  const baseWsUrl = process.env.NEXT_PUBLIC_API_WS || process.env.REACT_APP_API_WS || 'ws://72.60.40.57:3001';
+  // 프로덕션에서는 도메인 사용
+  const baseWsUrl = process.env.NEXT_PUBLIC_API_WS || process.env.REACT_APP_API_WS || 'wss://ta-go.shop';
   return baseWsUrl.endsWith('/graphql') ? baseWsUrl : `${baseWsUrl}/graphql`;
 };
 
