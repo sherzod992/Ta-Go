@@ -41,7 +41,8 @@ export const logIn = async (nick: string, password: string): Promise<void> => {
 		}
 	} catch (err) {
 		console.warn('login err', err);
-		logOut();
+		// 로그인 실패 시에는 logOut()을 호출하지 않음 (홈페이지로 이동 방지)
+		// logOut();
 		throw new Error('Login Err');
 	}
 };
@@ -304,7 +305,8 @@ export const socialLogin = async (authType: AuthProvider, token: string): Promis
 		}
 	} catch (err) {
 		console.warn('social login err', err);
-		logOut();
+		// 소셜 로그인 실패 시에도 logOut()을 호출하지 않음
+		// logOut();
 		throw new Error('Social Login Err');
 	}
 };
