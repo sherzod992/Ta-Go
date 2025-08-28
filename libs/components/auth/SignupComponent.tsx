@@ -28,7 +28,7 @@ import { useTranslation } from 'next-i18next';
 import PhoneInput from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 import { signUp, AuthProvider, MemberType } from '../../auth';
-import { sweetMixinErrorAlert } from '../../sweetAlert';
+import { sweetMixinErrorAlert, sweetMixinSuccessAlert } from '../../sweetAlert';
 
 const SignupComponent: React.FC = () => {
   const { t } = useTranslation('common');
@@ -134,8 +134,8 @@ const SignupComponent: React.FC = () => {
       const contactInfo = authType === AuthProvider.EMAIL ? formData.email : phoneNumber;
       await signUp(formData.nick, formData.password, contactInfo, authType, memberType);
       
-      // 회원가입 성공 시 홈페이지로 이동
-      await sweetMixinErrorAlert('회원가입이 완료되었습니다!');
+      // 회원가입 성공 시 성공 메시지 표시 후 홈페이지로 이동
+      await sweetMixinSuccessAlert('회원가입이 완료되었습니다! 환영합니다! 🎉');
       router.push('/');
     } catch (err) {
       console.error('회원가입 실패:', err);
