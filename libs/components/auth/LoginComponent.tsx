@@ -51,7 +51,7 @@ const LoginComponent: React.FC = () => {
       router.push('/');
     } catch (err) {
       console.error('로그인 실패:', err);
-      setError('로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.');
+      setError('로그인에 실패했습니다. 아이디와 비밀번호를 다시 확인해주세요.');
     } finally {
       setLoading(false);
     }
@@ -87,8 +87,24 @@ const LoginComponent: React.FC = () => {
 
           {/* 에러 메시지 */}
           {error && (
-            <Alert severity="error" sx={{ mb: 3 }}>
-              {error}
+            <Alert 
+              severity="error" 
+              sx={{ 
+                mb: 3,
+                '& .MuiAlert-message': {
+                  fontSize: '0.95rem',
+                  lineHeight: 1.4
+                }
+              }}
+            >
+              <Box>
+                <Typography variant="body2" sx={{ fontWeight: 500, mb: 0.5 }}>
+                  로그인 실패
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {error}
+                </Typography>
+              </Box>
             </Alert>
           )}
 
@@ -105,6 +121,8 @@ const LoginComponent: React.FC = () => {
               required
               disabled={loading}
               autoComplete="username"
+              placeholder="아이디를 입력해주세요"
+              helperText="등록된 아이디를 정확히 입력해주세요"
               sx={{ mb: 2 }}
             />
             
@@ -120,6 +138,8 @@ const LoginComponent: React.FC = () => {
               required
               disabled={loading}
               autoComplete="current-password"
+              placeholder="비밀번호를 입력해주세요"
+              helperText="비밀번호를 정확히 입력해주세요"
               sx={{ mb: 3 }}
             />
 

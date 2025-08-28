@@ -12,8 +12,6 @@ const nextConfig = {
 	// 이미지 최적화 설정
 	images: {
 		unoptimized: true,
-		// 이미지 품질 설정
-		quality: 85,
 		// 이미지 크기 제한
 		deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
 		imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],

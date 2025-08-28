@@ -71,10 +71,13 @@ const requestJwtToken = async ({
 		console.log('request token err', err.graphQLErrors);
 		switch (err.graphQLErrors[0].message) {
 			case 'Definer: login and password do not match':
-				await sweetMixinErrorAlert('Please check your password again');
+				await sweetMixinErrorAlert('아이디 또는 비밀번호가 올바르지 않습니다.\n\n다시 한 번 확인해주세요.');
 				break;
 			case 'Definer: user has been blocked!':
-				await sweetMixinErrorAlert('User has been blocked!');
+				await sweetMixinErrorAlert('계정이 차단되었습니다.\n\n관리자에게 문의해주세요.');
+				break;
+			default:
+				await sweetMixinErrorAlert('로그인에 실패했습니다.\n\n아이디와 비밀번호를 다시 확인해주세요.');
 				break;
 		}
 		throw new Error('token error');
