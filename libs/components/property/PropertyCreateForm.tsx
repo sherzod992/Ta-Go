@@ -237,20 +237,27 @@ const PropertyCreateForm: React.FC = () => {
     );
   }
 
-  // 이미지 압축 함수 (PNG, JPEG 지원)
-  const compressImage = (file: File): Promise<File> => {
+  // 이미지 처리 함수 (원본 화질 유지)
+  const processImage = (file: File): Promise<File> => {
     return new Promise((resolve) => {
+      // 파일 크기가 3MB 이하면 원본 그대로 사용
+      if (file.size <= 3 * 1024 * 1024) {
+        resolve(file);
+        return;
+      }
+      
+      // 파일 크기가 1MB를 초과하는 경우에만 크기 조정
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       const img = new Image();
       
       img.onload = () => {
-        // 최대 크기 설정 (413 에러 방지를 위해 더 작은 크기로 조정)
-        const maxWidth = 800;
-        const maxHeight = 600;
+        // 최대 크기 설정 (1MB 초과 시에만 적용)
+        const maxWidth = 1200;
+        const maxHeight = 900;
         let { width, height } = img;
         
-        // 원본 크기가 최대 크기보다 작으면 압축하지 않음
+        // 원본 크기가 최대 크기보다 작으면 원본 그대로 사용
         if (width <= maxWidth && height <= maxHeight) {
           resolve(file);
           return;
@@ -272,7 +279,7 @@ const PropertyCreateForm: React.FC = () => {
         canvas.width = width;
         canvas.height = height;
         
-        // 이미지 스무딩 설정으로 화질 개선
+        // 이미지 스무딩 설정으로 화질 최대한 유지
         if (ctx) {
           ctx.imageSmoothingEnabled = true;
           ctx.imageSmoothingQuality = 'high';
@@ -280,19 +287,18 @@ const PropertyCreateForm: React.FC = () => {
         
         ctx?.drawImage(img, 0, 0, width, height);
         
-        // 파일 타입에 따라 다른 압축 방식 적용
+        // 파일 타입에 따라 최고 품질로 처리
         const isPNG = file.type === 'image/png';
-        const isJPEG = file.type === 'image/jpeg' || file.type === 'image/jpg';
         const mimeType = isPNG ? 'image/png' : 'image/jpeg';
-        const quality = isPNG ? 0.9 : 0.7; // PNG는 더 높은 품질 유지, JPEG는 압축
+        const quality = 1.0; // 최고 품질 유지
         
         canvas.toBlob((blob) => {
           if (blob) {
-            const compressedFile = new File([blob], file.name, {
+            const processedFile = new File([blob], file.name, {
               type: mimeType,
               lastModified: Date.now(),
             });
-            resolve(compressedFile);
+            resolve(processedFile);
           } else {
             resolve(file);
           }
@@ -324,23 +330,23 @@ const PropertyCreateForm: React.FC = () => {
         return;
       }
       
-      // 파일 크기 검증 (각 파일 최대 1MB)
-      if (file.size > 1 * 1024 * 1024) {
-        setError('각 이미지 파일은 1MB 이하여야 합니다.');
+      // 파일 크기 검증 (각 파일 최대 3MB로 증가 - 원본 화질 유지)
+      if (file.size > 3 * 1024 * 1024) {
+        setError('각 이미지 파일은 3MB 이하여야 합니다.');
         return;
       }
     }
 
     try {
-      // 이미지 압축
-      const compressedFiles = await Promise.all(
-        newFiles.map(file => compressImage(file))
+      // 이미지 처리 (원본 화질 유지)
+      const processedFiles = await Promise.all(
+        newFiles.map(file => processImage(file))
       );
 
-      setImages(prev => [...prev, ...compressedFiles]);
+      setImages(prev => [...prev, ...processedFiles]);
       
       // 미리보기 URL 생성
-      compressedFiles.forEach(file => {
+      processedFiles.forEach(file => {
         const reader = new FileReader();
         reader.onload = (e) => {
           setImageUrls(prev => [...prev, e.target?.result as string]);
