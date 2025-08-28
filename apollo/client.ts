@@ -33,8 +33,8 @@ const getApiUrl = () => {
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname;
     if (hostname === 'ta-go.shop' || hostname === 'www.ta-go.shop') {
-      console.log('🔧 강제로 도메인 API URL 사용:', 'https://ta-go.shop/graphql');
-      return 'https://ta-go.shop/graphql';
+      console.log('🔧 강제로 도메인 API URL 사용:', 'http://ta-go.shop/graphql');
+      return 'http://ta-go.shop/graphql';
     }
   }
   
@@ -65,8 +65,8 @@ const getWsUrl = () => {
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname;
     if (hostname === 'ta-go.shop' || hostname === 'www.ta-go.shop') {
-      console.log('🔧 강제로 도메인 WebSocket URL 사용:', 'wss://ta-go.shop/graphql');
-      return 'wss://ta-go.shop/graphql';
+      console.log('🔧 강제로 도메인 WebSocket URL 사용:', 'ws://ta-go.shop/graphql');
+      return 'ws://ta-go.shop/graphql';
     }
   }
   
