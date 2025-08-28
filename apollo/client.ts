@@ -41,7 +41,7 @@ const getApiUrl = () => {
   // 개발 환경에서는 localhost 우선, 없으면 원격 서버 사용
   if (process.env.NODE_ENV === 'development') {
     const localUrl = process.env.NEXT_PUBLIC_LOCAL_API_URL || 'http://localhost:3000';
-    const remoteUrl = process.env.NEXT_PUBLIC_REMOTE_API_URL || 'http://72.60.40.57:3001';
+    const remoteUrl = process.env.NEXT_PUBLIC_REMOTE_API_URL || 'http://72.60.40.57:3002';
     
     // 환경 변수로 어떤 서버를 사용할지 선택 가능
     const useLocal = process.env.NEXT_PUBLIC_USE_LOCAL === 'true';
@@ -73,7 +73,7 @@ const getWsUrl = () => {
   // 개발 환경에서는 localhost 우선, 없으면 원격 서버 사용
   if (process.env.NODE_ENV === 'development') {
     const localWsUrl = process.env.NEXT_PUBLIC_LOCAL_WS_URL || 'ws://localhost:3000';
-    const remoteWsUrl = process.env.NEXT_PUBLIC_REMOTE_WS_URL || 'ws://72.60.40.57:3001';
+    const remoteWsUrl = process.env.NEXT_PUBLIC_REMOTE_WS_URL || 'ws://72.60.40.57:3002';
     
     // 환경 변수로 어떤 서버를 사용할지 선택 가능
     const useLocal = process.env.NEXT_PUBLIC_USE_LOCAL === 'true';
