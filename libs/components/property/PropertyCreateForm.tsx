@@ -237,7 +237,7 @@ const PropertyCreateForm: React.FC = () => {
     );
   }
 
-  // 이미지 압축 함수 (화질 개선)
+  // 이미지 압축 함수 (PNG, JPEG 지원)
   const compressImage = (file: File): Promise<File> => {
     return new Promise((resolve) => {
       const canvas = document.createElement('canvas');
@@ -280,17 +280,23 @@ const PropertyCreateForm: React.FC = () => {
         
         ctx?.drawImage(img, 0, 0, width, height);
         
+        // 파일 타입에 따라 다른 압축 방식 적용
+        const isPNG = file.type === 'image/png';
+        const isJPEG = file.type === 'image/jpeg' || file.type === 'image/jpg';
+        const mimeType = isPNG ? 'image/png' : 'image/jpeg';
+        const quality = isPNG ? 0.9 : 0.7; // PNG는 더 높은 품질 유지, JPEG는 압축
+        
         canvas.toBlob((blob) => {
           if (blob) {
             const compressedFile = new File([blob], file.name, {
-              type: 'image/jpeg',
+              type: mimeType,
               lastModified: Date.now(),
             });
             resolve(compressedFile);
           } else {
             resolve(file);
           }
-        }, 'image/jpeg', 0.7); // 70% 품질로 파일 크기 감소 (413 에러 방지)
+        }, mimeType, quality);
       };
       
       img.src = URL.createObjectURL(file);
@@ -309,8 +315,16 @@ const PropertyCreateForm: React.FC = () => {
       return;
     }
 
-    // 파일 크기 검증 (각 파일 최대 1MB로 감소 - 413 에러 방지)
+    // 파일 형식 및 크기 검증
     for (const file of newFiles) {
+      // 지원하는 파일 형식 확인
+      const supportedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+      if (!supportedTypes.includes(file.type)) {
+        setError('JPG, JPEG, PNG 파일만 업로드할 수 있습니다.');
+        return;
+      }
+      
+      // 파일 크기 검증 (각 파일 최대 1MB)
       if (file.size > 1 * 1024 * 1024) {
         setError('각 이미지 파일은 1MB 이하여야 합니다.');
         return;
@@ -980,7 +994,7 @@ const PropertyCreateForm: React.FC = () => {
               
               <Box sx={{ mb: 2 }}>
                 <input
-                  accept="image/*"
+                  accept="image/jpeg,image/jpg,image/png"
                   style={{ display: 'none' }}
                   id="image-upload"
                   multiple
