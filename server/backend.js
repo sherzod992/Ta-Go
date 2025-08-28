@@ -41,8 +41,9 @@ app.use((req, res, next) => {
   next();
 });
 
-// JSON 파서 설정
-app.use(express.json());
+// JSON 파서 설정 - 요청 크기 제한 증가 (50MB)
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Helmet 비활성화 (CORS 문제 해결을 위해)
 // app.use(helmet());
@@ -339,7 +340,7 @@ async function startServer() {
     app,
     path: '/graphql',
     bodyParserConfig: {
-      limit: '10mb'
+      limit: '50mb'
     },
     cors: false, // Apollo Server의 CORS 비활성화 (Express CORS 사용)
     disableHealthCheck: true

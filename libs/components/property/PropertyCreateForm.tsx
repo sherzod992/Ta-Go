@@ -245,9 +245,9 @@ const PropertyCreateForm: React.FC = () => {
       const img = new Image();
       
       img.onload = () => {
-        // 최대 크기 설정 (화질 개선을 위해 더 큰 크기로 설정)
-        const maxWidth = 1200;
-        const maxHeight = 900;
+        // 최대 크기 설정 (413 에러 방지를 위해 더 작은 크기로 조정)
+        const maxWidth = 800;
+        const maxHeight = 600;
         let { width, height } = img;
         
         // 원본 크기가 최대 크기보다 작으면 압축하지 않음
@@ -290,7 +290,7 @@ const PropertyCreateForm: React.FC = () => {
           } else {
             resolve(file);
           }
-        }, 'image/jpeg', 0.85); // 85% 품질로 화질 개선
+        }, 'image/jpeg', 0.7); // 70% 품질로 파일 크기 감소 (413 에러 방지)
       };
       
       img.src = URL.createObjectURL(file);
@@ -309,10 +309,10 @@ const PropertyCreateForm: React.FC = () => {
       return;
     }
 
-    // 파일 크기 검증 (각 파일 최대 2MB로 증가)
+    // 파일 크기 검증 (각 파일 최대 1MB로 감소 - 413 에러 방지)
     for (const file of newFiles) {
-      if (file.size > 2 * 1024 * 1024) {
-        setError('각 이미지 파일은 2MB 이하여야 합니다.');
+      if (file.size > 1 * 1024 * 1024) {
+        setError('각 이미지 파일은 1MB 이하여야 합니다.');
         return;
       }
     }
