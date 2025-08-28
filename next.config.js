@@ -20,6 +20,8 @@ const nextConfig = {
 			// 무한 리렌더링 방지
 			optimizeCss: false,
 		},
+		// Fast Refresh 비활성화
+		fastRefresh: false,
 	}),
 	env: {
 		NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || process.env.REACT_APP_API_URL || 'http://72.60.40.57:3000',

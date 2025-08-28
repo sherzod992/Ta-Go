@@ -48,7 +48,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
     const token = localStorage.getItem('accessToken');
     if (!token) return;
 
-    const socket = io(process.env.NEXT_PUBLIC_API_WS || 'ws://localhost:3000/chat', {
+    const socket = io(process.env.NEXT_PUBLIC_API_WS || 'ws://72.60.40.57:3001/chat', {
       auth: {
         token: token
       },

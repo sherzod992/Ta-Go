@@ -7,8 +7,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const endpoints = [
     { name: 'Nginx (포트 3000)', url: 'http://72.60.40.57:3000/graphql' },
-    { name: '직접 API (포트 3012)', url: 'http://72.60.40.57:3012/graphql' },
-    { name: '로컬 API (포트 3012)', url: 'http://localhost:3012/graphql' }
+      { name: '직접 API (포트 3000)', url: 'http://72.60.40.57:3000/graphql' },
+  { name: '로컬 API (포트 3000)', url: 'http://localhost:3000/graphql' }
   ];
 
   const results: any[] = [];

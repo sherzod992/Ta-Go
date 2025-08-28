@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useGlobalChat } from '../../hooks/useGlobalChat';
 import { ChatMessage } from '../../types/chat/chat';
-import { ChatRoom as ChatRoomType } from '../../stores/chatStore';
+import type { ChatRoom } from '../../stores/chatStore';
 import {
   Box,
   TextField,
@@ -20,7 +20,7 @@ import {
 } from '@mui/icons-material';
 
 interface ChatRoomProps {
-  selectedRoom: ChatRoomType | null;
+  selectedRoom: ChatRoom | null;
   onMessageSent?: (message: ChatMessage) => void;
 }
 

@@ -1,55 +1,72 @@
 #!/bin/bash
 
-# 프로덕션 배포 스크립트
-echo "🚀 TA-GO 프로덕션 배포를 시작합니다..."
+# 프로덕션 서버 배포 스크립트
+echo "🚀 ta-Go 프로덕션 서버 배포 시작..."
 
-# 현재 시간을 빌드 타임스탬프로 사용
-BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
-echo "📅 빌드 타임스탬프: $BUILD_DATE"
+# 1. 프로덕션 서버에 접속
+echo "📡 프로덕션 서버에 접속 중..."
+ssh root@72.60.40.57 << 'EOF'
 
-# 환경 변수 파일 설정
-echo "🔧 환경 변수를 설정합니다..."
-if [ -f "env.production" ]; then
-    cp env.production .env
-    echo "✅ env.production을 .env로 복사했습니다."
-else
-    echo "⚠️ env.production 파일이 없습니다. env.docker를 사용합니다."
-    cp env.docker .env
+# 2. 프로젝트 디렉토리로 이동
+cd /var/www/ta-go
+
+# 3. 최신 코드 강제 가져오기
+echo "📥 최신 코드 강제 가져오기..."
+git fetch origin main
+git reset --hard origin/main
+
+# 4. Node.js 및 Yarn 설치 확인
+echo "🔧 Node.js 및 Yarn 설치 확인..."
+if ! command -v yarn &> /dev/null; then
+    echo "📦 Yarn 설치 중..."
+    npm install -g yarn
 fi
 
-# 기존 컨테이너 중지 및 제거
-echo "📦 기존 컨테이너를 정리합니다..."
-docker-compose down -v
+# 5. 의존성 설치 (legacy-peer-deps 플래그 사용)
+echo "📦 의존성 설치..."
+npm install --legacy-peer-deps
 
-# 기존 이미지 제거 (캐시 무효화)
-echo "🗑️ 기존 이미지를 제거합니다..."
-docker rmi ta-go-ta-go-frontend:latest 2>/dev/null || true
-docker rmi ta-go-ta-go-backend:latest 2>/dev/null || true
+# 6. 프론트엔드 빌드
+echo "🔨 프론트엔드 빌드..."
+npm run build
 
-# Docker 빌드 캐시 정리
-echo "🧹 Docker 빌드 캐시를 정리합니다..."
-docker builder prune -f
+# 7. 백엔드 디렉토리로 이동
+echo "🔄 백엔드 설정..."
+cd server
 
-# 이미지 빌드 (캐시 없이)
-echo "🔨 Docker 이미지를 빌드합니다..."
-docker-compose build --no-cache --build-arg BUILD_DATE="$BUILD_DATE"
+# 8. 백엔드 의존성 설치
+echo "📦 백엔드 의존성 설치..."
+npm install
 
-# 컨테이너 시작
-echo "🚀 컨테이너를 시작합니다..."
-docker-compose up -d
+# 9. PM2 프로세스 확인 및 시작
+echo "🚀 PM2 프로세스 시작..."
+if pm2 list | grep -q "ta-go-backend"; then
+    echo "🔄 백엔드 재시작..."
+    pm2 restart ta-go-backend
+else
+    echo "🆕 백엔드 프로세스 시작..."
+    pm2 start backend.js --name ta-go-backend
+fi
 
-# 헬스체크
-echo "🏥 서비스 상태를 확인합니다..."
-sleep 15
+# 10. 프론트엔드 프로세스 시작
+cd ..
+if pm2 list | grep -q "ta-go-frontend"; then
+    echo "🔄 프론트엔드 재시작..."
+    pm2 restart ta-go-frontend
+else
+    echo "🆕 프론트엔드 프로세스 시작..."
+    pm2 start npm --name ta-go-frontend -- start
+fi
 
-# 컨테이너 상태 확인
-docker-compose ps
+# 11. PM2 설정 저장
+echo "💾 PM2 설정 저장..."
+pm2 save
 
-# 빌드 정보 확인
-echo "📋 빌드 정보:"
-docker inspect ta-go-ta-go-frontend:latest | grep -A 2 -B 2 "build-date"
+# 12. 상태 확인
+echo "📊 서비스 상태 확인..."
+pm2 status
 
-echo "✅ 프로덕션 배포가 완료되었습니다!"
-echo "🌐 프론트엔드: http://72.60.40.57:3011"
-echo "🔌 API: http://72.60.40.57:3000"
-echo "📊 로그 확인: docker-compose logs -f"
+echo "✅ 배포 완료!"
+EOF
+
+echo "🎉 프로덕션 배포가 완료되었습니다!"

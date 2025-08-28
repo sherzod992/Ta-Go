@@ -5,7 +5,9 @@
   "main": "backend.js",
   "scripts": {
     "start": "node backend.js",
-    "dev": "node backend.js"
+    "dev": "nodemon backend.js",
+    "dev:local": "PORT=3000 nodemon backend.js",
+    "dev:remote": "PORT=3001 node backend.js"
   },
   "dependencies": {
     "express": "^4.18.2",
@@ -13,6 +15,9 @@
     "cors": "^2.8.5",
     "helmet": "^7.1.0",
     "graphql": "^15.5.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
   },
   "keywords": ["graphql", "apollo", "express", "backend"],
   "author": "Ta-Go Team",

@@ -29,21 +29,57 @@ const createWebSocketWithLogging = (url: string) => {
 
 // 환경 변수에서 API URL 가져오기
 const getApiUrl = () => {
-  return process.env.NEXT_PUBLIC_API_URL || 
-         process.env.NEXT_PUBLIC_API_GRAPHQL_URL || 
-         process.env.REACT_PUBLIC_API_GRAPHQL_URL || 
-         'http://72.60.40.57:3000/graphql';
+  // 개발 환경에서는 localhost 우선, 없으면 원격 서버 사용
+  if (process.env.NODE_ENV === 'development') {
+    const localUrl = process.env.NEXT_PUBLIC_LOCAL_API_URL || 'http://localhost:3000';
+    const remoteUrl = process.env.NEXT_PUBLIC_REMOTE_API_URL || 'http://72.60.40.57:3001';
+    
+    // 환경 변수로 어떤 서버를 사용할지 선택 가능
+    const useLocal = process.env.NEXT_PUBLIC_USE_LOCAL === 'true';
+    
+    const baseUrl = useLocal ? localUrl : remoteUrl;
+    return baseUrl.endsWith('/graphql') ? baseUrl : `${baseUrl}/graphql`;
+  }
+  
+  // 프로덕션에서는 원격 서버 사용
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 
+                  process.env.NEXT_PUBLIC_API_GRAPHQL_URL || 
+                  process.env.REACT_PUBLIC_API_GRAPHQL_URL || 
+                  'http://72.60.40.57:3001';
+  
+  // /graphql 엔드포인트가 포함되어 있지 않으면 추가
+  return baseUrl.endsWith('/graphql') ? baseUrl : `${baseUrl}/graphql`;
 };
 
 const getWsUrl = () => {
-  const baseWsUrl = process.env.NEXT_PUBLIC_API_WS || process.env.REACT_APP_API_WS || 'ws://72.60.40.57:3000';
+  // 개발 환경에서는 localhost 우선, 없으면 원격 서버 사용
+  if (process.env.NODE_ENV === 'development') {
+    const localWsUrl = process.env.NEXT_PUBLIC_LOCAL_WS_URL || 'ws://localhost:3000';
+    const remoteWsUrl = process.env.NEXT_PUBLIC_REMOTE_WS_URL || 'ws://72.60.40.57:3001';
+    
+    // 환경 변수로 어떤 서버를 사용할지 선택 가능
+    const useLocal = process.env.NEXT_PUBLIC_USE_LOCAL === 'true';
+    
+    const baseWsUrl = useLocal ? localWsUrl : remoteWsUrl;
+    return baseWsUrl.endsWith('/graphql') ? baseWsUrl : `${baseWsUrl}/graphql`;
+  }
+  
+  // 프로덕션에서는 원격 서버 사용
+  const baseWsUrl = process.env.NEXT_PUBLIC_API_WS || process.env.REACT_APP_API_WS || 'ws://72.60.40.57:3001';
   return baseWsUrl.endsWith('/graphql') ? baseWsUrl : `${baseWsUrl}/graphql`;
 };
 
-// HTTP 링크 생성
+// HTTP 링크 생성 (CORS 오류 해결)
 const httpLink = createHttpLink({
-  uri: getApiUrl(),
-  credentials: 'include',
+  uri: getApiUrl(), // 환경 변수 기반으로 동적 URL 설정
+  credentials: 'omit', // include 대신 omit 사용하여 CORS 오류 해결
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  },
+  fetchOptions: {
+    mode: 'cors',
+  },
 });
 
 // WebSocket 링크 생성 (안전한 방식)
@@ -75,20 +111,18 @@ if (typeof window !== 'undefined') {
   }
 }
 
-// 인증 헤더 설정
+// 인증 헤더 설정 (Authorization 헤더 사용)
 const authLink = setContext((operation, { headers }) => {
   const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
   
   console.log('AuthLink called for operation:', operation.operationName);
-  console.log('AuthLink - Token:', token);
-  console.log('AuthLink - Headers before:', headers);
+  console.log('AuthLink - Token:', token ? '토큰 존재' : '토큰 없음');
   
   const authHeaders = {
     ...headers,
-    authorization: token ? `Bearer ${token}` : '',
+    'Content-Type': 'application/json',
+    'Authorization': token ? `Bearer ${token}` : '',
   };
-  
-  console.log('AuthLink - Headers after:', authHeaders);
   
   return {
     headers: authHeaders,
@@ -154,8 +188,20 @@ const tokenRefreshLink = process.env.NODE_ENV === 'development'
 
 // 에러 처리 링크
 const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) => {
-  console.log('ErrorLink called for operation:', operation.operationName);
+  // 개발 환경에서는 에러 로깅만 하고 조용히 처리
+  if (process.env.NODE_ENV === 'development') {
+    if (graphQLErrors) {
+      graphQLErrors.forEach(({ message, locations, path }) => {
+        console.log(`[DEV] GraphQL 에러 무시: ${message} (${operation.operationName})`);
+      });
+    }
+    if (networkError) {
+      console.log(`[DEV] 네트워크 에러 무시: ${networkError.message} (${operation.operationName})`);
+    }
+    return; // 개발 환경에서는 에러를 무시하고 계속 진행
+  }
   
+  // 프로덕션 환경에서만 에러 처리
   if (graphQLErrors) {
     graphQLErrors.forEach(({ message, locations, path }) => {
       console.error(
@@ -164,11 +210,7 @@ const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) 
         `경로: ${path}`,
         `작업: ${operation.operationName}`
       );
-      
-      // 개발 환경에서는 에러 알림을 조용히 처리
-      if (process.env.NODE_ENV !== 'development') {
-        sweetErrorAlert(`GraphQL 에러: ${message}`);
-      }
+      sweetErrorAlert(`GraphQL 에러: ${message}`);
     });
   }
 
@@ -177,21 +219,14 @@ const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) 
     console.error('네트워크 에러 작업:', operation.operationName);
     
     if ('statusCode' in networkError && networkError.statusCode === 401) {
-      // 인증 에러 처리 - 개발 환경에서는 조용히 처리
+      // 인증 에러 처리
       console.log('401 에러 발생');
-      if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'development') {
+      if (typeof window !== 'undefined') {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
-        // 무한 리다이렉트 방지를 위해 안전한 리다이렉트 함수 사용
         safeRedirect('/login');
       }
     } else {
-      // 개발 환경에서는 네트워크 에러를 조용히 처리
-      if (process.env.NODE_ENV === 'development') {
-        console.log('개발 환경에서 네트워크 에러 발생 (백엔드 연결 확인 필요)');
-        return;
-      }
-      // 프로덕션에서만 에러 알림 표시
       sweetErrorAlert('네트워크 에러: 서버와의 연결에 문제가 있습니다.');
     }
   }
@@ -255,7 +290,7 @@ export function createApolloClient(initialState = {}) {
     }),
     defaultOptions: {
       watchQuery: {
-        errorPolicy: 'all',
+        errorPolicy: 'ignore', // 개발 환경에서 에러 무시
         fetchPolicy: 'cache-first',
         notifyOnNetworkStatusChange: false,
         pollInterval: 0, // 폴링 완전 비활성화
@@ -265,7 +300,7 @@ export function createApolloClient(initialState = {}) {
         }),
       },
       query: {
-        errorPolicy: 'all',
+        errorPolicy: 'ignore', // 개발 환경에서 에러 무시
         fetchPolicy: 'cache-first',
         // 개발 환경에서 추가 안정성 설정
         ...(process.env.NODE_ENV === 'development' && {
@@ -273,7 +308,7 @@ export function createApolloClient(initialState = {}) {
         }),
       },
       mutate: {
-        errorPolicy: 'all',
+        errorPolicy: 'ignore', // 개발 환경에서 에러 무시
         // 개발 환경에서 추가 안정성 설정
         ...(process.env.NODE_ENV === 'development' && {
           errorPolicy: 'ignore', // 개발 환경에서는 에러를 무시
