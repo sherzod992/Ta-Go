@@ -176,252 +176,66 @@ const resolvers = {
   Query: {
     hello: () => 'Hello from ta-Go Backend!',
     getBoardArticles: (_, { input }) => {
-      // 목업 데이터 반환
+      // TODO: 실제 데이터베이스에서 데이터 조회
       return {
-        list: [
-          {
-            _id: '1',
-            articleCategory: 'FREE',
-            articleStatus: 'ACTIVE',
-            articleTitle: '오토바이 구매 팁',
-            articleContent: '오토바이 구매시 주의사항들...',
-            articleImage: '',
-            articleViews: 150,
-            articleLikes: 25,
-            articleComments: 8,
-            memberId: '1',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            memberData: {
-              id: '1',
-              username: '김바이커',
-              email: 'biker@example.com',
-              memberPoints: 100,
-              memberLikes: 25,
-              memberViews: 150,
-              memberComments: 8,
-              memberRank: 1,
-              memberWarnings: 0,
-              memberBlocks: 0,
-              accessToken: null,
-              updatedAt: new Date().toISOString(),
-              deletedAt: null
-            }
-          }
-        ],
-        metaCounter: [{ total: 1 }]
+        list: [],
+        metaCounter: [{ total: 0 }]
       };
     },
     getBoardArticle: (_, { articleId }) => {
-      return {
-        _id: articleId,
-        articleCategory: 'FREE',
-        articleStatus: 'ACTIVE',
-        articleTitle: '오토바이 구매 팁',
-        articleContent: '오토바이 구매시 주의사항들...',
-        articleImage: '',
-        articleViews: 150,
-        articleLikes: 25,
-        articleComments: 8,
-        memberId: '1',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        memberData: {
-          id: '1',
-          username: '김바이커',
-          email: 'biker@example.com',
-          memberPoints: 100,
-          memberLikes: 25,
-          memberViews: 150,
-          memberComments: 8,
-          memberRank: 1,
-          memberWarnings: 0,
-          memberBlocks: 0,
-          accessToken: null,
-          updatedAt: new Date().toISOString(),
-          deletedAt: null
-        }
-      };
+      // TODO: 실제 데이터베이스에서 데이터 조회
+      return null;
     },
     getUnreadMessageCount: () => {
-      return 0; // 목업 데이터
+      // TODO: 실제 데이터베이스에서 데이터 조회
+      return 0;
     },
-    properties: () => [
-      {
-        id: '1',
-        title: 'Honda CB650R',
-        description: '완벽한 도시 라이딩을 위한 스포츠 바이크',
-        price: 12000000,
-        location: '서울',
-        type: 'MOTORCYCLE',
-        images: ['honda1.jpg', 'honda2.jpg'],
-        features: ['ABS', 'LED 조명', '디지털 계기판'],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        owner: {
-          id: '1',
-          username: '김바이커',
-          email: 'biker@example.com'
-        }
-      },
-      {
-        id: '2',
-        title: 'BMW R1250GS',
-        description: '장거리 투어링에 최적화된 어드벤처 바이크',
-        price: 25000000,
-        location: '부산',
-        type: 'MOTORCYCLE',
-        images: ['bmw1.jpg', 'bmw2.jpg'],
-        features: ['전자 서스펜션', '크루즈 컨트롤', '히팅 그립'],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        owner: {
-          id: '2',
-          username: '박투어러',
-          email: 'tourer@example.com'
-        }
-      },
-      {
-        id: '3',
-        title: 'Ducati Panigale V4',
-        description: '트랙 성능에 특화된 슈퍼스포츠 바이크',
-        price: 35000000,
-        location: '대구',
-        type: 'MOTORCYCLE',
-        images: ['ducati1.jpg', 'ducati2.jpg'],
-        features: ['V4 엔진', '트랙 모드', '퀵시프터'],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        owner: {
-          id: '3',
-          username: '이스피드',
-          email: 'speed@example.com'
-        }
-      }
-    ],
+    properties: () => {
+      // TODO: 실제 데이터베이스에서 데이터 조회
+      return [];
+    },
     property: (_, { id }) => {
-      const properties = [
-        {
-          id: '1',
-          title: 'Honda CB650R',
-          description: '완벽한 도시 라이딩을 위한 스포츠 바이크',
-          price: 12000000,
-          location: '서울',
-          type: 'MOTORCYCLE',
-          images: ['honda1.jpg', 'honda2.jpg'],
-          features: ['ABS', 'LED 조명', '디지털 계기판'],
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          owner: {
-            id: '1',
-            username: '김바이커',
-            email: 'biker@example.com'
-          }
-        }
-      ];
-      return properties.find(p => p.id === id);
+      // TODO: 실제 데이터베이스에서 데이터 조회
+      return null;
     },
     searchProperties: (_, { keyword }) => {
-      const properties = [
-        {
-          id: '1',
-          title: 'Honda CB650R',
-          description: '완벽한 도시 라이딩을 위한 스포츠 바이크',
-          price: 12000000,
-          location: '서울',
-          type: 'MOTORCYCLE',
-          images: ['honda1.jpg', 'honda2.jpg'],
-          features: ['ABS', 'LED 조명', '디지털 계기판'],
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          owner: {
-            id: '1',
-            username: '김바이커',
-            email: 'biker@example.com'
-          }
-        }
-      ];
-      return properties.filter(p =>
-        p.title.toLowerCase().includes(keyword.toLowerCase()) ||
-        p.description.toLowerCase().includes(keyword.toLowerCase())
-      );
+      // TODO: 실제 데이터베이스에서 데이터 조회
+      return [];
     },
     getPropertiesByType: (_, { type }) => {
-      const properties = [
-        {
-          id: '1',
-          title: 'Honda CB650R',
-          description: '완벽한 도시 라이딩을 위한 스포츠 바이크',
-          price: 12000000,
-          location: '서울',
-          type: 'MOTORCYCLE',
-          images: ['honda1.jpg', 'honda2.jpg'],
-          features: ['ABS', 'LED 조명', '디지털 계기판'],
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          owner: {
-            id: '1',
-            username: '김바이커',
-            email: 'biker@example.com'
-          }
-        }
-      ];
-      return properties.filter(p => p.type === type);
+      // TODO: 실제 데이터베이스에서 데이터 조회
+      return [];
     },
-    users: () => [
-      {
-        id: '1',
-        username: '김바이커',
-        email: 'biker@example.com',
-        phone: '010-1234-5678',
-        avatar: 'avatar1.jpg',
-        createdAt: new Date().toISOString()
-      },
-      {
-        id: '2',
-        username: '박투어러',
-        email: 'tourer@example.com',
-        phone: '010-2345-6789',
-        avatar: 'avatar2.jpg',
-        createdAt: new Date().toISOString()
-      }
-    ]
+    users: () => {
+      // TODO: 실제 데이터베이스에서 데이터 조회
+      return [];
+    }
   },
   Mutation: {
-    createProperty: (_, { input }) => ({
-      id: Date.now().toString(),
-      ...input,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      owner: {
-        id: '1',
-        username: '김바이커',
-        email: 'biker@example.com'
-      }
-    }),
-    updateProperty: (_, { id, input }) => ({
-      id,
-      ...input,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      owner: {
-        id: '1',
-        username: '김바이커',
-        email: 'biker@example.com'
-      }
-    }),
-    deleteProperty: () => true,
-    createUser: (_, { input }) => ({
-      id: Date.now().toString(),
-      ...input,
-      createdAt: new Date().toISOString()
-    }),
-    updateUser: (_, { id, input }) => ({
-      id,
-      ...input,
-      createdAt: new Date().toISOString()
-    }),
-    deleteUser: () => true
+    createProperty: (_, { input }) => {
+      // TODO: 실제 데이터베이스에 데이터 저장
+      return null;
+    },
+    updateProperty: (_, { id, input }) => {
+      // TODO: 실제 데이터베이스에서 데이터 업데이트
+      return null;
+    },
+    deleteProperty: () => {
+      // TODO: 실제 데이터베이스에서 데이터 삭제
+      return false;
+    },
+    createUser: (_, { input }) => {
+      // TODO: 실제 데이터베이스에 사용자 저장
+      return null;
+    },
+    updateUser: (_, { id, input }) => {
+      // TODO: 실제 데이터베이스에서 사용자 업데이트
+      return null;
+    },
+    deleteUser: () => {
+      // TODO: 실제 데이터베이스에서 사용자 삭제
+      return false;
+    }
   }
 };
 
