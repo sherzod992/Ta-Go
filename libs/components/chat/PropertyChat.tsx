@@ -243,23 +243,38 @@ const PropertyChat: React.FC<PropertyChatProps> = ({
             p: 3
           }}>
             <ChatIcon sx={{ fontSize: 48, mb: 2, opacity: 0.5 }} />
-            <Typography variant="h6" sx={{ mb: 2 }}>
+            <Typography variant="h6" sx={{ mb: 2, color: '#4CAF50' }}>
               로그인이 필요합니다
             </Typography>
             <Typography variant="body1" sx={{ mb: 3, opacity: 0.8 }}>
               채팅을 이용하려면 로그인해주세요
             </Typography>
-            <Button 
-              variant="contained" 
-              color="primary"
-              onClick={() => window.location.href = '/login'}
-              sx={{ 
-                backgroundColor: '#667eea',
-                '&:hover': { backgroundColor: '#5a6fd8' }
-              }}
-            >
-              로그인하기
-            </Button>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <Button 
+                variant="contained" 
+                onClick={() => window.location.href = '/login'}
+                sx={{ 
+                  backgroundColor: '#4CAF50',
+                  '&:hover': { backgroundColor: '#45a049' }
+                }}
+              >
+                로그인하기
+              </Button>
+              <Button 
+                variant="outlined" 
+                onClick={onClose}
+                sx={{ 
+                  borderColor: '#9e9e9e',
+                  color: '#9e9e9e',
+                  '&:hover': { 
+                    borderColor: '#757575',
+                    backgroundColor: '#f5f5f5'
+                  }
+                }}
+              >
+                닫기
+              </Button>
+            </Box>
           </Box>
         ) : loading.messages ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>

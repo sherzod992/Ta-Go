@@ -14,6 +14,15 @@ export interface Member {
 	memberImage?: string;
 	memberAddress?: string;
 	memberDesc?: string;
+	
+	// 소셜 로그인 필드들 (선택적)
+	socialId?: string;
+	socialProvider?: AuthProvider;
+	// 민감한 토큰 정보는 제외 (보안상 필요시에만 요청)
+	// socialAccessToken?: string;
+	// socialRefreshToken?: string;
+	// socialTokenExpiresAt?: Date;
+	
 	memberProperties: number;
 	memberRank: number;
 	memberArticles: number;

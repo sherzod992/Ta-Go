@@ -82,6 +82,13 @@ const CommunityDetailPage: NextPage<CommunityDetailPageProps> = ({ id }) => {
     fetchPolicy: 'cache-and-network',
     errorPolicy: 'all', // 에러가 있어도 데이터를 표시
     skip: !article?._id, // 게시글이 로드된 후에만 댓글 조회
+    onError: (error) => {
+      console.error('댓글 조회 실패:', error);
+      // 사용자에게 적절한 에러 메시지 표시
+      if (error.message.includes('Cannot query field')) {
+        console.log('스키마 불일치 에러 - 백엔드 업데이트 필요');
+      }
+    }
   });
 
   // 좋아요 뮤테이션

@@ -96,6 +96,79 @@ hr {
 	}
 }
 
+// SweetAlert 채팅 로그인 알림 스타일
+.chat-login-alert {
+	.swal2-title {
+		color: #4CAF50 !important;
+		font-weight: 600;
+	}
+	
+	.swal2-content {
+		color: #333 !important;
+		font-size: 1rem;
+		line-height: 1.5;
+	}
+}
+
+.chat-login-confirm-btn {
+	background-color: #4CAF50 !important;
+	border-color: #4CAF50 !important;
+	
+	&:hover {
+		background-color: #45a049 !important;
+		border-color: #45a049 !important;
+	}
+}
+
+.chat-login-cancel-btn {
+	background-color: #9e9e9e !important;
+	border-color: #9e9e9e !important;
+	
+	&:hover {
+		background-color: #757575 !important;
+		border-color: #757575 !important;
+	}
+}
+
+// 매물 상세 페이지 스타일
+.property-detail {
+	.property-gallery {
+		.main-image-container {
+			margin-bottom: 1rem;
+			
+			.main-image {
+				transition: transform 0.3s ease;
+				
+				&:hover {
+					transform: scale(1.02);
+				}
+			}
+		}
+		
+		.image-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+			gap: 0.5rem;
+			
+			.thumbnail-container {
+				aspect-ratio: 1;
+				overflow: hidden;
+				border-radius: 8px;
+				cursor: pointer;
+				transition: transform 0.3s ease;
+				
+				&:hover {
+					transform: scale(1.05);
+				}
+				
+				.thumbnail {
+					transition: transform 0.3s ease;
+				}
+			}
+		}
+	}
+}
+
 // PhoneInput 스타일 개선
 .PhoneInput {
   .PhoneInputCountry {

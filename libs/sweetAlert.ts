@@ -68,6 +68,33 @@ export const sweetLoginConfirmAlert = (msg: string) => {
 	});
 };
 
+// 채팅 로그인 확인 알림 (초록색 테마)
+export const sweetChatLoginConfirmAlert = (msg: string) => {
+	return new Promise(async (resolve, reject) => {
+		await Swal.fire({
+			title: '로그인이 필요합니다',
+			text: msg,
+			icon: 'info',
+			showCancelButton: true,
+			showConfirmButton: true,
+			confirmButtonText: '예',
+			cancelButtonText: '아니요',
+			confirmButtonColor: '#4CAF50', // 초록색
+			cancelButtonColor: '#9e9e9e',
+			background: '#f8f9fa',
+			color: '#333',
+			customClass: {
+				popup: 'chat-login-alert',
+				confirmButton: 'chat-login-confirm-btn',
+				cancelButton: 'chat-login-cancel-btn'
+			}
+		}).then((response) => {
+			if (response?.isConfirmed) resolve(true);
+			else resolve(false);
+		});
+	});
+};
+
 export const sweetErrorAlert = async (msg: string, duration: number = 3000) => {
 	await Swal.fire({
 		icon: 'error',

@@ -259,77 +259,63 @@ const BuyPageMobile: React.FC = () => {
 
         {/* 검색 필터 */}
         <Paper className="search-section" sx={{ p: 2, mb: 2 }}>
-          {/* 매물 타입 - 가로 레이아웃, 한 화면에 4개만 보이고 나머지는 가로 스크롤 */}
+          {/* 매물 타입 - 2줄로 4개씩 배치 */}
           <Box sx={{ marginBottom: 2 }}>
             <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', mb: 1 }}>
               {t('Motorcycle Types')}
             </Typography>
-            <Box sx={{ 
-              display: 'flex', 
-              gap: 1, 
-              overflowX: 'auto',
-              pb: 1,
-              '&::-webkit-scrollbar': {
-                height: '4px'
-              },
-              '&::-webkit-scrollbar-track': {
-                background: '#f1f1f1',
-                borderRadius: '2px'
-              },
-              '&::-webkit-scrollbar-thumb': {
-                background: '#c1c1c1',
-                borderRadius: '2px'
-              }
-            }}>
+            <Grid container spacing={1}>
               {bikeCategories.map((categoryItem) => (
-                <Box
-                  key={categoryItem.name}
-                  onClick={() => {
-                    setSelectedCategory(selectedCategory === categoryItem.name ? 'all' : categoryItem.name);
-                  }}
-                  sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    cursor: 'pointer',
-                    padding: 1,
-                    borderRadius: 2,
-                    transition: 'all 0.2s',
-                    backgroundColor: selectedCategory === categoryItem.name ? 'rgba(25, 118, 210, 0.1)' : 'transparent',
-                    border: selectedCategory === categoryItem.name ? '2px solid #1976d2' : '2px solid transparent',
-                    minWidth: '80px',
-                    flexShrink: 0,
-                    '&:hover': {
-                      backgroundColor: 'rgba(0, 0, 0, 0.05)',
-                      transform: 'translateY(-2px)',
-                    },
-                  }}
-                >
+                <Grid item xs={3} key={categoryItem.name}>
                   <Box
-                    component="img"
-                    src={categoryItem.image}
-                    alt={categoryItem.name}
-                    sx={{
-                      width: 40,
-                      height: 40,
-                      objectFit: 'contain',
-                      marginBottom: 0.5,
+                    onClick={() => {
+                      setSelectedCategory(selectedCategory === categoryItem.name ? 'all' : categoryItem.name);
                     }}
-                  />
-                  <Typography
-                    variant="caption"
                     sx={{
-                      textAlign: 'center',
-                      fontWeight: 500,
-                      color: selectedCategory === categoryItem.name ? '#1976d2' : '#333',
-                      fontSize: '0.7rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      cursor: 'pointer',
+                      padding: 1,
+                      borderRadius: 2,
+                      transition: 'all 0.2s',
+                      backgroundColor: selectedCategory === categoryItem.name ? 'rgba(25, 118, 210, 0.1)' : 'transparent',
+                      border: selectedCategory === categoryItem.name ? '2px solid #1976d2' : '2px solid transparent',
+                      '&:hover': {
+                        backgroundColor: 'rgba(0, 0, 0, 0.05)',
+                        transform: 'translateY(-2px)',
+                      },
                     }}
                   >
-                    {categoryItem.name}
-                  </Typography>
-                </Box>
+                    <Box
+                      component="img"
+                      src={categoryItem.image}
+                      alt={categoryItem.name}
+                      sx={{
+                        width: '100%',
+                        height: '60px',
+                        objectFit: 'cover',
+                        borderRadius: 1,
+                        marginBottom: 0.5,
+                        aspectRatio: '1/1',
+                      }}
+                    />
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        textAlign: 'center',
+                        fontWeight: 500,
+                        color: selectedCategory === categoryItem.name ? '#1976d2' : '#333',
+                        fontSize: '0.6rem',
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      {categoryItem.name}
+                    </Typography>
+                  </Box>
+                </Grid>
               ))}
-            </Box>
+            </Grid>
           </Box>
 
           {/* 브랜드/키워드/위치/컨디션 - 매물 타입 아래에 가로 정렬 */}
@@ -735,21 +721,59 @@ const BuyPageMobile: React.FC = () => {
             </ListItem>
             
             <ListItem>
-              <FormControl fullWidth>
-                <InputLabel>{t('Motorcycle Types')}</InputLabel>
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                  {bikeCategories.map((categoryItem) => (
-                    <Chip
-                      key={categoryItem.name}
-                      label={categoryItem.name}
+              <Typography variant="subtitle2" gutterBottom>
+                {t('Motorcycle Types')}
+              </Typography>
+              <Grid container spacing={1}>
+                {bikeCategories.map((categoryItem) => (
+                  <Grid item xs={6} key={categoryItem.name}>
+                    <Box
                       onClick={() => setSelectedCategory(selectedCategory === categoryItem.name ? 'all' : categoryItem.name)}
-                      color={selectedCategory === categoryItem.name ? 'primary' : 'default'}
-                      variant={selectedCategory === categoryItem.name ? 'filled' : 'outlined'}
-                      sx={{ cursor: 'pointer' }}
-                    />
-                  ))}
-                </Box>
-              </FormControl>
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        cursor: 'pointer',
+                        padding: 1,
+                        borderRadius: 2,
+                        transition: 'all 0.3s ease',
+                        backgroundColor: selectedCategory === categoryItem.name ? 'rgba(25, 118, 210, 0.1)' : 'transparent',
+                        border: selectedCategory === categoryItem.name ? '2px solid #1976d2' : '2px solid transparent',
+                        '&:hover': {
+                          backgroundColor: 'rgba(25, 118, 210, 0.05)',
+                          borderColor: '#1976d2',
+                        },
+                      }}
+                    >
+                      <Box
+                        component="img"
+                        src={categoryItem.image}
+                        alt={categoryItem.name}
+                        sx={{
+                          width: '100%',
+                          height: '60px',
+                          objectFit: 'cover',
+                          borderRadius: 1,
+                          marginBottom: 0.5,
+                          aspectRatio: '1/1',
+                        }}
+                      />
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          textAlign: 'center',
+                          fontWeight: 500,
+                          color: selectedCategory === categoryItem.name ? '#1976d2' : '#333',
+                          fontSize: '0.6rem',
+                          lineHeight: 1.2,
+                        }}
+                      >
+                        {categoryItem.name}
+                      </Typography>
+                    </Box>
+                  </Grid>
+                ))}
+              </Grid>
             </ListItem>
             
             <ListItem>

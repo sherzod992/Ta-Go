@@ -96,6 +96,8 @@ export const GET_ALL_PROPERTIES_BY_ADMIN = gql`
                 memberImage
                 memberAddress
                 memberDesc
+                socialId
+                socialProvider
                 memberProperties
                 memberArticles
                 memberFollowers
@@ -151,6 +153,8 @@ export const GET_ALL_BOARD_ARTICLES_BY_ADMIN = gql`
             memberImage
             memberAddress
             memberDesc
+            socialId
+            socialProvider
             memberProperties
             memberArticles
             memberFollowers
@@ -205,9 +209,6 @@ export const GET_COMMENTS = gql`
                 memberDesc
                 socialId
                 socialProvider
-                socialAccessToken
-                socialRefreshToken
-                socialTokenExpiresAt
                 memberProperties
                 memberArticles
                 memberFollowers

@@ -372,62 +372,7 @@ const BuyPageDesktop: React.FC = () => {
         </Grid>
       </Paper>
 
-      {/* 바이크 카테고리 */}
-      <Paper sx={{ p: 2, mb: 3 }}>
-        <Typography variant="h6" gutterBottom>
-          {t('Bike Categories')}
-        </Typography>
-        <Grid container spacing={1}>
-          {bikeCategories.map((category) => (
-            <Grid item xs={3} sm={1.5} key={category.value}>
-              <Box
-                onClick={() => setSelectedCategory(selectedCategory === category.name ? 'all' : category.name)}
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  padding: 1,
-                  border: selectedCategory === category.name ? '2px solid #1976d2' : '2px solid transparent',
-                  borderRadius: 2,
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  backgroundColor: selectedCategory === category.name ? 'rgba(25, 118, 210, 0.1)' : 'transparent',
-                  '&:hover': {
-                    backgroundColor: 'rgba(25, 118, 210, 0.05)',
-                    borderColor: '#1976d2',
-                  },
-                }}
-              >
-                <Box
-                  component="img"
-                  src={category.image}
-                  alt={category.name}
-                  sx={{
-                    width: '100%',
-                    height: '120px',
-                    objectFit: 'cover',
-                    borderRadius: 1,
-                    marginBottom: 0.5,
-                    aspectRatio: '1/1',
-                  }}
-                />
-                <Typography
-                  variant="caption"
-                  sx={{
-                    textAlign: 'center',
-                    fontWeight: 500,
-                    color: selectedCategory === category.name ? '#1976d2' : '#333',
-                    fontSize: '0.7rem',
-                    lineHeight: 1.2,
-                  }}
-                >
-                  {category.name}
-                </Typography>
-              </Box>
-            </Grid>
-          ))}
-        </Grid>
-      </Paper>
+
 
       {/* 매물 목록 */}
       <Grid container spacing={3}>

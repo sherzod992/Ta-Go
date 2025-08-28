@@ -5,7 +5,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // CORS 설정 (개발 환경 고려)
 const allowedOrigins = [

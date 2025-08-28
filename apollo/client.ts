@@ -29,6 +29,15 @@ const createWebSocketWithLogging = (url: string) => {
 
 // 환경 변수에서 API URL 가져오기
 const getApiUrl = () => {
+  // 브라우저에서 실행 중이고 ta-go.shop 도메인인 경우 강제로 도메인 사용
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    if (hostname === 'ta-go.shop' || hostname === 'www.ta-go.shop') {
+      console.log('🔧 강제로 도메인 API URL 사용:', 'https://ta-go.shop/graphql');
+      return 'https://ta-go.shop/graphql';
+    }
+  }
+  
   // 개발 환경에서는 localhost 우선, 없으면 원격 서버 사용
   if (process.env.NODE_ENV === 'development') {
     const localUrl = process.env.NEXT_PUBLIC_LOCAL_API_URL || 'http://localhost:3000';
@@ -52,6 +61,15 @@ const getApiUrl = () => {
 };
 
 const getWsUrl = () => {
+  // 브라우저에서 실행 중이고 ta-go.shop 도메인인 경우 강제로 도메인 사용
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    if (hostname === 'ta-go.shop' || hostname === 'www.ta-go.shop') {
+      console.log('🔧 강제로 도메인 WebSocket URL 사용:', 'wss://ta-go.shop/graphql');
+      return 'wss://ta-go.shop/graphql';
+    }
+  }
+  
   // 개발 환경에서는 localhost 우선, 없으면 원격 서버 사용
   if (process.env.NODE_ENV === 'development') {
     const localWsUrl = process.env.NEXT_PUBLIC_LOCAL_WS_URL || 'ws://localhost:3000';
@@ -188,22 +206,33 @@ const tokenRefreshLink = process.env.NODE_ENV === 'development'
 
 // 에러 처리 링크
 const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) => {
-  // 개발 환경에서는 에러 로깅만 하고 조용히 처리
-  if (process.env.NODE_ENV === 'development') {
-    if (graphQLErrors) {
-      graphQLErrors.forEach(({ message, locations, path }) => {
-        console.log(`[DEV] GraphQL 에러 무시: ${message} (${operation.operationName})`);
-      });
-    }
-    if (networkError) {
-      console.log(`[DEV] 네트워크 에러 무시: ${networkError.message} (${operation.operationName})`);
-    }
-    return; // 개발 환경에서는 에러를 무시하고 계속 진행
-  }
+  // 모든 에러에 대해 상세한 로깅 추가
+  console.log(`[ERROR_LINK] 작업: ${operation.operationName}`);
+  console.log(`[ERROR_LINK] 변수:`, operation.variables);
   
-  // 프로덕션 환경에서만 에러 처리
+  // Bearer Token 에러 특별 처리
   if (graphQLErrors) {
     graphQLErrors.forEach(({ message, locations, path }) => {
+      console.log(`[ERROR_LINK] GraphQL 에러 감지: ${message}`);
+      
+      // Bearer Token 에러인 경우 사용자 친화적인 메시지로 처리
+      if (message.includes('Bearer Token') || message.includes('not provided')) {
+        console.log(`[AUTH] Bearer Token 에러 감지: ${operation.operationName}`);
+        // 개발 환경에서는 에러를 조용히 처리하고, 프로덕션에서는 로그인 안내
+        if (process.env.NODE_ENV === 'production') {
+          // 프로덕션에서는 로그인 페이지로 리다이렉트하지 않고 조용히 처리
+          console.log('Bearer Token 에러 - 사용자가 로그인하지 않음');
+        }
+        return; // 에러를 무시하고 계속 진행
+      }
+      
+      // 개발 환경에서는 에러 로깅만 하고 조용히 처리
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`[DEV] GraphQL 에러 무시: ${message} (${operation.operationName})`);
+        return;
+      }
+      
+      // 프로덕션 환경에서만 다른 에러들 처리
       console.error(
         `GraphQL 에러: ${message}`,
         `위치: ${locations}`,
@@ -215,6 +244,19 @@ const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) 
   }
 
   if (networkError) {
+    console.log(`[ERROR_LINK] 네트워크 에러 감지:`, networkError);
+    console.log(`[ERROR_LINK] 네트워크 에러 메시지: ${networkError.message}`);
+    // statusCode가 존재하는지 확인 후 로깅
+    if ('statusCode' in networkError) {
+      console.log(`[ERROR_LINK] 네트워크 에러 상태:`, networkError.statusCode);
+    }
+    
+    // 개발 환경에서는 네트워크 에러도 조용히 처리
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[DEV] 네트워크 에러 무시: ${networkError.message} (${operation.operationName})`);
+      return;
+    }
+    
     console.error('네트워크 에러:', networkError);
     console.error('네트워크 에러 작업:', operation.operationName);
     

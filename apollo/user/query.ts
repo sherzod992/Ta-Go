@@ -342,9 +342,6 @@ export const GET_FAVORITES = gql`
 					memberDesc
 					socialId
 					socialProvider
-					socialAccessToken
-					socialRefreshToken
-					socialTokenExpiresAt
 					memberProperties
 					memberArticles
 					memberFollowers
@@ -415,6 +412,8 @@ export const GET_VISITED = gql`
 					memberImage
 					memberAddress
 					memberDesc
+					socialId
+					socialProvider
 					memberProperties
 					memberArticles
 					memberFollowers
@@ -470,6 +469,8 @@ export const GET_BOARD_ARTICLE = gql`
             memberImage
             memberAddress
             memberDesc
+            socialId
+            socialProvider
             memberProperties
             memberArticles
             memberFollowers
@@ -574,9 +575,6 @@ export const GET_COMMENTS = gql`
 					memberDesc
 					socialId
 					socialProvider
-					socialAccessToken
-					socialRefreshToken
-					socialTokenExpiresAt
 					memberProperties
 					memberArticles
 					memberFollowers
@@ -637,9 +635,6 @@ export const GET_MEMBER_FOLLOWERS = gql`
 					memberDesc
 					socialId
 					socialProvider
-					socialAccessToken
-					socialRefreshToken
-					socialTokenExpiresAt
 					memberProperties
 					memberArticles
 					memberFollowers
@@ -685,11 +680,6 @@ export const GET_MEMBER_FOLLOWINGS = gql`
 					memberImage
 					memberAddress
 					memberDesc
-					socialId
-					socialProvider
-					socialAccessToken
-					socialRefreshToken
-					socialTokenExpiresAt
 					memberProperties
 					memberArticles
 					memberFollowers
