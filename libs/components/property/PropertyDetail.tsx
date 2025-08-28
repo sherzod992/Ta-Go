@@ -120,15 +120,16 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) =>
 								<Image
 									src={property.propertyImages[0]}
 									alt={property.propertyTitle}
-									width={600}
-									height={400}
+									width={400}
+									height={300}
 									className="main-image"
 									quality={85}
 									priority
 									style={{
 										width: '100%',
 										height: 'auto',
-										maxHeight: '350px',
+										maxHeight: '250px',
+										maxWidth: '400px',
 										objectFit: 'cover',
 										borderRadius: '8px'
 									}}
@@ -141,8 +142,8 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) =>
 											<Image
 												src={image}
 												alt={`${property.propertyTitle} ${index + 2}`}
-												width={150}
-												height={100}
+												width={120}
+												height={120}
 												className="thumbnail"
 												quality={85}
 												style={{
