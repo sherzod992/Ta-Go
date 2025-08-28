@@ -15,30 +15,63 @@ echo "📥 최신 코드 강제 가져오기..."
 git fetch origin main
 git reset --hard origin/main
 
-# 4. Node.js 및 Yarn 설치 확인
+# 4. 환경 변수 파일 업데이트
+echo "🔧 환경 변수 파일 업데이트..."
+cat > env.production << 'ENVEOF'
+# 프로덕션 환경 변수 설정
+NODE_ENV=production
+
+# API URLs
+NEXT_PUBLIC_API_URL=https://ta-go.shop
+NEXT_PUBLIC_API_GRAPHQL_URL=https://ta-go.shop/graphql
+NEXT_PUBLIC_API_WS=wss://ta-go.shop
+
+# 서버 설정
+PORT=3011
+HOSTNAME=0.0.0.0
+
+# Authentication
+NEXTAUTH_URL=https://ta-go.shop
+NEXTAUTH_SECRET=your-production-secret-key-here
+
+# OAuth Providers (실제 값으로 교체 필요)
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+
+FACEBOOK_CLIENT_ID=your-facebook-client-id
+FACEBOOK_CLIENT_SECRET=your-facebook-client-secret
+
+GITHUB_CLIENT_ID=your-github-client-id
+GITHUB_CLIENT_SECRET=your-github-client-secret
+
+KAKAO_CLIENT_ID=your-kakao-client-id
+KAKAO_CLIENT_SECRET=your-kakao-client-secret
+ENVEOF
+
+# 5. Node.js 및 Yarn 설치 확인
 echo "🔧 Node.js 및 Yarn 설치 확인..."
 if ! command -v yarn &> /dev/null; then
     echo "📦 Yarn 설치 중..."
     npm install -g yarn
 fi
 
-# 5. 의존성 설치 (legacy-peer-deps 플래그 사용)
+# 6. 의존성 설치 (legacy-peer-deps 플래그 사용)
 echo "📦 의존성 설치..."
 npm install --legacy-peer-deps
 
-# 6. 프론트엔드 빌드
+# 7. 프론트엔드 빌드
 echo "🔨 프론트엔드 빌드..."
 npm run build
 
-# 7. 백엔드 디렉토리로 이동
+# 8. 백엔드 디렉토리로 이동
 echo "🔄 백엔드 설정..."
 cd server
 
-# 8. 백엔드 의존성 설치
+# 9. 백엔드 의존성 설치
 echo "📦 백엔드 의존성 설치..."
 npm install
 
-# 9. PM2 프로세스 확인 및 시작
+# 10. PM2 프로세스 확인 및 시작
 echo "🚀 PM2 프로세스 시작..."
 if pm2 list | grep -q "ta-go-backend"; then
     echo "🔄 백엔드 재시작..."
@@ -48,7 +81,7 @@ else
     pm2 start backend.js --name ta-go-backend
 fi
 
-# 10. 프론트엔드 프로세스 시작
+# 11. 프론트엔드 프로세스 시작
 cd ..
 if pm2 list | grep -q "ta-go-frontend"; then
     echo "🔄 프론트엔드 재시작..."
@@ -58,13 +91,19 @@ else
     pm2 start npm --name ta-go-frontend -- start
 fi
 
-# 11. PM2 설정 저장
+# 12. PM2 설정 저장
 echo "💾 PM2 설정 저장..."
 pm2 save
 
-# 12. 상태 확인
+# 13. 상태 확인
 echo "📊 서비스 상태 확인..."
 pm2 status
+
+# 14. 환경 변수 확인
+echo "🔍 환경 변수 확인..."
+echo "=== env.production 내용 ==="
+cat env.production
+echo "=========================="
 
 echo "✅ 배포 완료!"
 EOF
