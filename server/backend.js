@@ -195,7 +195,17 @@ const resolvers = {
             memberData: {
               id: '1',
               username: '김바이커',
-              email: 'biker@example.com'
+              email: 'biker@example.com',
+              memberPoints: 100,
+              memberLikes: 25,
+              memberViews: 150,
+              memberComments: 8,
+              memberRank: 1,
+              memberWarnings: 0,
+              memberBlocks: 0,
+              accessToken: null,
+              updatedAt: new Date().toISOString(),
+              deletedAt: null
             }
           }
         ],
@@ -219,7 +229,17 @@ const resolvers = {
         memberData: {
           id: '1',
           username: '김바이커',
-          email: 'biker@example.com'
+          email: 'biker@example.com',
+          memberPoints: 100,
+          memberLikes: 25,
+          memberViews: 150,
+          memberComments: 8,
+          memberRank: 1,
+          memberWarnings: 0,
+          memberBlocks: 0,
+          accessToken: null,
+          updatedAt: new Date().toISOString(),
+          deletedAt: null
         }
       };
     },
