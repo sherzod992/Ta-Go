@@ -11,6 +11,7 @@ import { Chat as ChatIcon, Close as CloseIcon } from '@mui/icons-material';
 import { ChatMessage } from '../../types/chat/chat';
 import { userVar } from '../../../apollo/store';
 import SkeletonUI from '../common/SkeletonUI';
+import Image from 'next/image';
 
 interface PropertyDetailProps {
 	propertyId: string;
@@ -115,20 +116,43 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ propertyId }) =>
 					{/* 매물 이미지 갤러리 */}
 					{property.propertyImages && property.propertyImages.length > 0 && (
 						<div className="property-gallery">
-							<img
-								src={property.propertyImages[0]}
-								alt={property.propertyTitle}
-								className="main-image"
-							/>
+							<div className="main-image-container">
+								<Image
+									src={property.propertyImages[0]}
+									alt={property.propertyTitle}
+									width={800}
+									height={600}
+									className="main-image"
+									quality={85}
+									priority
+									style={{
+										width: '100%',
+										height: 'auto',
+										maxHeight: '500px',
+										objectFit: 'cover',
+										borderRadius: '8px'
+									}}
+								/>
+							</div>
 							{property.propertyImages.length > 1 && (
 								<div className="image-grid">
 									{property.propertyImages.slice(1, 4).map((image, index) => (
-										<img
-											key={index}
-											src={image}
-											alt={`${property.propertyTitle} ${index + 2}`}
-											className="thumbnail"
-										/>
+										<div key={index} className="thumbnail-container">
+											<Image
+												src={image}
+												alt={`${property.propertyTitle} ${index + 2}`}
+												width={200}
+												height={150}
+												className="thumbnail"
+												quality={85}
+												style={{
+													width: '100%',
+													height: '100%',
+													objectFit: 'cover',
+													borderRadius: '4px'
+												}}
+											/>
+										</div>
 									))}
 								</div>
 							)}

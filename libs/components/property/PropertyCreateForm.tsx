@@ -237,7 +237,7 @@ const PropertyCreateForm: React.FC = () => {
     );
   }
 
-  // 이미지 압축 함수
+  // 이미지 압축 함수 (화질 개선)
   const compressImage = (file: File): Promise<File> => {
     return new Promise((resolve) => {
       const canvas = document.createElement('canvas');
@@ -245,11 +245,18 @@ const PropertyCreateForm: React.FC = () => {
       const img = new Image();
       
       img.onload = () => {
-        // 최대 크기 설정 (400x300으로 더 작게)
-        const maxWidth = 400;
-        const maxHeight = 300;
+        // 최대 크기 설정 (화질 개선을 위해 더 큰 크기로 설정)
+        const maxWidth = 1200;
+        const maxHeight = 900;
         let { width, height } = img;
         
+        // 원본 크기가 최대 크기보다 작으면 압축하지 않음
+        if (width <= maxWidth && height <= maxHeight) {
+          resolve(file);
+          return;
+        }
+        
+        // 비율 유지하면서 크기 조정
         if (width > height) {
           if (width > maxWidth) {
             height = (height * maxWidth) / width;
@@ -265,6 +272,12 @@ const PropertyCreateForm: React.FC = () => {
         canvas.width = width;
         canvas.height = height;
         
+        // 이미지 스무딩 설정으로 화질 개선
+        if (ctx) {
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+        }
+        
         ctx?.drawImage(img, 0, 0, width, height);
         
         canvas.toBlob((blob) => {
@@ -277,7 +290,7 @@ const PropertyCreateForm: React.FC = () => {
           } else {
             resolve(file);
           }
-        }, 'image/jpeg', 0.5); // 50% 품질로 더 압축
+        }, 'image/jpeg', 0.85); // 85% 품질로 화질 개선
       };
       
       img.src = URL.createObjectURL(file);
@@ -296,10 +309,10 @@ const PropertyCreateForm: React.FC = () => {
       return;
     }
 
-    // 파일 크기 검증 (각 파일 최대 500KB)
+    // 파일 크기 검증 (각 파일 최대 2MB로 증가)
     for (const file of newFiles) {
-      if (file.size > 500 * 1024) {
-        setError('각 이미지 파일은 500KB 이하여야 합니다.');
+      if (file.size > 2 * 1024 * 1024) {
+        setError('각 이미지 파일은 2MB 이하여야 합니다.');
         return;
       }
     }

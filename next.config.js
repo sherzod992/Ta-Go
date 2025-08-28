@@ -9,9 +9,16 @@ const nextConfig = {
 	},
 	// Docker 배포를 위한 설정
 	output: 'standalone',
-	// 로컬 개발을 위한 설정
+	// 이미지 최적화 설정
 	images: {
-		unoptimized: true
+		unoptimized: true,
+		// 이미지 품질 설정
+		quality: 85,
+		// 이미지 크기 제한
+		deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+		imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+		// 이미지 형식 지원
+		formats: ['image/webp', 'image/avif'],
 	},
 	// 개발 환경에서 안정성 향상을 위한 설정
 	...(process.env.NODE_ENV === 'development' && {
