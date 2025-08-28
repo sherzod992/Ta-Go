@@ -94,7 +94,17 @@ const typeDefs = gql`
     phone: String
     avatar: String
     createdAt: String
+    updatedAt: String
+    deletedAt: String
     properties: [Property]
+    memberPoints: Int
+    memberLikes: Int
+    memberViews: Int
+    memberComments: Int
+    memberRank: Int
+    memberWarnings: Int
+    memberBlocks: Int
+    accessToken: String
   }
 
   type BoardArticle {
