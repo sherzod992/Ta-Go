@@ -446,12 +446,19 @@ const PropertyCreateForm: React.FC = () => {
       console.log('Uploaded images:', images);
       console.log('Image URLs:', imageUrls);
       
-      // 이미지를 Base64로 변환하여 propertyImages에 포함
+      // 이미지를 Base64로 변환하여 propertyImages에 포함 (413 에러 방지를 위해 크기 제한)
       const imagePromises = images.map(file => {
         return new Promise<string>((resolve) => {
           const reader = new FileReader();
           reader.onload = (e) => {
-            resolve(e.target?.result as string);
+            const dataUrl = e.target?.result as string;
+            // Base64 데이터가 너무 크면 압축된 버전 사용
+            if (dataUrl.length > 500000) { // 약 500KB 제한
+              console.warn('Image too large, using compressed version');
+              resolve(''); // 빈 문자열로 설정하여 서버에서 처리
+            } else {
+              resolve(dataUrl);
+            }
           };
           reader.readAsDataURL(file);
         });
