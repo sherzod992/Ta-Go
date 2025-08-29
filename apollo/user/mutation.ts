@@ -5,34 +5,17 @@ import { gql } from '@apollo/client';
  *************************/
 
 export const SIGN_UP = gql`
-	mutation Signup($input: MemberInput!) {
+	mutation Signup($input: SignupInput!) {
 		signup(input: $input) {
-			_id
-			memberType
-			memberStatus
-			memberAuthType
-			memberPhone
-			memberEmail
-			memberNick
-			memberFullName
-			memberImage
-			memberAddress
-			memberDesc
-			memberProperties
-			memberArticles
-			memberFollowers
-			memberFollowings
-			memberPoints
-			memberLikes
-			memberViews
-			memberComments
-			memberRank
-			memberWarnings
-			memberBlocks
-			deletedAt
-			createdAt
-			updatedAt
-			accessToken
+			success
+			message
+			token
+			member {
+				id
+				email
+				nickname
+				createdAt
+			}
 		}
 	}
 `;
@@ -40,32 +23,15 @@ export const SIGN_UP = gql`
 export const LOGIN = gql`
 	mutation Login($input: LoginInput!) {
 		login(input: $input) {
-			_id
-			memberType
-			memberStatus
-			memberAuthType
-			memberPhone
-			memberEmail
-			memberNick
-			memberFullName
-			memberImage
-			memberAddress
-			memberDesc
-			memberProperties
-			memberArticles
-			memberFollowers
-			memberFollowings
-			memberPoints
-			memberLikes
-			memberViews
-			memberComments
-			memberRank
-			memberWarnings
-			memberBlocks
-			deletedAt
-			createdAt
-			updatedAt
-			accessToken
+			success
+			message
+			token
+			member {
+				id
+				email
+				nickname
+				createdAt
+			}
 		}
 	}
 `;
@@ -143,31 +109,11 @@ export const LIKE_TARGET_MEMBER = gql`
 export const CREATE_PROPERTY = gql`
 	mutation CreateProperty($input: PropertyInput!) {
 		createProperty(input: $input) {
-			_id
-			propertyType
-			propertyStatus
-			propertyLocation
-			propertyAddress
-			propertyTitle
-			propertyPrice
-			propertyBrand
-			propertyModel
-			propertyYear
-			propertyMileage
-			propertyEngineSize
-			propertyFuelType
-			propertyTransmission
-			propertyColor
-			propertyCondition
-			propertyViews
-			propertyLikes
-			propertyComments
-			propertyRank
-			propertyImages
-			propertyDesc
-			memberId
-			soldAt
-			deletedAt
+			id
+			title
+			description
+			price
+			location
 			manufacturedAt
 			createdAt
 			updatedAt
