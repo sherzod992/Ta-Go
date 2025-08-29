@@ -196,7 +196,14 @@ export const updateStorage = ({ jwtToken }: { jwtToken: any }) => {
 export const updateUserInfo = (jwtToken: any) => {
 	if (!jwtToken) return false;
 
-	const claims = decodeJWT<CustomJwtPayload>(jwtToken);
+	// JWT 토큰 형식 검증
+	if (typeof jwtToken !== 'string' || !jwtToken.includes('.')) {
+		console.warn('Invalid JWT token format:', jwtToken);
+		return false;
+	}
+
+	try {
+		const claims = decodeJWT<CustomJwtPayload>(jwtToken);
 	userVar({
 		_id: claims._id ?? '',
 		memberType: claims.memberType ?? '',
@@ -220,6 +227,10 @@ export const updateUserInfo = (jwtToken: any) => {
 		memberWarnings: claims.memberWarnings,
 		memberBlocks: claims.memberBlocks,
 	});
+	} catch (error) {
+		console.error('JWT 토큰 디코드 실패:', error);
+		return false;
+	}
 };
 
 export const logOut = () => {
