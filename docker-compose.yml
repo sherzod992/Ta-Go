@@ -14,9 +14,9 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3011
-      - NEXT_PUBLIC_API_URL=http://72.60.40.57:3000
-      - NEXT_PUBLIC_API_GRAPHQL_URL=http://72.60.40.57:3000/graphql
-      - NEXT_PUBLIC_API_WS=ws://72.60.40.57:3000
+      - NEXT_PUBLIC_API_URL=http://ta-go.shop
+      - NEXT_PUBLIC_API_GRAPHQL_URL=http://ta-go.shop/graphql
+      - NEXT_PUBLIC_API_WS=ws://ta-go.shop
     restart: unless-stopped
     networks:
       - ta-go-network

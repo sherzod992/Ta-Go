@@ -22,16 +22,16 @@ cat > env.production << 'ENVEOF'
 NODE_ENV=production
 
 # API URLs
-NEXT_PUBLIC_API_URL=https://ta-go.shop
-NEXT_PUBLIC_API_GRAPHQL_URL=https://ta-go.shop/graphql
-NEXT_PUBLIC_API_WS=wss://ta-go.shop
+NEXT_PUBLIC_API_URL=http://ta-go.shop
+NEXT_PUBLIC_API_GRAPHQL_URL=http://ta-go.shop/graphql
+NEXT_PUBLIC_API_WS=ws://ta-go.shop
 
 # 서버 설정
 PORT=3011
 HOSTNAME=0.0.0.0
 
 # Authentication
-NEXTAUTH_URL=https://ta-go.shop
+NEXTAUTH_URL=http://ta-go.shop
 NEXTAUTH_SECRET=your-production-secret-key-here
 
 # OAuth Providers (실제 값으로 교체 필요)
