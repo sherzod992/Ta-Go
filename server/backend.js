@@ -102,14 +102,17 @@ const typeDefs = `
   }
 
   input LoginInput {
-    email: String!
-    password: String!
+    memberNick: String!
+    memberPassword: String!
   }
 
   input SignupInput {
-    email: String!
-    password: String!
-    nickname: String!
+    memberNick: String!
+    memberPassword: String!
+    memberPhone: String
+    memberEmail: String
+    memberType: String
+    memberAuthType: String
   }
 `;
 
@@ -169,9 +172,9 @@ const resolvers = {
             ...input
         }),
         login: (_, { input }) => {
-            console.log('Login attempt:', input.email);
+            console.log('Login attempt:', input.memberNick);
             // 임시 로그인 로직 (실제로는 데이터베이스 검증 필요)
-            if (input.email && input.password) {
+            if (input.memberNick && input.memberPassword) {
                 const now = new Date().toISOString();
                 const mockToken = `mock-jwt-token-${Date.now()}`;
                 return {
@@ -183,9 +186,9 @@ const resolvers = {
                     memberStatus: 'ACTIVE',
                     memberAuthType: 'EMAIL',
                     memberPhone: null,
-                    memberEmail: input.email,
-                    memberNick: '사용자',
-                    memberFullName: '사용자',
+                    memberEmail: input.memberEmail || `${input.memberNick}@example.com`,
+                    memberNick: input.memberNick,
+                    memberFullName: input.memberNick,
                     memberImage: null,
                     memberAddress: null,
                     memberDesc: null,
@@ -211,7 +214,7 @@ const resolvers = {
             } else {
                 return {
                     success: false,
-                    message: '이메일과 비밀번호를 입력해주세요',
+                    message: '닉네임과 비밀번호를 입력해주세요',
                     token: null,
                     _id: null,
                     memberType: null,
@@ -246,9 +249,9 @@ const resolvers = {
             }
         },
         signup: (_, { input }) => {
-            console.log('Signup attempt:', input.email);
+            console.log('Signup attempt:', input.memberNick);
             // 임시 회원가입 로직 (실제로는 데이터베이스 저장 필요)
-            if (input.email && input.password && input.nickname) {
+            if (input.memberNick && input.memberPassword) {
                 const now = new Date().toISOString();
                 const mockToken = `mock-jwt-token-${Date.now()}`;
                 return {
@@ -256,13 +259,13 @@ const resolvers = {
                     message: '회원가입 성공',
                     token: mockToken,
                     _id: Date.now().toString(),
-                    memberType: 'USER',
+                    memberType: input.memberType || 'USER',
                     memberStatus: 'ACTIVE',
-                    memberAuthType: 'EMAIL',
-                    memberPhone: null,
-                    memberEmail: input.email,
-                    memberNick: input.nickname,
-                    memberFullName: input.nickname,
+                    memberAuthType: input.memberAuthType || 'EMAIL',
+                    memberPhone: input.memberPhone || null,
+                    memberEmail: input.memberEmail || `${input.memberNick}@example.com`,
+                    memberNick: input.memberNick,
+                    memberFullName: input.memberNick,
                     memberImage: null,
                     memberAddress: null,
                     memberDesc: null,
@@ -288,7 +291,7 @@ const resolvers = {
             } else {
                 return {
                     success: false,
-                    message: '모든 필드를 입력해주세요',
+                    message: '닉네임과 비밀번호를 입력해주세요',
                     token: null,
                     _id: null,
                     memberType: null,
