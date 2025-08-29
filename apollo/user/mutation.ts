@@ -16,6 +16,11 @@ export const SIGN_UP = gql`
 				nickname
 				createdAt
 			}
+			deletedAt
+			createdAt
+			updatedAt
+			accessToken
+			refreshToken
 		}
 	}
 `;
@@ -32,6 +37,11 @@ export const LOGIN = gql`
 				nickname
 				createdAt
 			}
+			deletedAt
+			createdAt
+			updatedAt
+			accessToken
+			refreshToken
 		}
 	}
 `;
@@ -109,11 +119,31 @@ export const LIKE_TARGET_MEMBER = gql`
 export const CREATE_PROPERTY = gql`
 	mutation CreateProperty($input: PropertyInput!) {
 		createProperty(input: $input) {
-			id
-			title
-			description
-			price
-			location
+			_id
+			propertyType
+			propertyStatus
+			propertyLocation
+			propertyAddress
+			propertyTitle
+			propertyPrice
+			propertyBrand
+			propertyModel
+			propertyYear
+			propertyMileage
+			propertyEngineSize
+			propertyFuelType
+			propertyTransmission
+			propertyColor
+			propertyCondition
+			propertyViews
+			propertyLikes
+			propertyComments
+			propertyRank
+			propertyImages
+			propertyDesc
+			memberId
+			soldAt
+			deletedAt
 			manufacturedAt
 			createdAt
 			updatedAt

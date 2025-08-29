@@ -38,6 +38,18 @@ const typeDefs = `
     createdAt: String
   }
 
+  type AuthResponse {
+    success: Boolean!
+    message: String
+    token: String
+    member: Member
+    deletedAt: String
+    createdAt: String
+    updatedAt: String
+    accessToken: String
+    refreshToken: String
+  }
+
   type LoginResponse {
     success: Boolean!
     message: String
@@ -48,8 +60,8 @@ const typeDefs = `
   type Mutation {
     createProperty(input: PropertyInput!): Property
     createBoardArticle(input: BoardArticleInput!): BoardArticle
-    login(input: LoginInput!): LoginResponse
-    signup(input: SignupInput!): LoginResponse
+    login(input: LoginInput!): AuthResponse
+    signup(input: SignupInput!): AuthResponse
   }
 
   input PropertyInput {
@@ -137,6 +149,7 @@ const resolvers = {
             console.log('Login attempt:', input.email);
             // 임시 로그인 로직 (실제로는 데이터베이스 검증 필요)
             if (input.email && input.password) {
+                const now = new Date().toISOString();
                 const mockToken = `mock-jwt-token-${Date.now()}`;
                 return {
                     success: true,
@@ -146,15 +159,25 @@ const resolvers = {
                         id: '1',
                         email: input.email,
                         nickname: '사용자',
-                        createdAt: new Date().toISOString()
-                    }
+                        createdAt: now
+                    },
+                    deletedAt: null,
+                    createdAt: now,
+                    updatedAt: now,
+                    accessToken: mockToken,
+                    refreshToken: `refresh-token-${Date.now()}`
                 };
             } else {
                 return {
                     success: false,
                     message: '이메일과 비밀번호를 입력해주세요',
                     token: null,
-                    member: null
+                    member: null,
+                    deletedAt: null,
+                    createdAt: null,
+                    updatedAt: null,
+                    accessToken: null,
+                    refreshToken: null
                 };
             }
         },
@@ -162,6 +185,7 @@ const resolvers = {
             console.log('Signup attempt:', input.email);
             // 임시 회원가입 로직 (실제로는 데이터베이스 저장 필요)
             if (input.email && input.password && input.nickname) {
+                const now = new Date().toISOString();
                 const mockToken = `mock-jwt-token-${Date.now()}`;
                 return {
                     success: true,
@@ -171,15 +195,25 @@ const resolvers = {
                         id: Date.now().toString(),
                         email: input.email,
                         nickname: input.nickname,
-                        createdAt: new Date().toISOString()
-                    }
+                        createdAt: now
+                    },
+                    deletedAt: null,
+                    createdAt: now,
+                    updatedAt: now,
+                    accessToken: mockToken,
+                    refreshToken: `refresh-token-${Date.now()}`
                 };
             } else {
                 return {
                     success: false,
                     message: '모든 필드를 입력해주세요',
                     token: null,
-                    member: null
+                    member: null,
+                    deletedAt: null,
+                    createdAt: null,
+                    updatedAt: null,
+                    accessToken: null,
+                    refreshToken: null
                 };
             }
         }
