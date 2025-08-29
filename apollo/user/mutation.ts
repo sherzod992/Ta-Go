@@ -10,17 +10,35 @@ export const SIGN_UP = gql`
 			success
 			message
 			token
-			member {
-				id
-				email
-				nickname
-				createdAt
-			}
+			_id
+			memberType
+			memberStatus
+			memberAuthType
+			memberPhone
+			memberEmail
+			memberNick
+			memberFullName
+			memberImage
+			memberAddress
+			memberDesc
+			memberProperties
+			memberArticles
+			memberFollowers
+			memberFollowings
+			memberPoints
+			memberLikes
+			memberViews
+			memberComments
+			memberRank
+			memberWarnings
+			memberBlocks
 			deletedAt
 			createdAt
 			updatedAt
 			accessToken
 			refreshToken
+			meLiked
+			meFollowed
 		}
 	}
 `;
@@ -31,17 +49,35 @@ export const LOGIN = gql`
 			success
 			message
 			token
-			member {
-				id
-				email
-				nickname
-				createdAt
-			}
+			_id
+			memberType
+			memberStatus
+			memberAuthType
+			memberPhone
+			memberEmail
+			memberNick
+			memberFullName
+			memberImage
+			memberAddress
+			memberDesc
+			memberProperties
+			memberArticles
+			memberFollowers
+			memberFollowings
+			memberPoints
+			memberLikes
+			memberViews
+			memberComments
+			memberRank
+			memberWarnings
+			memberBlocks
 			deletedAt
 			createdAt
 			updatedAt
 			accessToken
 			refreshToken
+			meLiked
+			meFollowed
 		}
 	}
 `;

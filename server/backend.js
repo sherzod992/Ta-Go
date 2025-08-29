@@ -42,12 +42,35 @@ const typeDefs = `
     success: Boolean!
     message: String
     token: String
-    member: Member
+    _id: String
+    memberType: String
+    memberStatus: String
+    memberAuthType: String
+    memberPhone: String
+    memberEmail: String
+    memberNick: String
+    memberFullName: String
+    memberImage: String
+    memberAddress: String
+    memberDesc: String
+    memberProperties: [String]
+    memberArticles: [String]
+    memberFollowers: [String]
+    memberFollowings: [String]
+    memberPoints: Int
+    memberLikes: Int
+    memberViews: Int
+    memberComments: Int
+    memberRank: Int
+    memberWarnings: Int
+    memberBlocks: Int
     deletedAt: String
     createdAt: String
     updatedAt: String
     accessToken: String
     refreshToken: String
+    meLiked: Boolean
+    meFollowed: Boolean
   }
 
   type LoginResponse {
@@ -155,29 +178,70 @@ const resolvers = {
                     success: true,
                     message: '로그인 성공',
                     token: mockToken,
-                    member: {
-                        id: '1',
-                        email: input.email,
-                        nickname: '사용자',
-                        createdAt: now
-                    },
+                    _id: '1',
+                    memberType: 'USER',
+                    memberStatus: 'ACTIVE',
+                    memberAuthType: 'EMAIL',
+                    memberPhone: null,
+                    memberEmail: input.email,
+                    memberNick: '사용자',
+                    memberFullName: '사용자',
+                    memberImage: null,
+                    memberAddress: null,
+                    memberDesc: null,
+                    memberProperties: [],
+                    memberArticles: [],
+                    memberFollowers: [],
+                    memberFollowings: [],
+                    memberPoints: 0,
+                    memberLikes: 0,
+                    memberViews: 0,
+                    memberComments: 0,
+                    memberRank: 1,
+                    memberWarnings: 0,
+                    memberBlocks: 0,
                     deletedAt: null,
                     createdAt: now,
                     updatedAt: now,
                     accessToken: mockToken,
-                    refreshToken: `refresh-token-${Date.now()}`
+                    refreshToken: `refresh-token-${Date.now()}`,
+                    meLiked: false,
+                    meFollowed: false
                 };
             } else {
                 return {
                     success: false,
                     message: '이메일과 비밀번호를 입력해주세요',
                     token: null,
-                    member: null,
+                    _id: null,
+                    memberType: null,
+                    memberStatus: null,
+                    memberAuthType: null,
+                    memberPhone: null,
+                    memberEmail: null,
+                    memberNick: null,
+                    memberFullName: null,
+                    memberImage: null,
+                    memberAddress: null,
+                    memberDesc: null,
+                    memberProperties: null,
+                    memberArticles: null,
+                    memberFollowers: null,
+                    memberFollowings: null,
+                    memberPoints: null,
+                    memberLikes: null,
+                    memberViews: null,
+                    memberComments: null,
+                    memberRank: null,
+                    memberWarnings: null,
+                    memberBlocks: null,
                     deletedAt: null,
                     createdAt: null,
                     updatedAt: null,
                     accessToken: null,
-                    refreshToken: null
+                    refreshToken: null,
+                    meLiked: null,
+                    meFollowed: null
                 };
             }
         },
@@ -191,29 +255,70 @@ const resolvers = {
                     success: true,
                     message: '회원가입 성공',
                     token: mockToken,
-                    member: {
-                        id: Date.now().toString(),
-                        email: input.email,
-                        nickname: input.nickname,
-                        createdAt: now
-                    },
+                    _id: Date.now().toString(),
+                    memberType: 'USER',
+                    memberStatus: 'ACTIVE',
+                    memberAuthType: 'EMAIL',
+                    memberPhone: null,
+                    memberEmail: input.email,
+                    memberNick: input.nickname,
+                    memberFullName: input.nickname,
+                    memberImage: null,
+                    memberAddress: null,
+                    memberDesc: null,
+                    memberProperties: [],
+                    memberArticles: [],
+                    memberFollowers: [],
+                    memberFollowings: [],
+                    memberPoints: 0,
+                    memberLikes: 0,
+                    memberViews: 0,
+                    memberComments: 0,
+                    memberRank: 1,
+                    memberWarnings: 0,
+                    memberBlocks: 0,
                     deletedAt: null,
                     createdAt: now,
                     updatedAt: now,
                     accessToken: mockToken,
-                    refreshToken: `refresh-token-${Date.now()}`
+                    refreshToken: `refresh-token-${Date.now()}`,
+                    meLiked: false,
+                    meFollowed: false
                 };
             } else {
                 return {
                     success: false,
                     message: '모든 필드를 입력해주세요',
                     token: null,
-                    member: null,
+                    _id: null,
+                    memberType: null,
+                    memberStatus: null,
+                    memberAuthType: null,
+                    memberPhone: null,
+                    memberEmail: null,
+                    memberNick: null,
+                    memberFullName: null,
+                    memberImage: null,
+                    memberAddress: null,
+                    memberDesc: null,
+                    memberProperties: null,
+                    memberArticles: null,
+                    memberFollowers: null,
+                    memberFollowings: null,
+                    memberPoints: null,
+                    memberLikes: null,
+                    memberViews: null,
+                    memberComments: null,
+                    memberRank: null,
+                    memberWarnings: null,
+                    memberBlocks: null,
                     deletedAt: null,
                     createdAt: null,
                     updatedAt: null,
                     accessToken: null,
-                    refreshToken: null
+                    refreshToken: null,
+                    meLiked: null,
+                    meFollowed: null
                 };
             }
         }
