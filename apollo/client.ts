@@ -27,70 +27,60 @@ const createWebSocketWithLogging = (url: string) => {
   return ws;
 };
 
-// 환경 변수에서 API URL 가져오기
+// 환경 변수에서 API URL 가져오기 (백엔드 변경사항 반영)
 const getApiUrl = () => {
-  // 브라우저에서 실행 중이고 ta-go.shop 도메인인 경우 강제로 도메인 사용
+  // 브라우저에서 실행 중이고 ta-go.shop 도메인인 경우
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname;
     if (hostname === 'ta-go.shop' || hostname === 'www.ta-go.shop') {
-      console.log('🔧 강제로 도메인 API URL 사용:', 'http://ta-go.shop/graphql');
+      console.log('🔧 도메인 API URL 사용:', 'http://ta-go.shop/graphql');
       return 'http://ta-go.shop/graphql';
     }
   }
   
-  // 개발 환경에서는 localhost 우선, 없으면 원격 서버 사용
+  // 개발 환경에서는 로컬 서버 사용 (포트 3001)
   if (process.env.NODE_ENV === 'development') {
-    const localUrl = process.env.NEXT_PUBLIC_LOCAL_API_URL || 'http://localhost:3000';
-    const remoteUrl = process.env.NEXT_PUBLIC_REMOTE_API_URL || 'http://72.60.40.57:3001';
-    
-    // 환경 변수로 어떤 서버를 사용할지 선택 가능
-    const useLocal = process.env.NEXT_PUBLIC_USE_LOCAL === 'true';
-    
-    const baseUrl = useLocal ? localUrl : remoteUrl;
-    return baseUrl.endsWith('/graphql') ? baseUrl : `${baseUrl}/graphql`;
+    const localUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/graphql';
+    console.log('🔧 개발 환경 API URL:', localUrl);
+    return localUrl;
   }
   
   // 프로덕션에서는 도메인 사용
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || 
                   process.env.NEXT_PUBLIC_API_GRAPHQL_URL || 
-                  process.env.REACT_PUBLIC_API_GRAPHQL_URL || 
-                  'https://ta-go.shop';
+                  'http://ta-go.shop/graphql';
   
-  // /graphql 엔드포인트가 포함되어 있지 않으면 추가
-  return baseUrl.endsWith('/graphql') ? baseUrl : `${baseUrl}/graphql`;
+  console.log('🔧 프로덕션 API URL:', baseUrl);
+  return baseUrl;
 };
 
 const getWsUrl = () => {
-  // 브라우저에서 실행 중이고 ta-go.shop 도메인인 경우 강제로 도메인 사용
+  // 브라우저에서 실행 중이고 ta-go.shop 도메인인 경우
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname;
     if (hostname === 'ta-go.shop' || hostname === 'www.ta-go.shop') {
-      console.log('🔧 강제로 도메인 WebSocket URL 사용:', 'ws://ta-go.shop/graphql');
+      console.log('🔧 도메인 WebSocket URL 사용:', 'ws://ta-go.shop/graphql');
       return 'ws://ta-go.shop/graphql';
     }
   }
   
-  // 개발 환경에서는 localhost 우선, 없으면 원격 서버 사용
+  // 개발 환경에서는 로컬 서버 사용 (포트 3001)
   if (process.env.NODE_ENV === 'development') {
-    const localWsUrl = process.env.NEXT_PUBLIC_LOCAL_WS_URL || 'ws://localhost:3000';
-    const remoteWsUrl = process.env.NEXT_PUBLIC_REMOTE_WS_URL || 'ws://72.60.40.57:3001';
-    
-    // 환경 변수로 어떤 서버를 사용할지 선택 가능
-    const useLocal = process.env.NEXT_PUBLIC_USE_LOCAL === 'true';
-    
-    const baseWsUrl = useLocal ? localWsUrl : remoteWsUrl;
-    return baseWsUrl.endsWith('/graphql') ? baseWsUrl : `${baseWsUrl}/graphql`;
+    const localWsUrl = process.env.NEXT_PUBLIC_API_WS || 'ws://localhost:3001/graphql';
+    console.log('🔧 개발 환경 WebSocket URL:', localWsUrl);
+    return localWsUrl;
   }
   
   // 프로덕션에서는 도메인 사용
-  const baseWsUrl = process.env.NEXT_PUBLIC_API_WS || process.env.REACT_APP_API_WS || 'wss://ta-go.shop';
-  return baseWsUrl.endsWith('/graphql') ? baseWsUrl : `${baseWsUrl}/graphql`;
+  const baseWsUrl = process.env.NEXT_PUBLIC_API_WS || 'ws://ta-go.shop/graphql';
+  console.log('🔧 프로덕션 WebSocket URL:', baseWsUrl);
+  return baseWsUrl;
 };
 
-// HTTP 링크 생성 (CORS 오류 해결)
+// HTTP 링크 생성 (CORS 설정 개선)
 const httpLink = createHttpLink({
-  uri: getApiUrl(), // 환경 변수 기반으로 동적 URL 설정
-  credentials: 'omit', // include 대신 omit 사용하여 CORS 오류 해결
+  uri: getApiUrl(),
+  credentials: 'include', // CORS 오류 해결을 위해 include 사용
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',

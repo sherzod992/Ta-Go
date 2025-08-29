@@ -142,49 +142,18 @@ const requestSignUpJwtToken = async ({
 		console.log('Data:', result?.data);
 		console.log('Signup data:', result?.data?.signup);
 		
-		const { accessToken } = result?.data?.signup;
+		// accessToken이 있는지 확인
+		if (!result?.data?.signup?.accessToken) {
+			throw new Error('회원가입 후 토큰을 받지 못했습니다.');
+		}
+		
+		const { accessToken } = result.data.signup;
 		console.log('Access token:', accessToken);
 
 		return { jwtToken: accessToken };
-	} catch (err: any) {
-		console.log('request signup token err', err);
-		
-		// GraphQL 에러가 있는 경우
-		if (err.graphQLErrors && err.graphQLErrors.length > 0) {
-			const errorMessage = err.graphQLErrors[0].message;
-			console.log('GraphQL error message:', errorMessage);
-			
-			switch (errorMessage) {
-				case 'Definer: login and password do not match':
-					await sweetMixinErrorAlert('Please check your password again');
-					break;
-				case 'Definer: user has been blocked!':
-					await sweetMixinErrorAlert('User has been blocked!');
-					break;
-				case 'Definer: user already exists':
-					await sweetMixinErrorAlert('이미 존재하는 사용자입니다.');
-					break;
-				case 'Definer: invalid email format':
-					await sweetMixinErrorAlert('올바른 이메일 형식을 입력해주세요.');
-					break;
-				case 'Definer: invalid phone format':
-					await sweetMixinErrorAlert('올바른 전화번호 형식을 입력해주세요.');
-					break;
-				default:
-					await sweetMixinErrorAlert(errorMessage || '회원가입 중 오류가 발생했습니다.');
-					break;
-			}
-		} else if (err.networkError) {
-			// 네트워크 에러인 경우
-			console.log('Network error:', err.networkError);
-			await sweetMixinErrorAlert('네트워크 연결을 확인해주세요.');
-		} else {
-			// 기타 에러
-			console.log('Other error:', err);
-			await sweetMixinErrorAlert('회원가입 중 오류가 발생했습니다.');
-		}
-		
-		throw new Error('signup token error');
+	} catch (error) {
+		console.error('Signup mutation error:', error);
+		throw error;
 	}
 };
 

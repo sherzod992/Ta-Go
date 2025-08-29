@@ -42,6 +42,77 @@ export interface Member {
 	accessToken?: string;
 }
 
+// GraphQL 응답을 위한 타입들
+export interface SignupResponse {
+	success: boolean;
+	message: string;
+	token: string;
+	refreshToken: string;
+	_id: string;
+	memberType: MemberType;
+	memberStatus: MemberStatus;
+	memberAuthType: AuthProvider;
+	memberPhone: string;
+	memberEmail: string;
+	memberNick: string;
+	memberFullName?: string;
+	memberImage?: string;
+	memberAddress?: string;
+	memberDesc?: string;
+	memberProperties: number;
+	memberArticles: number;
+	memberFollowers?: number;
+	memberFollowings?: number;
+	memberPoints: number;
+	memberLikes: number;
+	memberViews: number;
+	memberComments: number;
+	memberRank: number;
+	memberWarnings: number;
+	memberBlocks: number;
+	deletedAt?: Date;
+	createdAt: Date;
+	updatedAt: Date;
+	accessToken: string;
+	meLiked?: MeLiked[];
+	meFollowed?: MeFollowed[];
+}
+
+export interface LoginResponse {
+	success: boolean;
+	message: string;
+	token: string;
+	refreshToken: string;
+	_id: string;
+	memberType: MemberType;
+	memberStatus: MemberStatus;
+	memberAuthType: AuthProvider;
+	memberPhone: string;
+	memberEmail: string;
+	memberNick: string;
+	memberFullName?: string;
+	memberImage?: string;
+	memberAddress?: string;
+	memberDesc?: string;
+	memberProperties: number;
+	memberArticles: number;
+	memberFollowers?: number;
+	memberFollowings?: number;
+	memberPoints: number;
+	memberLikes: number;
+	memberViews: number;
+	memberComments: number;
+	memberRank: number;
+	memberWarnings: number;
+	memberBlocks: number;
+	deletedAt?: Date;
+	createdAt: Date;
+	updatedAt: Date;
+	accessToken: string;
+	meLiked?: MeLiked[];
+	meFollowed?: MeFollowed[];
+}
+
 export interface Members {
 	list: Member[];
 	metaCounter: TotalCounter[];

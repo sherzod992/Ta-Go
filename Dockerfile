@@ -20,6 +20,9 @@ ENV NODE_ENV=production
 ENV PORT=3011
 ENV HOSTNAME="0.0.0.0"
 
+# curl 설치 (헬스체크용)
+RUN apk add --no-cache curl
+
 # 빌드 결과 복사
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/yarn.lock ./
@@ -27,9 +30,14 @@ COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/next.config.js ./
 
+# standalone 서버 파일 복사
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+
 # 프로덕션 의존성만 설치
 RUN yarn install --production
 
 EXPOSE 3011
 
-CMD ["yarn", "start"]
+# standalone 모드에 맞는 시작 명령어
+CMD ["node", "server.js"]

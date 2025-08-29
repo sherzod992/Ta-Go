@@ -4,12 +4,9 @@ import { gql } from '@apollo/client';
  *         MEMBER         *
  *************************/
 
-export const SIGN_UP = gql`
-	mutation Signup($input: SignupInput!) {
+	export const SIGN_UP = gql`
+	mutation Signup($input: MemberInput!) {
 		signup(input: $input) {
-			success
-			message
-			token
 			_id
 			memberType
 			memberStatus
@@ -36,9 +33,16 @@ export const SIGN_UP = gql`
 			createdAt
 			updatedAt
 			accessToken
-			refreshToken
-			meLiked
-			meFollowed
+			meLiked {
+				_id
+				memberNick
+				memberFullName
+			}
+			meFollowed {
+				followingId
+				followerId
+				myFollowing
+			}
 		}
 	}
 `;
@@ -46,9 +50,6 @@ export const SIGN_UP = gql`
 export const LOGIN = gql`
 	mutation Login($input: LoginInput!) {
 		login(input: $input) {
-			success
-			message
-			token
 			_id
 			memberType
 			memberStatus
@@ -75,9 +76,16 @@ export const LOGIN = gql`
 			createdAt
 			updatedAt
 			accessToken
-			refreshToken
-			meLiked
-			meFollowed
+			meLiked {
+				_id
+				memberNick
+				memberFullName
+			}
+			meFollowed {
+				followingId
+				followerId
+				myFollowing
+			}
 		}
 	}
 `;
