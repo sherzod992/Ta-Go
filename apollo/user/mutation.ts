@@ -33,11 +33,7 @@ import { gql } from '@apollo/client';
 			createdAt
 			updatedAt
 			accessToken
-			meLiked {
-				_id
-				memberNick
-				memberFullName
-			}
+					meLiked
 			meFollowed {
 				followingId
 				followerId
@@ -76,11 +72,7 @@ export const LOGIN = gql`
 			createdAt
 			updatedAt
 			accessToken
-			meLiked {
-				_id
-				memberNick
-				memberFullName
-			}
+					meLiked
 			meFollowed {
 				followingId
 				followerId
